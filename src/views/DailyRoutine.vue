@@ -17,11 +17,32 @@ const editRoutine = () => {
   router.push('/edit')
 }
 
-const loadSavedRoutine = () => {
-  const saved = JSON.parse(localStorage.getItem('saved_routines') || '[]')
-  if (saved.length) {
-    routineData.value = saved[saved.length - 1].routine
+const downloadRoutineTxt = () => {
+  const current = localStorage.getItem('routine')
+  if (!current) {
+    alert('No routines found! Please generate one first.')
+    return
   }
+
+  const latest =  JSON.parse(current)
+
+  // format to txt
+  let content = `Routine: ${latest.name}\nAge Group: ${latest.age_group}, Gender: ${latest.gender}\n\n`
+  latest.routine.forEach((item: any) => {
+    content += `${item.period} - ${item.activity.name}\n`
+    if (item.activity.tip) content += `  Tip: ${item.activity.tip}\n`
+    if (item.activity.tip_des) content += `  ${item.activity.tip_des}\n`
+    content += '\n'
+  })
+
+  // download
+  const blob = new Blob([content], { type: 'text/plain' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${latest.name || 'routine'}.txt`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 </script>
 
@@ -32,7 +53,7 @@ const loadSavedRoutine = () => {
       <p>Age Group: {{ routineData.age_group }}, Gender: {{ routineData.gender }}</p>
 
       <button @click="editRoutine">Edit Routine</button>
-      <button @click="loadSavedRoutine">Load Saved Routine</button>
+      <button @click="downloadRoutineTxt">Download as TXT</button>
 
       <ul class="mt-4 space-y-4">
         <li v-for="item in routineData.routine" :key="item.activity.id" class="p-4 border rounded-lg bg-white">
