@@ -36,16 +36,15 @@ const onSearch = (e: Event) => {
 
 <style scoped>
 .app-header {
+  height: 100px;
   align-items: center;
   background: #ffffff;
   border-bottom: 1px solid #e5e5e5;
   display: flex;
   position: sticky;
-  padding: 16px 0;
   top: 0;
   justify-content: space-between;
   gap: 16px;
-
   z-index: 10;
 }
 .brand {

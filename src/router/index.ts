@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 
-const Today = () => import('@/views/Today.vue')
+const Today = () => import('@/views/DailyRoutine.vue')
 const Activities = () => import('@/views/Activities.vue')
 const Favorites = () => import('@/views/Favorites.vue')
 const Progress = () => import('@/views/Progress.vue')
+const EditRoutine = () => import('@/views/EditRoutine.vue')
 
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ export default createRouter({
         { path: 'activities', name: 'Activities', component: Activities },
         { path: 'favorites', name: 'Favorites', component: Favorites },
         { path: 'progress', name: 'Progress', component: Progress },
+        { path: 'edit', name: 'edit', component: EditRoutine },
       ],
     },
     // put pages here if it shouldn't show header/sidebar

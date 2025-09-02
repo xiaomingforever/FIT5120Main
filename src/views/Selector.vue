@@ -10,12 +10,27 @@ const gender = ref<string | null>(null)
 const selectAge = (a: string) => (age.value = a)
 const selectGender = (g: string) => (gender.value = g)
 
-const enter = () => {
-  if (age.value && gender.value) {
-    // TODO: store age/gender in Pinia or localStorage if needed
-    router.push('/')
-  } else {
+// generate routine
+const enter = async () => {
+  if (!age.value || ! gender.value) {
     alert('Please select both age and gender.')
+    return
+  }
+
+  try {
+    const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ age_group: age.value, gender: gender.value })
+    })
+    const data = await res.json()
+    // save to localStorage
+    localStorage.setItem('routine', JSON.stringify(data))
+    // jump to display routine
+    router.push('/')
+  } catch (err) {
+    console.error(err)
+    alert('Failed to generate routine.')
   }
 }
 </script>

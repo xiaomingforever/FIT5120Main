@@ -1,0 +1,90 @@
+[
+  {
+    "id": 1,
+    "act_code": "ACT_ANYTIME_ANYWHERE",
+    "act_name": "ANYTIME ANYWHERE",
+    "default_dayparts": "morning",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 10,
+    "status": "active"
+  },
+  {
+    "id": 2,
+    "act_code": "ACT_BATHTIME",
+    "act_name": "BATHTIME",
+    "default_dayparts": "evening|morning",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 20,
+    "status": "active"
+  },
+  {
+    "id": 3,
+    "act_code": "ACT_BEDTIME",
+    "act_name": "BEDTIME",
+    "default_dayparts": "afternoon|evening|morning",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 30,
+    "status": "active"
+  },
+  {
+    "id": 4,
+    "act_code": "ACT_CLEANING_UP",
+    "act_name": "CLEANING UP",
+    "default_dayparts": "morning",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 40,
+    "status": "active"
+  },
+  {
+    "id": 5,
+    "act_code": "ACT_DIAPER_CHANGE",
+    "act_name": "DIAPER CHANGE",
+    "default_dayparts": "afternoon",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 50,
+    "status": "active"
+  },
+  {
+    "id": 6,
+    "act_code": "ACT_GETTING_DRESSED",
+    "act_name": "GETTING DRESSED",
+    "default_dayparts": "morning",
+    "recommended_blocks_per_day": 1,
+    "icon": "",
+    "color": "",
+    "order_index": 60,
+    "status": "active"
+  },
+  {
+    "id": 7,
+    "act_code": "ACT_MEALTIME",
+    "act_name": "MEALTIME",
+    "default_dayparts": "afternoon",
+    "recommended_blocks_per_day": 3,
+    "icon": "",
+    "color": "",
+    "order_index": 70,
+    "status": "active"
+  },
+  {
+    "id": 8,
+    "act_code": "ACT_PLAYTIME",
+    "act_name": "PLAYTIME",
+    "default_dayparts": "afternoon|evening|morning",
+    "recommended_blocks_per_day": 2,
+    "icon": "",
+    "color": "",
+    "order_index": 80,
+    "status": "active"
+  }
+]

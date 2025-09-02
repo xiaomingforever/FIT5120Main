@@ -14,7 +14,7 @@
         {{ t.label }}
       </button>
     </nav>
-    <h1 class="page-title">Exercise Collection</h1>
+    <h1 class="page-title">Tips Collection</h1>
 
     <section class="grid">
       <ExerciseCard v-for="ex in visible" :key="ex.id" :exercise="ex" />
