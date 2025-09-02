@@ -44,6 +44,13 @@ const downloadRoutineTxt = () => {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// click to complete routine
+const markCompleted = (index: number) => {
+  routineData.value.routine[index].completed = true
+  // save complete status
+  localStorage.setItem("todayRoutine", JSON.stringify(routineData.value))
+}
 </script>
 
 <template>
@@ -56,11 +63,24 @@ const downloadRoutineTxt = () => {
       <button @click="downloadRoutineTxt">Download as TXT</button>
 
       <ul class="mt-4 space-y-4">
-        <li v-for="item in routineData.routine" :key="item.activity.id" class="p-4 border rounded-lg bg-white">
+        <li v-for="(item, index) in routineData.routine" :key="item.activity.id" class="routine-card p-4 border rounded-lg bg-white">
+          <!-- skill badge -->
+          <div class="skills-container" v-if="item.activity.skills">
+            <span v-for="skill in item.activity.skills.split('|')" :key="skill" class="skill-badge">
+                {{ skill }}
+            </span>
+          </div>
+
           <h2 class="font-semibold">{{ item.period }}</h2>
           <p><strong>Activity:</strong> {{ item.activity.name }}</p>
           <p v-if="item.activity.tip"><strong>Tip:</strong> {{ item.activity.tip }}</p>
           <p v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
+          <button 
+            :class="['btn-complete', { done: item.completed }]"
+            @click="markCompleted(index)"
+            >
+            {{ item.completed ? "Done" : "Mark as Done" }}
+          </button>
         </li>
       </ul>
     </div>
@@ -83,6 +103,34 @@ h1 {
   text-align: center;
   margin-bottom: 24px;
   color: #2c3e50;
+}
+
+.routine-card {
+  position: relative; 
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.3s;
+}
+
+.skills-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.skill-badge {
+  background: #1eb592;
+  color: white;
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 500;
 }
 
 .info {
