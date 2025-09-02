@@ -75,6 +75,12 @@ const markCompleted = (index: number) => {
           <p><strong>Activity:</strong> {{ item.activity.name }}</p>
           <p v-if="item.activity.tip"><strong>Tip:</strong> {{ item.activity.tip }}</p>
           <p v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
+          <p v-if="item.activity.sources" class="source">
+            <strong>Sources:</strong>
+            <a :href="item.activity.sources" target="_blank" rel="noopener noreferrer">
+                {{ item.activity.sources }}
+            </a>
+          </p>
           <button 
             :class="['btn-complete', { done: item.completed }]"
             @click="markCompleted(index)"
@@ -205,5 +211,26 @@ li h2 {
   color: #27ae60;
   font-size: 14px;
   margin-top: 6px;
+}
+
+.source {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.source strong {
+  margin-right: 4px;
+}
+
+.source a {
+  color: #2980b9;         
+  text-decoration: underline;
+  transition: color 0.2s, transform 0.2s;
+}
+
+.source a:hover {
+  color: #1c5980;          
+  transform: translateX(2px); 
 }
 </style>
