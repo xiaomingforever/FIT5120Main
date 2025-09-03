@@ -10,7 +10,7 @@ onMounted(() => {
   const stored = localStorage.getItem('routine')
   if (stored) routineData.value = JSON.parse(stored)
   // show only if no profile saved yet
-  showSelector.value = false
+  showSelector.value = true
 })
 
 const editRoutine = () => {
@@ -24,23 +24,22 @@ const downloadRoutineTxt = () => {
     return
   }
 
-  const latest =  JSON.parse(current)
+  const latest = JSON.parse(current)
 
-  // format to txt
-  let content = `Routine: ${latest.name}\nAge Group: ${latest.age_group}, Gender: ${latest.gender}\n\n`
+  let content = `Routine\nAge Group: ${latest.age_code}, Gender: ${latest.gender}\n\n`
   latest.routine.forEach((item: any) => {
     content += `${item.period} - ${item.activity.name}\n`
     if (item.activity.tip) content += `  Tip: ${item.activity.tip}\n`
     if (item.activity.tip_des) content += `  ${item.activity.tip_des}\n`
+    if (item.activity.source) content += `  Source: ${item.activity.source}\n`
     content += '\n'
   })
 
-  // download
   const blob = new Blob([content], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `${latest.name || 'routine'}.txt`
+  a.download = `routine_${latest.age_code}_${latest.gender}.txt`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -51,23 +50,65 @@ const markCompleted = (index: number) => {
   // save complete status
   localStorage.setItem("todayRoutine", JSON.stringify(routineData.value))
 }
+
+// saved routines
+const savedRoutines = ref<any[]>(JSON.parse(localStorage.getItem('saved_routines') || '[]'))
+
+const loadRoutine = (e: Event) => {
+  const index = (e.target as HTMLSelectElement).value
+  routineData.value = savedRoutines.value[index]
+  localStorage.setItem('routine', JSON.stringify(routineData.value))
+}
+
+// regenerate routine
+const refreshRoutine = async () => {
+  const refreshRoutine = async () => {
+  try {
+    const age_code = routineData.value.age_code
+    const gender = routineData.value.gender
+    const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ age_code, gender })
+    })
+    const data = await res.json()
+    const parsed = JSON.parse(data.body) 
+    localStorage.setItem('routine', JSON.stringify(parsed))
+    routineData.value = parsed
+  } catch (err) {
+    console.error(err)
+    alert('Failed to generate routine.')
+  }
+}
+}
 </script>
 
 <template>
   <div class="home-page p-4">
     <h1 class="text-2xl font-bold mb-4">Daily Routine</h1>
+    <p class="update-info">
+        Routine is updated daily. You can also update manually.
+    </p>
     <div v-if="routineData">
-      <p>Age Group: {{ routineData.age_group }}, Gender: {{ routineData.gender }}</p>
+      <p>Age Group: {{ routineData.age_code }}, Gender: {{ routineData.gender }}</p>
 
       <button @click="editRoutine">Edit Routine</button>
       <button @click="downloadRoutineTxt">Download as TXT</button>
+      <button @click="refreshRoutine" class="btn-refresh">Update Routine Now</button>
+      
+      <div class="saved-routines">
+        <label for="saved">Load Saved Routine:</label>
+        <select id="saved" @change="loadRoutine($event)">
+            <option v-for="(r, i) in savedRoutines" :key="i" :value="i">{{ r.name }}</option>
+        </select>
+      </div>
 
       <ul class="mt-4 space-y-4">
         <li v-for="(item, index) in routineData.routine" :key="item.activity.id" class="routine-card p-4 border rounded-lg bg-white">
           <!-- skill badge -->
-          <div class="skills-container" v-if="item.activity.skills">
-            <span v-for="skill in item.activity.skills.split('|')" :key="skill" class="skill-badge">
-                {{ skill }}
+          <div class="skills-container" v-if="item.activity.skills && item.activity.skills.length">
+            <span v-for="skill in item.activity.skills" :key="skill.code" class="skill-badge">
+              {{ skill.code }}
             </span>
           </div>
 
@@ -75,10 +116,10 @@ const markCompleted = (index: number) => {
           <p><strong>Activity:</strong> {{ item.activity.name }}</p>
           <p v-if="item.activity.tip"><strong>Tip:</strong> {{ item.activity.tip }}</p>
           <p v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
-          <p v-if="item.activity.sources" class="source">
-            <strong>Sources:</strong>
-            <a :href="item.activity.sources" target="_blank" rel="noopener noreferrer">
-                {{ item.activity.sources }}
+          <p v-if="item.activity.source" class="source">
+            <strong>Source:</strong>
+            <a :href="item.activity.source" target="_blank" rel="noopener noreferrer">
+              {{ item.activity.source }}
             </a>
           </p>
           <button 
@@ -109,6 +150,13 @@ h1 {
   text-align: center;
   margin-bottom: 24px;
   color: #2c3e50;
+}
+
+.update-info {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 12px;
+  text-align: center;
 }
 
 .routine-card {

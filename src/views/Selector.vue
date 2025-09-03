@@ -48,19 +48,19 @@ const enter = async () => {
       <div class="section">
         <label class="label">Age:</label>
         <div class="options">
-          <button :class="['opt', { active: age === '0-1' }]" @click="selectAge('0-1')">0-1</button>
-          <button :class="['opt', { active: age === '1-2' }]" @click="selectAge('1-2')">1-2</button>
-          <button :class="['opt', { active: age === '3-5' }]" @click="selectAge('3-5')">3-5</button>
+          <button :class="['opt', { active: age === '0-1y' }]" @click="selectAge('0-1y')">0-1</button>
+          <button :class="['opt', { active: age === '1-3y' }]" @click="selectAge('1-3y')">1-3</button>
+          <button :class="['opt', { active: age === '3-5y' }]" @click="selectAge('3-5y')">3-5</button>
         </div>
       </div>
 
       <div class="section">
         <label class="label">Gender:</label>
         <div class="options">
-          <button :class="['opt', { active: gender === 'Girl' }]" @click="selectGender('Girl')">
+          <button :class="['opt', { active: gender === 'Girl' }]" @click="selectGender('girl')">
             <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl
           </button>
-          <button :class="['opt', { active: gender === 'Boy' }]" @click="selectGender('Boy')">
+          <button :class="['opt', { active: gender === 'Boy' }]" @click="selectGender('boy')">
             <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> Boy
           </button>
         </div>
