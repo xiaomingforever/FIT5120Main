@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 
+const Home = () => import('@/views/Home.vue')
 const Today = () => import('@/views/DailyRoutine.vue')
 const Activities = () => import('@/views/Activities.vue')
 const Favorites = () => import('@/views/Favorites.vue')
@@ -11,11 +12,12 @@ export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 
   routes: [
+    { path: '/', name: 'Home', component: Home },
     {
       path: '/',
       component: AppLayout, // shared header and sidebar for these pages
       children: [
-        { path: '', name: 'Today', component: Today },
+        { path: 'today', name: 'Today', component: Today },
         { path: 'activities', name: 'Activities', component: Activities },
         { path: 'favorites', name: 'Favorites', component: Favorites },
         { path: 'progress', name: 'Progress', component: Progress },
@@ -24,6 +26,7 @@ export default createRouter({
     },
     // put pages here if it shouldn't show header/sidebar
     { path: '/selector', name: 'Selector', component: () => import('@/views/Selector.vue') },
+    { path: '/:pathMatch(.*)*', redirect: '/' }, // catch-all to Home
   ],
   scrollBehavior: () => ({ top: 0 }),
 })

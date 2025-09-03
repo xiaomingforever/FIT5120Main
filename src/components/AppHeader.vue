@@ -10,7 +10,9 @@ const onSearch = (e: Event) => {
   <header class="app-header">
     <div class="header-inner">
       <div class="brand">
-        <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
+        <router-link to="/Home" aria-label="Go to Today">
+          <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
+        </router-link>
       </div>
 
       <div class="search">
