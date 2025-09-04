@@ -23,114 +23,105 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted  } from 'vue'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import type { Exercise, AgeGroup } from '@/stores/Exercise'
 
-// mock data. Replace with API/store later if needed.
-const exercises = ref<Exercise[]>([
-  {
-    id: 'ex-1',
-    title: 'BedTime',
-    description:
-      'End the day with calm voices and gentle talk. It helps your child feel safe and ready for sleep.',
-    ageGroup: '0-1',
-    image: 'Bedtime2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-2',
-    title: 'MealTime',
-    description:
-      'Share stories or name foods while you eat. It turns mealtime into a moment for learning and connection.',
-    ageGroup: '1-3',
-    image: 'Mealtime2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-3',
-    title: 'BathTime',
-    description: 'Make bathtime a place for fun and learning. These tips make bathtime a splash!',
-    ageGroup: '0-1',
-    image: 'Bathtime2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-4',
-    title: 'LearningTime',
-    description:
-      'Use puzzles or blocks to explore shapes and numbers. Small steps like these build strong thinking skills.',
-    ageGroup: '3-5',
-    image: 'LearningTime2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-5',
-    title: 'Outdoor Play',
-    description:
-      'Run, jump, and explore outside together.Fresh air and movement build strong bodies and happy minds.',
-    ageGroup: '1-3',
-    image: 'Outdoor2.png',
-    practiceCount: 102,
-  },
-
-  {
-    id: 'ex-6',
-    title: 'Problem Solving',
-    description:
-      'Try puzzles, blocks, or matching games together. These playful challenges grow patience and thinking skills.',
-    ageGroup: '3-5',
-    image: 'Problem2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-7',
-    title: 'Language Moments',
-    description:
-      'Talk about what you see and hear during the day. Simple words and chats help your child grow strong language skills.',
-    ageGroup: '3-5',
-    image: 'Language2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-8',
-    title: 'Getting Dressed',
-    description: 'Teach your child what you know by naming clothing colors as you go!',
-    ageGroup: '0-1',
-    image: 'Dressing2.png',
-    practiceCount: 102,
-  },
-  {
-    id: 'ex-9',
-    title: 'Gardening',
-    description:
-      'Let your child dig, plant, and water with you. Caring for plants teaches patience and love for nature.',
-    ageGroup: '3-5',
-    image: 'Gardening2.png',
-    practiceCount: 102,
-  },
-])
-
-const query = ref('')
-
-// tabs for the selector bar
-const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
-  { label: 'All Ages', value: 'all' },
-  { label: '0-1', value: '0-1' },
-  { label: '1-3', value: '1-3' },
-  { label: '3-5', value: '3-5' },
-]
-
-// active tab
+const exercises = ref<Exercise[]>([]) // API data
 const selectedAge = ref<'all' | AgeGroup>('all')
 
-const sourceList = computed<Exercise[]>(() => {
-  return exercises.value
+// tabs for the selector bar
+const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
+const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
+  { label: 'All Ages', value: 'all' },
+  { label: '0-1', value: '0-1y' },
+  { label: '1-3', value: '1-3y' },
+  { label: '3-5', value: '3-5y' },
+]
+
+// request to backend when loading
+onMounted(async () => {
+  try {
+    const res = await fetch("https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        age_code: "1-3y",   // default
+        gender: "girl",     // default
+        daypart: "morning"  // default
+      })
+    })
+    const data = await res.json()
+    
+    // map backend data to frontend
+    exercises.value = data.options.map((act: any) => ({
+      id: act.id,
+      title: act.name,
+      description: act.desc || "No description available",
+      // ageGroup: "1-3", 
+      image: act.image,
+      tips: act.tips.map((t: any) => ({
+        tip_id: t.tip_id,
+        tip: t.tip,
+        age_code: t.age_code as AgeGroup
+      })),
+      practiceCount: act.tips?.length || 0
+    }))
+  } catch (err) {
+    console.error("Failed to fetch exercises:", err)
+  }
 })
 
+const grouped = computed(() => {
+  const groups: Record<AgeGroup, Exercise[]> = { '0-1y': [], '1-3y': [], '3-5y': [] }
+
+  exercises.value.forEach((ex) => {
+    ex.tips.forEach((tip: Tip) => {
+      const age = tip.age_code as AgeGroup
+      if (!groups[age]) return
+
+      // check if activity already exist
+      let existing = groups[age].find(e => e.id === ex.id)
+      if (existing) {
+        existing.tips.push(tip) 
+      } else {
+        groups[age].push({
+          ...ex,
+          tips: [tip] // only keep current age group's tips
+        })
+      }
+    })
+  })
+
+  return AGE_ORDER.map((label) => ({
+    label,
+    items: groups[label]
+  })).filter(g => g.items.length)
+})
+
+// const sourceList = computed<Exercise[]>(() => {
+//   return exercises.value
+// })
+
 const visible = computed<Exercise[]>(() => {
-  if (selectedAge.value === 'all') return sourceList.value
-  return sourceList.value.filter((ex) => ex.ageGroup === selectedAge.value)
+  if (selectedAge.value === 'all') {
+    return exercises.value.map(ex => ({
+      ...ex,
+      practiceCount: ex.tips.length,
+      currentAgeGroup: 'all'
+    }))
+  }
+
+  // display current age group
+  const group = grouped.value.find(g => g.label === selectedAge.value)
+  if (!group) return []
+
+  // show only once of each activity
+  return group.items.map(ex => ({
+    ...ex,
+    practiceCount: ex.tips.length,
+    currentAgeGroup: selectedAge.value
+  }))
 })
 
 function openExercise(ex: Exercise) {
@@ -139,13 +130,12 @@ function openExercise(ex: Exercise) {
   console.log('open', ex)
 }
 
-const AGE_ORDER: AgeGroup[] = ['0-1', '1-3', '3-5']
-const grouped = computed(() =>
-  AGE_ORDER.map((label) => ({
-    label,
-    items: exercises.value.filter((e) => e.ageGroup === label),
-  })).filter((g) => g.items.length),
-)
+// const grouped = computed(() =>
+//   AGE_ORDER.map((label) => ({
+//     label,
+//     items: exercises.value.filter((e) => e.ageGroup === label),
+//   })).filter((g) => g.items.length),
+// )
 </script>
 
 <style scoped>
