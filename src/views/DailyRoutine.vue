@@ -89,6 +89,10 @@ onMounted(() => {
     router.push('/edit')
 }
 
+const extractHttpsLink = (text: string): string | null => {
+  const match = text.match(/https?:\/\/[^\s]+/i)
+  return match ? match[0] : null
+}
 </script>
 
 <template>
@@ -126,9 +130,18 @@ onMounted(() => {
           <p v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
           <p v-if="item.activity.source" class="source">
             <strong>Source:</strong>
-            <a :href="item.activity.source" target="_blank" rel="noopener noreferrer">
+            <span v-if="extractHttpsLink(item.activity.source)">
+              <a 
+                :href="extractHttpsLink(item.activity.source)!" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                {{ extractHttpsLink(item.activity.source) }}
+              </a>
+            </span>
+            <span v-else>
               {{ item.activity.source }}
-            </a>
+            </span>
           </p>
           <button 
             :class="['btn-complete', { done: item.completed }]"
