@@ -122,6 +122,12 @@ const closeTip = () => {
   showTip.value = false
   selectedTip.value = null
 }
+
+/* When a related tip is clicked inside the modal, swap the selection */
+const openRelated = (tipId: string | number) => {
+  const found = tips.value.find((t: any) => String(t.tip_id) === String(tipId))
+  if (found) selectedTip.value = found
+}
 </script>
 
 <template>
@@ -165,11 +171,13 @@ const closeTip = () => {
       v-if="showTip && selectedTip"
       :open="showTip"
       :tip="selectedTip"
+      :tips="tips"
       :activity-name="activityName"
       :age="age"
       :gender="gender"
       :period="period"
       @close="closeTip"
+      @open-related="openRelated"
     />
   </div>
 </template>

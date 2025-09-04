@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch, computed } from 'vue'
+import { onMounted, onBeforeUnmount, ref, watch, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 type Skill = { code: string; weight?: number }
@@ -11,13 +11,17 @@ const router = useRouter()
 const props = defineProps<{
   open: boolean
   tip: TipFull
+  tips?: TipFull[] //list of tips from the same activity
   activityName: string
   age: string
   gender: string
   period: string
 }>()
 
-const emit = defineEmits<{ (e: 'close'): void }>()
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'open-related', tipId: string | number): void
+}>()
 
 const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev'
 
@@ -25,7 +29,7 @@ const model = ref<TipFull>({ ...props.tip })
 
 /** ---------- Local image handling ----------
  * Map activity name -> local asset image.
- * We support both .../Activities/Excercise and .../Activities/Exercise folders.
+
  * The backend usually sends filenames like "bedtime2.png" etc., so we try a few variants.
  */
 const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
@@ -72,8 +76,7 @@ const imageUrl = computed(() => {
 })
 
 /** ---------- Enrich single tip if needed ----------
- * We request tip_des / skills / source from the /dev endpoint if missing
- * or obviously incomplete.
+ * request tip_des / skills / source from the /dev endpoint if missing
  */
 const needEnrich = () =>
   !model.value.tip_des || !Array.isArray(model.value.skills) || !('source' in model.value)
@@ -128,6 +131,17 @@ watch(
   },
   { immediate: true },
 )
+// update local model, re-enrich if needed, and scroll to top.
+watch(
+  () => props.tip,
+  async (t) => {
+    if (!t) return
+    model.value = { ...t }
+    if (needEnrich()) await enrich()
+    await nextTick()
+    document.querySelector('.tipmodal')?.scrollTo({ top: 0, behavior: 'smooth' })
+  },
+)
 
 const onKey = (e: KeyboardEvent) => {
   if (e.key === 'Escape') emit('close')
@@ -153,6 +167,16 @@ const startRoutine = () => {
     },
   })
 }
+
+const related = computed(() => {
+  const all = props.tips || []
+  const others = all.filter((t) => String(t.tip_id) !== String(model.value.tip_id))
+  // stable: pick first 2 by id
+  return others
+    .slice()
+    .sort((a: any, b: any) => Number(a.tip_id) - Number(b.tip_id))
+    .slice(0, 2)
+})
 </script>
 
 <template>
@@ -184,6 +208,18 @@ const startRoutine = () => {
           </template>
           <template v-else>{{ model.source }}</template>
         </div>
+
+        <section v-if="related.length" class="related">
+          <h3 class="related-title">Related tips</h3>
+          <ul class="related-list">
+            <li v-for="r in related" :key="r.tip_id">
+              <button class="related-link" @click="emit('open-related', r.tip_id)">
+                {{ r.tip }}
+              </button>
+            </li>
+          </ul>
+        </section>
+
         <div class="footer">
           <button class="start-btn" @click="startRoutine">Start routine</button>
         </div>
@@ -272,6 +308,33 @@ const startRoutine = () => {
 .source a {
   text-decoration: underline;
 }
+/* related tips */
+.related {
+  margin-top: 16px;
+}
+.related-title {
+  font-size: 16px;
+  margin: 0 0 8px;
+}
+.related-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.related-link {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  border-radius: 999px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.related-link:hover {
+  background: #f3f4f6;
+}
+/* the button */
 .footer {
   position: sticky; /* stays at bottom while scrolling in the modal */
   bottom: 0;
