@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import TipModal from '@/components/TipModal.vue'
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
@@ -108,12 +109,25 @@ onMounted(async () => {
 })
 
 const goBack = () => router.push({ name: 'Activities' })
+
+// existing reactive state...
+const showTip = ref(false)
+const selectedTip = ref<any | null>(null)
+
+const openTip = (t: any) => {
+  selectedTip.value = t
+  showTip.value = true
+}
+const closeTip = () => {
+  showTip.value = false
+  selectedTip.value = null
+}
 </script>
 
 <template>
   <div class="tips-display">
     <header class="header">
-      <button class="back" @click="goBack" aria-label="Back to Activities">←</button>
+      <button class="back" @click="goBack" aria-label="Back to Activities">back</button>
       <h1 class="title">{{ activityName || 'Activity' }}</h1>
       <p class="subtitle">
         All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
@@ -124,7 +138,16 @@ const goBack = () => router.push({ name: 'Activities' })
     <section v-else-if="notFound" class="state">No tips found for this activity.</section>
 
     <section v-else class="grid">
-      <article v-for="t in tips" :key="t.tip_id" class="tip-card">
+      <article
+        v-for="t in tips"
+        :key="t.tip_id"
+        class="tip-card"
+        @click="openTip(t)"
+        role="button"
+        tabindex="0"
+        @keydown.enter="openTip(t)"
+        @keydown.space.prevent="openTip(t)"
+      >
         <div class="tip-card-head">
           <span class="activity-chip">{{ t.activityName }}</span>
         </div>
@@ -137,6 +160,17 @@ const goBack = () => router.push({ name: 'Activities' })
         </ul>
       </article>
     </section>
+    <!-- tip modal -->
+    <TipModal
+      v-if="showTip && selectedTip"
+      :open="showTip"
+      :tip="selectedTip"
+      :activity-name="activityName"
+      :age="age"
+      :gender="gender"
+      :period="period"
+      @close="closeTip"
+    />
   </div>
 </template>
 
