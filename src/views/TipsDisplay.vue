@@ -21,7 +21,6 @@ const tips = ref<TipFull[]>([])
 const notFound = ref(false)
 
 /**
- * API helpers
  * - /option returns activities + (tip_id, tip, age_code) lists
  * - /dev enriches a given activity+tip_id with tip_des & skills
  */
@@ -48,7 +47,6 @@ const fetchTipsForActivity = async (actId: string) => {
         .filter((t: any) => !t.age_code || t.age_code === selectedAge)
         .map((t: any) => ({ tip_id: t.tip_id, tip: t.tip, age_code: t.age_code }))
 
-      // de-dupe by tip_id
       const unique = Array.from(new Map(filtered.map((t) => [t.tip_id, t])).values())
       return unique
     }
@@ -56,10 +54,10 @@ const fetchTipsForActivity = async (actId: string) => {
   return null
 }
 
-// enrich a single tip with description + skills using the /dev endpoint
+// a single tip with description + skills using the /dev endpoint
 const hydrateTip = async (t: TipLite): Promise<TipFull> => {
   try {
-    // we pass back an explicit routine with the chosen activity+tip_id
+    // pass back an explicit routine with the chosen activity+tip_id
     const payload = {
       age_code: selectedAge,
       gender,
@@ -87,7 +85,7 @@ const hydrateTip = async (t: TipLite): Promise<TipFull> => {
       tip: act.tip || t.tip,
       tip_des: act.tip_des || '',
       skills: act.skills || [],
-      activityName: act.name || activityName.value,
+      activityName: activityName.value,
     }
   } catch {
     // graceful fallback: still render the lite tip
