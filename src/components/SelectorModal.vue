@@ -27,7 +27,7 @@ const submit = () => emit('submit', { age: age.value, gender: gender.value })
       <div class="modal">
         <!-- selector card content -->
         <button class="close" aria-label="Close" @click="close">✕</button>
-        <img src="/src/assets/selector page/baby-1.webp" alt="Baby" class="icon" />
+        <img src="/src/selector page/baby-1.webp" alt="Baby" class="icon" />
         <h2 class="title">Select your child's<br />age and gender</h2>
 
         <!-- Age -->
