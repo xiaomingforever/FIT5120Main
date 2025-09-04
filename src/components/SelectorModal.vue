@@ -51,9 +51,9 @@ const submit = () => emit('submit', { age: age.value, gender: gender.value })
           <label class="label">Gender:</label>
           <div class="options">
             <button :class="['opt', { active: gender === 'Girl' }]" @click="selectGender('Girl')">
-              <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl Girl
+              <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl
             </button>
-            <button :class="['opt', { active: gender === 'Boy' }]" @click="selectGender('Boy')">
+            <button :class="['opt', { active: gender=== 'Boy' }]" @click="selectGender('Boy')">
               <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> Boy
             </button>
           </div>

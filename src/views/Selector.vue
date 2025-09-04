@@ -43,7 +43,7 @@ const enter = async () => {
       <button class="close" aria-label="Close" @click="router.push('/')">✕</button>
 
       <div class="header">
-        <img src="/src/assets/selector page/baby-1.webp" alt="Baby" class="icon" />
+        <img src="/selector page/baby-1.webp" alt="Baby" class="icon" />
         <h2>Select your child's<br />age and gender</h2>
       </div>
 
@@ -59,10 +59,10 @@ const enter = async () => {
       <div class="section">
         <label class="label">Gender:</label>
         <div class="options">
-          <button :class="['opt', { active: gender === 'Girl' }]" @click="selectGender('girl')">
+          <button :class="['opt', { active: gender === 'girl' }]" @click="selectGender('girl')">
             <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl
           </button>
-          <button :class="['opt', { active: gender === 'Boy' }]" @click="selectGender('boy')">
+          <button :class="['opt', { active: gender === 'boy' }]" @click="selectGender('boy')">
             <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> Boy
           </button>
         </div>
