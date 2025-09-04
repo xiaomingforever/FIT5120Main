@@ -31,9 +31,16 @@
   })
 
   const goToTips = (activity: any) => {
+    const age = localStorage.getItem("age_code") || "1-3y"
     showDropdown.value = false
     query.value = activity.name
-    router.push(`/tips/${activity.id}`)   // jump to tips page
+    router.push({
+    path: `/activities/${activity.id}`,
+    query: {
+      name: activity.name,
+      age
+    }})   // jump to tips page
+    showDropdown.value = false
   }
 </script>
 
@@ -57,7 +64,6 @@
           v-model="query"
           placeholder="Search activities"
           @focus="showDropdown = true"
-          @blur="showDropdown = false" 
           aria-label="Search activities"
         />
 

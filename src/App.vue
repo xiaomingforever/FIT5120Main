@@ -1,4 +1,4 @@
 <script setup lang="ts"></script>
 
-<template><RouterView /></template>
+<template><router-view :key="$route.fullPath" /></template>
 <style scoped></style>
