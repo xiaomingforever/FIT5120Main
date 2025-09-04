@@ -17,16 +17,18 @@
     <h1 class="page-title">Tips Collection</h1>
 
     <section class="grid">
-      <ExerciseCard v-for="ex in visible" :key="ex.id" :exercise="ex" />
+      <ExerciseCard v-for="ex in visible" :key="ex.id" :exercise="ex" @open="goToTips" />
     </section>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted  } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 
+const router = useRouter()
 const exercises = ref<Exercise[]>([]) // API data
 const selectedAge = ref<'all' | AgeGroup>('all')
 
@@ -42,33 +44,33 @@ const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
 // request to backend when loading
 onMounted(async () => {
   try {
-    const res = await fetch("https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+    const res = await fetch('https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        age_code: "1-3y",   // default
-        gender: "girl",     // default
-        daypart: "morning"  // default
-      })
+        age_code: '1-3y', // default
+        gender: 'girl', // default
+        daypart: 'morning', // default
+      }),
     })
     const data = await res.json()
-    
+
     // map backend data to frontend
     exercises.value = data.options.map((act: any) => ({
       id: act.id,
       title: act.name,
-      description: act.desc || "No description available",
-      // ageGroup: "1-3", 
+      description: act.desc || 'No description available',
+      // ageGroup: "1-3",
       image: act.image,
       tips: act.tips.map((t: any) => ({
         tip_id: t.tip_id,
         tip: t.tip,
-        age_code: t.age_code as AgeGroup
+        age_code: t.age_code as AgeGroup,
       })),
-      practiceCount: act.tips?.length || 0
+      practiceCount: act.tips?.length || 0,
     }))
   } catch (err) {
-    console.error("Failed to fetch exercises:", err)
+    console.error('Failed to fetch exercises:', err)
   }
 })
 
@@ -81,13 +83,13 @@ const grouped = computed(() => {
       if (!groups[age]) return
 
       // check if activity already exist
-      let existing = groups[age].find(e => e.id === ex.id)
+      let existing = groups[age].find((e) => e.id === ex.id)
       if (existing) {
-        existing.tips.push(tip) 
+        existing.tips.push(tip)
       } else {
         groups[age].push({
           ...ex,
-          tips: [tip] // only keep current age group's tips
+          tips: [tip], // only keep current age group's tips
         })
       }
     })
@@ -95,8 +97,8 @@ const grouped = computed(() => {
 
   return AGE_ORDER.map((label) => ({
     label,
-    items: groups[label]
-  })).filter(g => g.items.length)
+    items: groups[label],
+  })).filter((g) => g.items.length)
 })
 
 // const sourceList = computed<Exercise[]>(() => {
@@ -105,22 +107,22 @@ const grouped = computed(() => {
 
 const visible = computed<Exercise[]>(() => {
   if (selectedAge.value === 'all') {
-    return exercises.value.map(ex => ({
+    return exercises.value.map((ex) => ({
       ...ex,
       practiceCount: ex.tips.length,
-      currentAgeGroup: 'all'
+      currentAgeGroup: 'all',
     }))
   }
 
   // display current age group
-  const group = grouped.value.find(g => g.label === selectedAge.value)
+  const group = grouped.value.find((g) => g.label === selectedAge.value)
   if (!group) return []
 
   // show only once of each activity
-  return group.items.map(ex => ({
+  return group.items.map((ex) => ({
     ...ex,
     practiceCount: ex.tips.length,
-    currentAgeGroup: selectedAge.value
+    currentAgeGroup: selectedAge.value,
   }))
 })
 
@@ -130,6 +132,19 @@ function openExercise(ex: Exercise) {
   console.log('open', ex)
 }
 
+const goToTips = (ex: Exercise) => {
+  const raw = selectedAge.value
+  const normalizedAge = raw === 'all' ? localStorage.getItem('age_code') || '1-3y' : raw
+
+  router.push({
+    name: 'TipsDisplay',
+    params: { activityId: ex.id },
+    query: {
+      name: ex.title, // header label on TipsDisplay
+      age: normalizedAge,
+    },
+  })
+}
 // const grouped = computed(() =>
 //   AGE_ORDER.map((label) => ({
 //     label,
