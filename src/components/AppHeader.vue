@@ -1,9 +1,40 @@
 <script setup lang="ts">
-const onSearch = (e: Event) => {
-  const q = (e.target as HTMLInputElement).value.trim()
-  // TODO: route to search or filter activities with `q`
-  // console.log('search:', q)
-}
+  import { ref, computed, onMounted } from "vue"
+  import { useRouter } from "vue-router"
+
+  const router = useRouter()
+  const query = ref("")
+  const allActivities = ref<any[]>([])
+  const showDropdown = ref(false)
+
+  onMounted(async () => {
+    const res = await fetch("https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        age_code: "1-3y",
+        gender: "girl",
+        daypart: "morning",
+        query: query.value   
+      })
+    })
+    const data = await res.json()
+    allActivities.value = data.options || []
+  })
+
+  // filter by input
+  const filteredActivities = computed(() => {
+    if (!query.value) return allActivities.value
+    return allActivities.value.filter((a) =>
+      a.name.toLowerCase().includes(query.value.toLowerCase())
+    )
+  })
+
+  const goToTips = (activity: any) => {
+    showDropdown.value = false
+    query.value = activity.name
+    router.push(`/tips/${activity.id}`)   // jump to tips page
+  }
 </script>
 
 <template>
@@ -23,10 +54,23 @@ const onSearch = (e: Event) => {
         />
         <input
           type="search"
+          v-model="query"
           placeholder="Search activities"
-          @input="onSearch"
+          @focus="showDropdown = true"
+          @blur="showDropdown = false" 
           aria-label="Search activities"
         />
+
+        <!-- drop down box -->
+        <ul v-if="showDropdown && filteredActivities.length" class="dropdown">
+        <li
+          v-for="activity in filteredActivities"
+          :key="activity.id"
+          @click="goToTips(activity)"
+        >
+          {{ activity.name }}
+        </li>
+      </ul>
       </div>
 
       <button class="profile" aria-label="Profile / settings">
@@ -83,6 +127,7 @@ const onSearch = (e: Event) => {
   margin-left: 0;
 }
 .search {
+  position: relative;
   flex: 1;
   display: flex;
   align-items: center;
@@ -92,6 +137,35 @@ const onSearch = (e: Event) => {
   border: 2px solid #ccc;
   border-radius: 24px;
   padding: 10px 14px;
+}
+.search input {
+  width: 100%;
+  padding: 10px 12px 10px 34px;
+  border: none;
+  outline: none;
+  font-size: 1.125rem;
+}
+.dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 20;
+}
+.dropdown li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.dropdown li:hover {
+  background: #f5f5f5;
 }
 .search-icon {
   width: 20px;
