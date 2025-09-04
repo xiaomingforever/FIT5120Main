@@ -40,9 +40,10 @@
     const mapped = (data.options || []).map((act: { id: any; name: any; tips: any }) => ({
       id: act.id,
       act_name: act.name,
-      tips: (act.tips || []).map((tip: { tip_id: any; tip: any }) => ({
+      tips: (act.tips || []).map((tip: { tip_id: any; tip: any; age_code: string }) => ({
         tip_code: tip.tip_id,
-        tip_name: tip.tip
+        tip_name: tip.tip,
+        age_code: tip.age_code
       }))
     }))
 
@@ -56,9 +57,17 @@
 
   // return activity's tip list
   const tipsByActivity = (actId: number, daypart: string) => {
+    const age_code = localStorage.getItem('age_code') || '0-1y'
     const acts = activitiesByDaypart(daypart)
     const act = acts.find(a => a.id === actId)
-    return act?.tips || []
+    if (!act) return []
+
+    // 只返回 age_code 匹配的 tips，并去重
+    const filtered = act.tips
+      .filter(t => t.age_code === age_code)
+    // 按 tip_id 去重
+    const unique = Array.from(new Map(filtered.map(t => [t.tip_code, t])).values())
+    return unique
   }
 
   // set default tip
