@@ -1,4 +1,5 @@
 <script setup lang="ts">
+  import type { Tip } from '@/stores/Exercise'
   import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
 
@@ -41,8 +42,8 @@
       id: act.id,
       act_name: act.name,
       tips: (act.tips || []).map((tip: { tip_id: any; tip: any; age_code: string }) => ({
-        tip_code: tip.tip_id,
-        tip_name: tip.tip,
+        tip_id: tip.tip_id,
+        tip: tip.tip,
         age_code: tip.age_code
       }))
     }))
@@ -56,18 +57,19 @@
   }
 
   // return activity's tip list
-  const tipsByActivity = (actId: number, daypart: string) => {
+  const tipsByActivity = (actId: number, daypart: string): Tip[] => {
     const age_code = localStorage.getItem('age_code') || '0-1y'
     const acts = activitiesByDaypart(daypart)
     const act = acts.find(a => a.id === actId)
     if (!act) return []
 
-    // 只返回 age_code 匹配的 tips，并去重
-    const filtered = act.tips
-      .filter(t => t.age_code === age_code)
-    // 按 tip_id 去重
-    const unique = Array.from(new Map(filtered.map(t => [t.tip_code, t])).values())
-    return unique
+    const tips = act.tips as Tip[]
+
+    // only return tips that match age_code
+    const filtered = tips.filter(t => t.age_code === age_code)
+    // based on tip_id
+   const unique = Array.from(new Map(filtered.map(t => [t.tip_id, t])).values())
+   return unique
   }
 
   // set default tip
@@ -76,8 +78,8 @@
     const actId = routine.value[index].activity.id
     const tips = tipsByActivity(actId, dp)
     if (tips.length) {
-      routine.value[index].activity.tip = tips[0].tip_name
-      routine.value[index].activity.tip_id = tips[0].tip_code
+      routine.value[index].activity.tip = tips[0].tip
+      routine.value[index].activity.tip_id = tips[0].tip_id
     } else {
       routine.value[index].activity.tip = ''
       routine.value[index].activity.tip_id = null
@@ -131,9 +133,9 @@
           </option>
         </select>
 
-        <select v-model="item.activity.tip">
-          <option v-for="tip in tipsByActivity(item.activity.id, item.period.toLowerCase())" :value="tip.tip_name" :key="tip.tip_code">
-            {{ tip.tip_name }}
+        <select v-model="item.activity.tip_id">
+          <option v-for="tip in tipsByActivity(item.activity.id, item.period.toLowerCase())" :value="tip.tip_id" :key="tip.tip_id">
+            {{ tip.tip }}
           </option>
         </select>
       </li>
