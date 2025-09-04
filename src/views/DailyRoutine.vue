@@ -6,17 +6,6 @@ const routineData = ref<any>(null)
 const showSelector = ref(false)
 const router = useRouter()
 
-onMounted(() => {
-  const stored = localStorage.getItem('routine')
-  if (stored) routineData.value = JSON.parse(stored)
-  // show only if no profile saved yet
-  showSelector.value = true
-})
-
-const editRoutine = () => {
-  router.push('/edit')
-}
-
 const downloadRoutineTxt = () => {
   const current = localStorage.getItem('routine')
   if (!current) {
@@ -53,34 +42,53 @@ const markCompleted = (index: number) => {
 
 // saved routines
 const savedRoutines = ref<any[]>(JSON.parse(localStorage.getItem('saved_routines') || '[]'))
+// select the latest one
+const selectedRoutineIndex = ref<number|null>(null)
 
 const loadRoutine = (e: Event) => {
-  const index = (e.target as HTMLSelectElement).value
+  const index = parseInt((e.target as HTMLSelectElement).value,10)
+  selectedRoutineIndex.value = index
   routineData.value = savedRoutines.value[index]
   localStorage.setItem('routine', JSON.stringify(routineData.value))
 }
 
 // regenerate routine
 const refreshRoutine = async () => {
-  const refreshRoutine = async () => {
   try {
-    const age_code = routineData.value.age_code
-    const gender = routineData.value.gender
+    const age_code = localStorage.getItem('age_code') || '0-1y'
+    const gender = localStorage.getItem('gender') || 'girl'
     const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ age_code, gender })
     })
     const data = await res.json()
-    const parsed = JSON.parse(data.body) 
-    localStorage.setItem('routine', JSON.stringify(parsed))
-    routineData.value = parsed
+    // const parsed = JSON.parse(data.body) 
+    localStorage.setItem('routine', JSON.stringify(data))
+    routineData.value = data,age_code,gender
   } catch (err) {
     console.error(err)
     alert('Failed to generate routine.')
   }
 }
+
+onMounted(() => {
+  const stored = localStorage.getItem('routine')
+  if (stored) routineData.value = JSON.parse(stored)
+  // show only if no profile saved yet
+  showSelector.value = true
+})
+
+  if (savedRoutines.value.length > 0) {
+      selectedRoutineIndex.value = savedRoutines.value.length - 1
+      routineData.value = JSON.parse(JSON.stringify(savedRoutines.value[selectedRoutineIndex.value]))
+      localStorage.setItem('routine', JSON.stringify(routineData.value))
+    }
+
+  const editRoutine = () => {
+    router.push('/edit')
 }
+
 </script>
 
 <template>
@@ -98,8 +106,8 @@ const refreshRoutine = async () => {
       
       <div class="saved-routines">
         <label for="saved">Load Saved Routine:</label>
-        <select id="saved" @change="loadRoutine($event)">
-            <option v-for="(r, i) in savedRoutines" :key="i" :value="i">{{ r.name }}</option>
+        <select id="saved" @change="loadRoutine($event)" v-model="selectedRoutineIndex">
+            <option v-for="(r, i) in savedRoutines" :key="i" :value="i">{{ r.name || `Routine ${i+1}` }}</option>
         </select>
       </div>
 

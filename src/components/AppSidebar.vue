@@ -8,7 +8,7 @@ import iconProgress from '@/assets/Font icons/analytics_200dp_1F1F1F.png'
 
 type Item = { label: string; to: string; icon: string }
 const items: Item[] = [
-  { label: 'Today', to: '/', icon: iconToday },
+  { label: 'Today', to: '/today', icon: iconToday },
   { label: 'Activities', to: '/activities', icon: iconActivities },
   { label: 'Favorite', to: '/favorites', icon: iconFavorite },
   { label: 'progress', to: '/progress', icon: iconProgress },

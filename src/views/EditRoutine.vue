@@ -1,100 +1,113 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+  import { ref, onMounted } from 'vue'
+  import { useRouter } from 'vue-router'
 
-const router = useRouter()
+  const router = useRouter()
 
-const routine = ref<any[]>([])
-const optionsByDaypart = ref<Record<string, any[]>>({}) // 后端返回的活动和 tips
+  const routine = ref<any[]>([])
+  const optionsByDaypart = ref<Record<string, any[]>>({}) 
 
-// 读取当前 routine
-onMounted(async () => {
-  const current = localStorage.getItem('routine')
-  if (!current) {
-    alert('No routine found! Please generate a routine first.')
-    router.push('/')
-    return
-  }
-  const parsed = JSON.parse(current)
-  routine.value = parsed.routine
+  // read current routine
+  onMounted(async () => {
+    const current = localStorage.getItem('routine')
+    if (!current) {
+      alert('No routine found! Please generate a routine first.')
+      router.push('/')
+      return
+    }
+    const parsed = JSON.parse(current)
+    routine.value = parsed.routine
 
-  // 获取每个 daypart 的活动和 tips
-  for (const item of routine.value) {
-    await fetchOptions(item.period.toLowerCase())
-  }
-
-  // 初始化默认 tip
-//   routine.value.forEach((item, index) => setDefaultTip(index))
-})
-
-// 调用后端 API 获取活动和 tips
-const fetchOptions = async (daypart: string) => {
-  const age_code = localStorage.getItem('age_group') || '0-1'
-  const gender = localStorage.getItem('gender') || 'girl'
-
-  const res = await fetch('https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ age_code, gender, daypart })
+    // get each daypart's activity and tips
+    for (const item of routine.value) {
+      await fetchOptions(item.period.toLowerCase())
+    }
   })
-  const data = await res.json()
 
-  // 映射字段
-  const mapped = (data.options || []).map(act => ({
-    id: act.id,
-    act_name: act.name,
-    tips: (act.tips || []).map(tip => ({
-      tip_code: tip.tip_id,
-      tip_name: tip.tip
+  // API get activities and tips
+  const fetchOptions = async (daypart: string) => {
+    const age_code = localStorage.getItem('age_code') || '0-1y'
+    const gender = localStorage.getItem('gender') || 'girl'
+
+    const res = await fetch('https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ age_code, gender, daypart })
+    })
+    const data = await res.json()
+
+    // map keys
+    const mapped = (data.options || []).map((act: { id: any; name: any; tips: any }) => ({
+      id: act.id,
+      act_name: act.name,
+      tips: (act.tips || []).map((tip: { tip_id: any; tip: any }) => ({
+        tip_code: tip.tip_id,
+        tip_name: tip.tip
+      }))
     }))
-  }))
 
-  optionsByDaypart.value[daypart] = mapped
-}
-
-// 返回 daypart 活动列表
-const activitiesByDaypart = (daypart: string) => {
-  return optionsByDaypart.value[daypart] || []
-}
-
-// 返回 activity 的 tip 列表
-const tipsByActivity = (actId: number, daypart: string) => {
-  const acts = activitiesByDaypart(daypart)
-  const act = acts.find(a => a.id === actId)
-  return act?.tips || []
-}
-
-// 设置默认 tip
-// const setDefaultTip = (index: number) => {
-//   const dp = routine.value[index].period
-//   const tips = tipsByActivity(routine.value[index].activity.id, dp)
-//   if (tips.length) routine.value[index].activity.tip = tips[0].tip_name
-//   else routine.value[index].activity.tip = ''
-// }
-
-// activity 改变时更新 tip
-const updateActivity = (index: number) => {
-  setDefaultTip(index)
-}
-
-// 保存到 localStorage
-const saveRoutine = () => {
-  const saved = {
-    age_group: localStorage.getItem('age_group') || '0-1',
-    gender: localStorage.getItem('gender') || 'Both',
-    routine: routine.value,
-    name: 'Routine_' + Date.now()
+    optionsByDaypart.value[daypart] = mapped
   }
-  // 更新当前 routine
-  localStorage.setItem('routine', JSON.stringify(saved))
 
-  // 保存到复用列表
-  let stored = JSON.parse(localStorage.getItem('saved_routines') || '[]')
-  stored.push(saved)
-  localStorage.setItem('saved_routines', JSON.stringify(stored))
-  alert('Saved!')
-  router.push('/')
-}
+  // return daypart list
+  const activitiesByDaypart = (daypart: string) => {
+    return optionsByDaypart.value[daypart] || []
+  }
+
+  // return activity's tip list
+  const tipsByActivity = (actId: number, daypart: string) => {
+    const acts = activitiesByDaypart(daypart)
+    const act = acts.find(a => a.id === actId)
+    return act?.tips || []
+  }
+
+  // set default tip
+  const setDefaultTip = (index: number) => {
+    const dp = routine.value[index].period.toLowerCase()
+    const actId = routine.value[index].activity.id
+    const tips = tipsByActivity(actId, dp)
+    if (tips.length) {
+      routine.value[index].activity.tip = tips[0].tip_name
+      routine.value[index].activity.tip_id = tips[0].tip_code
+    } else {
+      routine.value[index].activity.tip = ''
+      routine.value[index].activity.tip_id = null
+    }
+  }
+
+  // change tip when update activity 
+  const updateActivity = (index: number, newActId: number) => {
+    const dp = routine.value[index].period.toLowerCase()
+    const acts = activitiesByDaypart(dp)
+    const selected = acts.find(a => a.id === newActId)
+    if (selected) {
+      routine.value[index].activity.id = selected.id
+      routine.value[index].activity.name = selected.act_name
+      // set dufault tip
+      setDefaultTip(index)
+    }
+  }
+
+  // save to localStorage
+  const saveRoutine = () => {
+    const now = new Date()
+    const formatted = now.toLocaleString()
+    const saved = {
+      age_code: localStorage.getItem('age_code') || '0-1',
+      gender: localStorage.getItem('gender') || 'Both',
+      routine: routine.value,
+      name: `Routine ${formatted}`
+    }
+    // update current routine
+    localStorage.setItem('routine', JSON.stringify(saved))
+
+    // save to reuse list
+    let stored = JSON.parse(localStorage.getItem('saved_routines') || '[]')
+    stored.push(saved)
+    localStorage.setItem('saved_routines', JSON.stringify(stored))
+    alert('Saved!')
+    router.push('/today')
+  }
 </script>
 
 <template>
@@ -103,14 +116,14 @@ const saveRoutine = () => {
     <ul>
       <li v-for="(item, index) in routine" :key="index">
         <strong>{{ item.period }}:</strong>
-        <select v-model="item.activity.id" @change="updateTips(index)">
-          <option v-for="act in activitiesByDaypart(item.period)" :value="act.id" :key="act.id">
+        <select v-model="item.activity.id" @change="updateActivity(index, item.activity.id)">
+          <option v-for="act in activitiesByDaypart(item.period.toLowerCase())" :value="act.id" :key="act.id">
             {{ act.act_name }}
           </option>
         </select>
 
         <select v-model="item.activity.tip">
-          <option v-for="tip in tipsByActivity(item.activity.id, item.period)" :value="tip.tip_name" :key="tip.tip_code">
+          <option v-for="tip in tipsByActivity(item.activity.id, item.period.toLowerCase())" :value="tip.tip_name" :key="tip.tip_code">
             {{ tip.tip_name }}
           </option>
         </select>

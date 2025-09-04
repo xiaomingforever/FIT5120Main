@@ -21,13 +21,15 @@ const enter = async () => {
     const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ age_group: age.value, gender: gender.value })
+      body: JSON.stringify({ age_code: age.value, gender: gender.value })
     })
     const data = await res.json()
     // save to localStorage
     localStorage.setItem('routine', JSON.stringify(data))
+    localStorage.setItem('age_code', age.value)
+    localStorage.setItem('gender', gender.value)
     // jump to display routine
-    router.push('/')
+    router.push('/today')
   } catch (err) {
     console.error(err)
     alert('Failed to generate routine.')
