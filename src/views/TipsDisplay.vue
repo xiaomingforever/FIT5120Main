@@ -173,6 +173,7 @@ const openRelated = (tipId: string | number) => {
       :tip="selectedTip"
       :tips="tips"
       :activity-name="activityName"
+      :activity-id="activityId"
       :age="age"
       :gender="gender"
       :period="period"

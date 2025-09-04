@@ -13,6 +13,7 @@ const props = defineProps<{
   tip: TipFull
   tips?: TipFull[] //list of tips from the same activity
   activityName: string
+  activityId: string | number //correct activity id
   age: string
   gender: string
   period: string
@@ -29,7 +30,6 @@ const model = ref<TipFull>({ ...props.tip })
 
 /** ---------- Local image handling ----------
  * Map activity name -> local asset image.
-
  * The backend usually sends filenames like "bedtime2.png" etc., so we try a few variants.
  */
 const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
@@ -81,7 +81,9 @@ const imageUrl = computed(() => {
 const needEnrich = () =>
   !model.value.tip_des || !Array.isArray(model.value.skills) || !('source' in model.value)
 
+let enrichSeq = 0
 const enrich = async () => {
+  const seq = ++enrichSeq
   const payload = {
     age_code: props.age,
     gender: props.gender,
@@ -89,7 +91,7 @@ const enrich = async () => {
       {
         period: props.period, // keep period pinned/consistent
         activity: {
-          id: Number.NaN, // optional; not required for enrich by tip_id
+          id: Number(props.activityId), //correct activity id
           name: props.activityName,
           tip_id: model.value.tip_id,
         },
@@ -103,7 +105,16 @@ const enrich = async () => {
       body: JSON.stringify(payload),
     })
     const data = await res.json()
+    if (seq !== enrichSeq) return // If another enrich started after this one, drop this result
     const act = data?.routine?.[0]?.activity ?? {}
+
+    if (act.tip_id !== undefined && String(act.tip_id) !== String(model.value.tip_id)) {
+      console.warn('Dropped mismatched enrich result', {
+        asked: model.value.tip_id,
+        got: act.tip_id,
+      })
+      return
+    }
     model.value = {
       ...model.value,
       tip: act.tip || model.value.tip,
