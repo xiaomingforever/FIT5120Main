@@ -25,7 +25,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted  } from 'vue'
 import ExerciseCard from '@/components/ExerciseCard.vue'
-import type { Exercise, AgeGroup } from '@/stores/Exercise'
+import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 
 const exercises = ref<Exercise[]>([]) // API data
 const selectedAge = ref<'all' | AgeGroup>('all')
