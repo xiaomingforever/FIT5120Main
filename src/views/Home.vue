@@ -2,29 +2,30 @@
   <div class="home">
     <HeadBar />
 
+    <!-- HERO -->
     <main class="hero">
-      <section class="hero__content">
-        <h1>Build your child's brains with everyday moments</h1>
-        <p>description work in progress</p>
+      <section class="hero__left">
+        <!--  headline -->
+        <h1 class="pill pill--xl">Build your child's brains with everyday moments</h1>
+
+        <!-- subhead -->
+        <p class="pill pill--lg">Turn every minutes into mind-building fun.</p>
+
+        <!-- pill lines to echo the reference layout -->
+        <ul class="hero__list">
+          <li class="pill">Personalized ideas</li>
+          <li class="pill">zero stress</li>
+          <li class="pill">Backed by acadamic source</li>
+        </ul>
+
         <div class="hero__actions">
-          <RouterLink class="cta" to="/today" aria-label="Go to Today">Go to Today</RouterLink>
+          <RouterLink class="cta" to="/today" aria-label="Go to Today">Try Brainbuilder</RouterLink>
         </div>
       </section>
 
-      <aside class="hero__art" aria-hidden="true">
-        <!--  decorative blob -->
-        <svg viewBox="0 0 300 300" width="100%" height="100%" role="img">
-          <defs>
-            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="#c9efe4" />
-              <stop offset="1" stop-color="#f1edcd" />
-            </linearGradient>
-          </defs>
-          <path
-            fill="url(#g)"
-            d="M234 60c28 26 45 67 34 103-12 36-52 68-96 79-44 12-93 3-116-25-23-28-20-74 1-105 22-31 60-45 98-53 37-8 72-25 79 1z"
-          />
-        </svg>
+      <!-- Right visual area (large translucent card like the mock) -->
+      <aside class="hero__right" aria-hidden="true">
+        <div class="hero__panel"></div>
       </aside>
     </main>
   </div>
@@ -39,71 +40,158 @@ export default {
 </script>
 
 <style scoped>
+/* -----------------------------------------------------------
+   Page wrapper
+----------------------------------------------------------- */
 .home {
-  background: #efe9c8;
+  background: #2f5bff;
   min-height: 100vh;
 }
+
+/* -----------------------------------------------------------
+   --hero-bg: url('/src/assets/hero.jpg');
+   --hero-bg: url('https://example.com/your-image.jpg');
+----------------------------------------------------------- */
 .hero {
+  --hero-bg: url('/src/assets/Background/Background1.png'); /* <-- put your background image URL here */
+  position: relative;
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  gap: 24px;
-  padding: 48px 24px;
-  max-width: 1100px;
-  margin: 0 auto;
+  align-items: start;
+  gap: 40px;
+  min-height: clamp(560px, 84vh, 920px);
+  padding: clamp(24px, 4vw, 48px);
+  isolation: isolate; /* ensure overlay stacking works */
+  color: #0b1b3b;
 }
-.hero__content {
-  background: #ffffff;
-  border: 1px solid #e9e6d4;
-  border-radius: 24px;
-  padding: 36px;
-  box-shadow: 0 8px 24px rgba(17, 122, 122, 0.08);
+
+/* Background image layer */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--hero-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -2;
 }
-h1 {
-  margin: 0 0 12px;
-  font-size: 36px;
-  line-height: 1.15;
-  color: #0c5151;
+
+/* A subtle color overlay for better contrast on top of the photo */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(243, 249, 140, 0.65); /* matches the blue in your reference */
+  z-index: -1;
 }
-p {
-  margin: 0 0 20px;
-  color: #334;
-  font-size: 16px;
+
+/* -----------------------------------------------------------
+   Left column: pill lines
+----------------------------------------------------------- */
+.hero__left {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  max-width: 760px;
 }
-.hero__actions {
-  display: flex;
+
+.pill {
+  display: inline-block;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  line-height: 1.2;
+  box-shadow: none;
+  border: 0;
+  color: #000;
+}
+
+.pill--xl {
+  font-size: clamp(20px, 3.2vw, 34px);
+  font-weight: 800;
+  padding: 18px 22px;
+  max-width: 52ch;
+  margin-bottom: 8px;
+}
+
+.pill--lg {
+  font-size: clamp(16px, 2vw, 18px);
+  font-weight: 600;
+  max-width: 48ch;
+  margin-bottom: 8px;
+}
+
+.hero__list {
+  list-style: none;
+  padding: 0;
+  margin: 6px 0 2px 0;
+  display: grid;
   gap: 12px;
+}
+.hero__list .pill {
+  font-size: 15px;
+  font-weight: 600;
+  max-width: 40ch;
+}
+
+/* CTA */
+.hero__actions {
+  margin-top: 18px;
 }
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 160px;
-  height: 44px;
-  padding: 0 18px;
-  border-radius: 999px;
-  background: #117a7a;
-  color: #fff;
-  font-weight: 700;
-  border: 1px solid transparent;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #000000;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transition:
+    transform 120ms ease,
+    filter 120ms ease;
+  text-decoration: none;
 }
 .cta:hover {
-  filter: brightness(0.98);
+  filter: brightness(0.97);
+  transform: translateY(-1px);
 }
 
-.hero__art {
-  align-self: center;
-  background: #ffffff;
-  border: 1px solid #e9e6d4;
-  border-radius: 24px;
-  padding: 20px;
-  box-shadow: 0 8px 24px rgba(17, 122, 122, 0.08);
+/* Right column: big translucent panel */
+/* .hero__right {
+  display: grid;
+  place-items: center;
+  min-height: 380px;
 }
-@media (max-width: 900px) {
+.hero__panel {
+  width: min(640px, 95%);
+  height: min(440px, 56vh);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 12px 40px rgba(15, 40, 160, 0.15);
+  backdrop-filter: blur(2px);
+} */
+
+/* Responsive */
+@media (max-width: 960px) {
   .hero {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
-  .hero__art {
-    order: -1;
+  .hero__right {
+    order: 2;
+  }
+  .hero__left {
+    order: 1;
+  }
+  .hero__panel {
+    height: 36vh;
   }
 }
 </style>
