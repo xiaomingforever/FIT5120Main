@@ -15,6 +15,8 @@ const activityId = computed(() => String(route.params.activityId ?? ''))
 const activityName = ref<string>(String(route.query.name ?? ''))
 const selectedAge = String(route.query.age ?? (localStorage.getItem('age_code') || '1-3y'))
 const gender = String(localStorage.getItem('gender') || 'girl')
+const age = ref<string>(String(route.query.age ?? ''))
+const period = ref<string>(String(route.query.period ?? ''))
 
 // local state
 const loading = ref(true)
