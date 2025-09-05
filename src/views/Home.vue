@@ -19,7 +19,7 @@
         </ul>
 
         <div class="hero__actions">
-          <RouterLink class="cta" to="/today" aria-label="Go to Today">Go to Today</RouterLink>
+          <RouterLink class="cta" to="/today" aria-label="Go to Today">Try Brainbuilder</RouterLink>
         </div>
       </section>
 
