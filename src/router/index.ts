@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '@/components/AppLayout.vue'
 
 const Home = () => import('@/views/Home.vue')
-const Today = () => import('@/views/DailyRoutine.vue')
+const Today = () => import('@/views/Today.vue')
 const Activities = () => import('@/views/Activities.vue')
 const Favorites = () => import('@/views/Favorites.vue')
 const Progress = () => import('@/views/Progress.vue')

@@ -29,7 +29,7 @@ import ExerciseCard from '@/components/ExerciseCard.vue'
 import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 
 const router = useRouter()
-const exercises = ref<Exercise[]>([]) // API data
+const exercises = ref<Exercise[]>([]) // API data from back-end
 const selectedAge = ref<'all' | AgeGroup>('all')
 
 // tabs for the selector bar
@@ -82,7 +82,7 @@ const grouped = computed(() => {
       const age = tip.age_code as AgeGroup
       if (!groups[age]) return
 
-      // check if activity already exist
+      // check if there are same activity id
       let existing = groups[age].find((e) => e.id === ex.id)
       if (existing) {
         existing.tips.push(tip)
@@ -126,11 +126,11 @@ const visible = computed<Exercise[]>(() => {
   }))
 })
 
-function openExercise(ex: Exercise) {
-  // route to detail  or open a modal
-  // router.push({ name: 'ExerciseDetail', params: { id: ex.id } })
-  console.log('open', ex)
-}
+// function openExercise(ex: Exercise) {
+//   // route to detail  or open a modal
+//   // router.push({ name: 'ExerciseDetail', params: { id: ex.id } })
+//   console.log('open', ex)
+// }
 
 const goToTips = (ex: Exercise) => {
   const raw = selectedAge.value
