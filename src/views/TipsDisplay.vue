@@ -5,8 +5,12 @@ import TipModal from '@/components/TipModal.vue'
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
-type TipFull = TipLite & { tip_des?: string; skills?: Skill[]; activityName: string }
-
+type TipFull = TipLite & {
+  tip_des?: string
+  skills?: Skill[]
+  source?: string
+  activityName: string
+}
 const route = useRoute()
 const router = useRouter()
 
@@ -88,6 +92,7 @@ const hydrateTip = async (t: TipLite): Promise<TipFull> => {
       tip: act.tip || t.tip,
       tip_des: act.tip_des || '',
       skills: act.skills || [],
+      source: (act.source ?? '').trim(),
       activityName: activityName.value,
     }
   } catch {
@@ -178,7 +183,7 @@ const openRelated = (tipId: string | number) => {
       :activity-id="activityId"
       :age="age"
       :gender="gender"
-      :period="period"
+      :period="period || 'Any'"
       @close="closeTip"
       @open-related="openRelated"
     />
