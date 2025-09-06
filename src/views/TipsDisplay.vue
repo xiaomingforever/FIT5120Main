@@ -2,6 +2,25 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import TipModal from '@/components/TipModal.vue'
+import { useFavoritesStore } from '@/stores/favorites'
+import heartEmpty from '@/assets/Font icons/favorite_empty.png'
+import heartRed from '@/assets/Font icons/favorite_red.png'
+// fav button
+const favorites = useFavoritesStore()
+const isFavorited = (id: string | number) => favorites.isFavorite(id)
+
+function toggleFavorite(t: TipFull) {
+  favorites.toggle({
+    tip_id: t.tip_id,
+    tip: t.tip,
+    tip_des: t.tip_des,
+    skills: t.skills,
+    source: t.source,
+    activityName: activityName.value || '',
+    activityId: activityId.value,
+    age_code: t.age_code,
+  })
+}
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
@@ -161,6 +180,14 @@ const openRelated = (tipId: string | number) => {
         @keydown.enter="openTip(t)"
         @keydown.space.prevent="openTip(t)"
       >
+        <button
+          class="fav-btn"
+          :aria-pressed="isFavorited(t.tip_id)"
+          :title="isFavorited(t.tip_id) ? 'Remove from favorites' : 'Add to favorites'"
+          @click.stop="toggleFavorite(t)"
+        >
+          <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
+        </button>
         <div class="tip-card-head">
           <span class="activity-chip">{{ t.activityName }}</span>
         </div>
@@ -226,6 +253,7 @@ const openRelated = (tipId: string | number) => {
   align-items: stretch;
 }
 .tip-card {
+  position: relative;
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
@@ -241,7 +269,7 @@ const openRelated = (tipId: string | number) => {
   font-size: 12px;
   font-weight: 600;
   color: #065f46;
-  background: #d1fae5; /* decorative green */
+  background: #d1fae5;
   border: 1px solid #a7f3d0;
   border-radius: 999px;
   padding: 2px 10px;
@@ -275,5 +303,25 @@ const openRelated = (tipId: string | number) => {
   text-align: center;
   padding: 40px 0;
   color: #6b7280;
+}
+.fav-btn {
+  position: absolute;
+  top: 12px;
+  left: 10px;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+}
+.fav-btn:focus {
+  outline: 2px solid #a7f3d0;
+  outline-offset: 2px;
+}
+.fav-btn img {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 </style>
