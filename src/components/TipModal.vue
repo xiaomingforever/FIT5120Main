@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref, watch, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useFavoritesStore } from '@/stores/favorites'
+import heartEmpty from '@/assets/Font icons/favorite_empty.png'
+import heartRed from '@/assets/Font icons/favorite_red.png'
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
 type TipFull = TipLite & { tip_des?: string; skills?: Skill[]; source?: string }
 
 const router = useRouter()
+const fav = useFavoritesStore()
 
 const props = defineProps<{
   open: boolean
@@ -27,6 +31,20 @@ const emit = defineEmits<{
 const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev'
 
 const model = ref<TipFull>({ ...props.tip })
+
+const isFavorited = computed(() => fav.isFavorite(model.value.tip_id))
+const toggleFavorite = () => {
+  fav.toggle({
+    tip_id: model.value.tip_id,
+    tip: model.value.tip,
+    tip_des: model.value.tip_des,
+    skills: model.value.skills,
+    source: model.value.source,
+    activityName: props.activityName,
+    activityId: props.activityId,
+    age_code: (model.value as any).age_code,
+  })
+}
 
 const extractHttpsLink = (text?: string): string | null => {
   if (!text) return null
@@ -192,10 +210,19 @@ const related = computed(() => {
   <teleport to="body">
     <div v-if="open" class="tipmodal-overlay" @click.self="emit('close')">
       <div class="tipmodal" role="dialog" aria-modal="true" aria-label="Tip details">
+        <!-- close button-->
         <button id="tip-close-btn" class="close" @click="emit('close')" aria-label="Close">
           ✕
         </button>
-
+        <!-- favorite button -->
+        <button
+          class="fav-btn"
+          :aria-pressed="isFavorited"
+          :title="isFavorited ? 'Remove from favorites' : 'Add to favorites'"
+          @click.stop="toggleFavorite"
+        >
+          <img :src="isFavorited ? heartRed : heartEmpty" alt="" />
+        </button>
         <img v-if="imageUrl" class="hero" :src="imageUrl" :alt="activityName" />
 
         <div class="meta">
@@ -347,7 +374,7 @@ const related = computed(() => {
 .related-link:hover {
   background: #f3f4f6;
 }
-/* the button */
+/* the done button */
 .footer {
   position: sticky; /* stays at bottom while scrolling in the modal */
   bottom: 0;
@@ -371,5 +398,25 @@ const related = computed(() => {
 .start-btn:focus {
   outline: 2px solid #a7f3d0;
   outline-offset: 2px;
+}
+
+.fav-btn {
+  position: absolute;
+  top: 12px;
+  right: 46px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+}
+.fav-btn:focus {
+  outline: 2px solid #a7f3d0;
+  outline-offset: 2px;
+}
+.fav-btn img {
+  width: 26px;
+  height: 26px;
+  display: block;
 }
 </style>
