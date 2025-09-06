@@ -3,7 +3,7 @@ import { RouterLink } from 'vue-router'
 // import icons
 import iconToday from '@/assets/Font icons/today_200dp_000000.png'
 import iconActivities from '@/assets/Font icons/monitor_heart_200dp_000000.png'
-import iconFavorite from '@/assets/Font icons/favorite_border_200dp_000000.png'
+import iconFavorite from '@/assets/Font icons/favorite_empty.png'
 import iconProgress from '@/assets/Font icons/analytics_200dp_1F1F1F.png'
 
 type Item = { label: string; to: string; icon: string }
