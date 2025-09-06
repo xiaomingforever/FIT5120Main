@@ -28,6 +28,12 @@ const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev
 
 const model = ref<TipFull>({ ...props.tip })
 
+const extractHttpsLink = (text?: string): string | null => {
+  if (!text) return null
+  const match = text.match(/https?:\/\/[^\s]+/i)
+  return match ? match[0] : null
+}
+
 /** ---------- Local image handling ----------
  * Map activity name -> local asset image.
  * The backend usually sends filenames like "bedtime2.png" etc., so we try a few variants.
@@ -75,11 +81,11 @@ const imageUrl = computed(() => {
   return hit ? IMAGE_MAP[hit] : ''
 })
 
-/** ---------- Enrich single tip if needed ----------
- * request tip_des / skills / source from the /dev endpoint if missing
- */
+// treat undefined/null/empty-string as missing
 const needEnrich = () =>
-  !model.value.tip_des || !Array.isArray(model.value.skills) || !('source' in model.value)
+  !model.value.tip_des ||
+  !Array.isArray(model.value.skills) ||
+  !(model.value.source && model.value.source.trim().length > 0)
 
 let enrichSeq = 0
 const enrich = async () => {
@@ -120,7 +126,7 @@ const enrich = async () => {
       tip: act.tip || model.value.tip,
       tip_des: act.tip_des || model.value.tip_des,
       skills: act.skills || model.value.skills || [],
-      source: act.source || model.value.source || '',
+      source: (act.source ?? '').trim() || (model.value.source ?? '').trim() || '',
     }
   } catch (e) {
     // fail-soft: keep what we have
@@ -159,14 +165,6 @@ const onKey = (e: KeyboardEvent) => {
 }
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
-
-const openSourceHref = computed(() => {
-  const s = model.value.source?.trim() || ''
-  // if it already looks like a URL, use it; otherwise leave as text
-  if (/^https?:\/\//i.test(s)) return s
-  const m = s.match(/https?:\/\/\S+/i)
-  return m ? m[0] : ''
-})
 
 const startRoutine = () => {
   router.push({
@@ -211,14 +209,18 @@ const related = computed(() => {
         <ul v-if="model.skills?.length" class="skills">
           <li v-for="s in model.skills" :key="s.code" class="chip">{{ s.code }}</li>
         </ul>
-
-        <div class="source" v-if="model.source || openSourceHref">
+        <!-- Source-->
+        <p v-if="model.source" class="source">
           <strong>Source:</strong>
-          <template v-if="openSourceHref">
-            <a :href="openSourceHref" target="_blank" rel="noopener">{{ model.source }}</a>
-          </template>
-          <template v-else>{{ model.source }}</template>
-        </div>
+          <span v-if="extractHttpsLink(model.source)">
+            <a :href="extractHttpsLink(model.source)!" target="_blank" rel="noopener noreferrer">
+              {{ extractHttpsLink(model.source) }}
+            </a>
+          </span>
+          <span v-else>
+            {{ model.source }}
+          </span>
+        </p>
 
         <section v-if="related.length" class="related">
           <h3 class="related-title">Related tips</h3>
@@ -232,7 +234,7 @@ const related = computed(() => {
         </section>
 
         <div class="footer">
-          <button class="start-btn" @click="startRoutine">Start routine</button>
+          <button class="start-btn" @click="startRoutine">Done</button>
         </div>
       </div>
     </div>
