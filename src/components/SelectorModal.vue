@@ -27,20 +27,20 @@ const submit = () => emit('submit', { age: age.value, gender: gender.value })
       <div class="modal">
         <!-- selector card content -->
         <button class="close" aria-label="Close" @click="close">✕</button>
-        <img src="/src/selector page/baby-1.webp" alt="Baby" class="icon" />
+        <img src="/selector-page/baby-1.webp" alt="Baby" class="icon" />
         <h2 class="title">Select your child's<br />age and gender</h2>
 
         <!-- Age -->
         <div class="row">
           <label class="label">Age:</label>
           <div class="options">
-            <button :class="['opt', { active: age === '0-1' }]" @click="selectAge('0-1')">
+            <button :class="['opt', { active: age === '0-1y' }]" @click="selectAge('0-1y')">
               0-1
             </button>
-            <button :class="['opt', { active: age === '1-2' }]" @click="selectAge('1-2')">
+            <button :class="['opt', { active: age === '1-2y' }]" @click="selectAge('1-2y')">
               1-2
             </button>
-            <button :class="['opt', { active: age === '3-5' }]" @click="selectAge('3-5')">
+            <button :class="['opt', { active: age === '3-5y' }]" @click="selectAge('3-5y')">
               3-5
             </button>
           </div>
@@ -50,11 +50,11 @@ const submit = () => emit('submit', { age: age.value, gender: gender.value })
         <div class="row">
           <label class="label">Gender:</label>
           <div class="options">
-            <button :class="['opt', { active: gender === 'Girl' }]" @click="selectGender('Girl')">
-              <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl
+            <button :class="['opt', { active: gender === 'girl' }]" @click="selectGender('girl')">
+              <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> girl
             </button>
-            <button :class="['opt', { active: gender=== 'Boy' }]" @click="selectGender('Boy')">
-              <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> Boy
+            <button :class="['opt', { active: gender=== 'boy' }]" @click="selectGender('boy')">
+              <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> boy
             </button>
           </div>
         </div>
