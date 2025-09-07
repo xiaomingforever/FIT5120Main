@@ -55,49 +55,84 @@ onMounted(async () => {
     })
     const data = await res.json()
 
-    // map backend data to frontend
-    exercises.value = data.options.map((act: any) => ({
-      id: act.id,
-      title: act.name,
-      description: act.desc || 'No description available',
-      // ageGroup: "1-3",
-      image: act.image,
-      tips: act.tips.map((t: any) => ({
-        tip_id: t.tip_id,
-        tip: t.tip,
-        age_code: t.age_code as AgeGroup,
-      })),
-      practiceCount: act.tips?.length || 0,
-    }))
-  } catch (err) {
+   // map backend data to frontend
+    exercises.value = (data.options || []).map((act: any) => {
+      // normalize raw tips (keep fields we need)
+      const rawTips = (act.tips || []).map((t: any) => ({
+        tip_id: String(t.tip_id),
+        tip: t.tip_name ?? t.tip ?? '',
+        age_code: (t.age_code as AgeGroup) ?? undefined,
+        skill_code: t.skill_code ?? undefined,
+        tip_desc: t.tip_desc ?? '',
+        brainy_background: t.brainy_background ?? '',
+        source_url: t.source_url ?? '',
+        act_name: t.act_name ?? act.name,
+        act_desc: t.act_desc ?? act.desc,
+      }))
+
+      // compute unique tip count (dedupe by tip_id) for practiceCount
+      const uniqueTipCount = new Set(rawTips.map((rt: { tip_id: any }) => rt.tip_id)).size
+      
+      return {
+        id: String(act.id),
+        title: act.name,
+        description: act.desc || 'No description available',
+        image: act.image,
+        // store full raw tips (may contain duplicates by skill)
+        tips: rawTips,
+        // set initial practiceCount to unique count
+        practiceCount: uniqueTipCount,
+      } as Exercise
+    }) 
+    }  catch (err) {
     console.error('Failed to fetch exercises:', err)
   }
 })
 
+/**
+ * grouped: produce per-age grouped activities, each activity's tips are unique by tip_id
+ * structure: [{ label: '0-1y', items: Exercise[] }, ...]
+ */
 const grouped = computed(() => {
-  const groups: Record<AgeGroup, Exercise[]> = { '0-1y': [], '1-3y': [], '3-5y': [] }
+  // maps to collect activities per age: age -> (activityId -> Exercise)
+  const groupsMap: Record<AgeGroup, Map<string, Exercise>> = {
+    '0-1y': new Map(),
+    '1-3y': new Map(),
+    '3-5y': new Map(),
+  }
 
-  exercises.value.forEach((ex) => {
-    ex.tips.forEach((tip: Tip) => {
-      const age = tip.age_code as AgeGroup
-      if (!groups[age]) return
+  for (const ex of exercises.value) {
+    // ex.tips may contain multiple rows for same tip_id (different skills/ages)
+    for (const tipRow of ex.tips as any[]) {
+      const age = tipRow.age_code as AgeGroup | undefined
+      if (!age || !groupsMap[age]) continue
 
-      // check if there are same activity id
-      let existing = groups[age].find((e) => e.id === ex.id)
-      if (existing) {
-        existing.tips.push(tip)
-      } else {
-        groups[age].push({
+      const activityMap = groupsMap[age]
+      if (!activityMap.has(ex.id)) {
+        // create a shallow copy of exercise but with empty tips to fill unique tips
+        activityMap.set(ex.id, {
           ...ex,
-          tips: [tip], // only keep current age group's tips
-        })
+          tips: [],
+        } as Exercise)
       }
-    })
-  })
+
+      const exInGroup = activityMap.get(ex.id)!
+      // push only if this tip_id not yet added for this activity in this age group
+      if (!exInGroup.tips.some((t: any) => String(t.tip_id) === String(tipRow.tip_id))) {
+        exInGroup.tips.push({
+          tip_id: String(tipRow.tip_id),
+          tip: tipRow.tip,
+          age_code: age,
+          tip_desc: tipRow.tip_desc,
+          // optionally include other fields if Exercise.Tip type supports them
+        } as unknown as Tip)
+      }
+    }
+  }
 
   return AGE_ORDER.map((label) => ({
     label,
-    items: groups[label],
+    items: Array.from(groupsMap[label].values()),
   })).filter((g) => g.items.length)
 })
 
@@ -107,13 +142,13 @@ const grouped = computed(() => {
 
 const visible = computed<Exercise[]>(() => {
   if (selectedAge.value === 'all') {
+    // for 'all' show every activity and practiceCount is unique tip count across all ages
     return exercises.value.map((ex) => ({
       ...ex,
-      practiceCount: ex.tips.length,
+      practiceCount: new Set((ex.tips || []).map((t: any) => String(t.tip_id))).size,
       currentAgeGroup: 'all',
     }))
   }
-
   // display current age group
   const group = grouped.value.find((g) => g.label === selectedAge.value)
   if (!group) return []
@@ -121,7 +156,8 @@ const visible = computed<Exercise[]>(() => {
   // show only once of each activity
   return group.items.map((ex) => ({
     ...ex,
-    practiceCount: ex.tips.length,
+    // ex.tips in group.items are already unique by tip_id, but use Set for safety
+    practiceCount: new Set((ex.tips || []).map((t: any) => String(t.tip_id))).size,
     currentAgeGroup: selectedAge.value,
   }))
 })

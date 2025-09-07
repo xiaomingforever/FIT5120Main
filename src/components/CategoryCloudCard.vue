@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import bedtime from '@/assets/Activities/ActivityCard/Bedtime1.png'
 import mealtime from '@/assets/Activities/ActivityCard/Mealtime1.png'
 import bathtime from '@/assets/Activities/ActivityCard/Bathtime1.png'
@@ -14,15 +14,38 @@ type Cat = { key: string; label: string; icon: string }
 const cats: Cat[] = [
   /* cat means category */
   { key: 'bedtime', label: 'Bedtime', icon: bedtime },
-  { key: 'mealtime', label: 'Mealtime', icon: mealtime },
+  { key: 'playtime', label: 'Playtime', icon: mealtime },
   { key: 'bathtime', label: 'Bathtime', icon: bathtime },
-  { key: 'learning', label: 'Learning Time', icon: learning },
-  { key: 'outdoor', label: 'Outdoor Play', icon: outdoor },
-  { key: 'problem', label: 'Problem Solving', icon: problem },
-  { key: 'language', label: 'Language Moments', icon: language },
-  { key: 'gardening', label: 'Gardening', icon: gardening },
-  { key: 'dressing', label: 'Getting Dressed', icon: dressing },
+  { key: 'mealtime', label: 'Mealtime', icon: learning },
+  { key: 'anytime-anywhere', label: 'Anytime Anywhere', icon: outdoor },
+  { key: 'diaper-change', label: 'Diaper Change', icon: problem },
+  { key: 'cleaning-up', label: 'Cleaning Up', icon: language },
+  { key: 'getting-dressed', label: 'Getting Dressed', icon: dressing },
 ]
+
+const router = useRouter()
+
+const goToActivity = (c: Cat) => {
+  const activityIdMap: Record<string, string> = {
+    'bedtime': '1',
+    'playtime': '2',
+    'bathtime': '3',
+    'mealtime': '4',
+    'anytime-anywhere': '5',
+    'diaper-change': '6',
+    'cleaning-up': '7',
+    'getting-dressed': '8',
+  }
+  const id = activityIdMap[c.key] || '1'
+  router.push({
+    name: 'TipsDisplay',            // router name
+    params: { activityId: id },
+    query: {
+      name: c.key,
+      age: localStorage.getItem('age_code') || '3-5y'
+    }
+  })
+}
 </script>
 
 <template>
@@ -31,10 +54,13 @@ const cats: Cat[] = [
     <ul class="pill-grid">
       <li v-for="c in cats" :key="c.label">
         <!-- Send users to the Activities page with a category query -->
-        <RouterLink class="pill" :to="{ name: 'Activities', query: { category: c.key } }">
+        <button 
+          class="pill" 
+          @click="goToActivity(c)"
+        >
           <img class="pill-icon" :src="c.icon" :alt="c.label" aria-hidden="true" />
           <span>{{ c.label }}</span>
-        </RouterLink>
+        </button>
       </li>
     </ul>
   </section>
