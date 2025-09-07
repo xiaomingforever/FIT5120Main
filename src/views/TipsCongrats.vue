@@ -138,7 +138,7 @@ function openTipsList() {
     <header class="hero">
       <h1 class="hero-title">Congratulations!</h1>
       <p class="hero-sub">
-        You just finished a <span class="chip">{{ activityName }}, </span> tip. Every small step
+        You just finished a <span class="chip">{{ activityName }} </span> tip. Every small step
         helps your child grow.
       </p>
       <div class="hero-actions">
