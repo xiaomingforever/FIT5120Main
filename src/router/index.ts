@@ -8,6 +8,7 @@ const Favorites = () => import('@/views/Favorites.vue')
 const Progress = () => import('@/views/Progress.vue')
 const EditRoutine = () => import('@/views/EditRoutine.vue')
 const TipsDisplay = () => import('@/views/TipsDisplay.vue')
+const TipsCongrats = () => import('@/views/TipsCongrats.vue')
 
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,6 +25,12 @@ export default createRouter({
           path: 'activities/:activityId',
           name: 'TipsDisplay',
           component: TipsDisplay,
+          props: true,
+        },
+        {
+          path: 'activities/:activityId/congrats',
+          name: 'TipsCongrats',
+          component: TipsCongrats,
           props: true,
         },
         { path: 'favorites', name: 'Favorites', component: Favorites },
