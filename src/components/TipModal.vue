@@ -58,15 +58,12 @@ const extractHttpsLink = (text?: string): string | null => {
   return match ? match[0] : null
 }
 
-/** ---------- Local image handling ----------
- * Map activity name -> local asset image.
- * The backend usually sends filenames like "bedtime2.png" etc., so we try a few variants.
- */
 const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
   eager: true,
   import: 'default',
   query: '?url',
 }) as Record<string, string>
+// secondary image handling if previous failed
 const IMAGES_B = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
   eager: true,
   import: 'default',
@@ -192,13 +189,16 @@ const onKey = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-const startRoutine = () => {
+const done = () => {
   router.push({
-    name: 'Today',
+    name: 'TipsCongrats',
+    params: { activityId: String(props.activityId) },
     query: {
+      name: props.activityName,
       age: props.age,
       gender: props.gender,
       period: props.period,
+      completedTipId: String(model.value.tip_id), // the tip just finished
     },
   })
 }
@@ -253,7 +253,11 @@ const related = computed(() => {
         <p v-if="model.source_url" class="source">
           <strong>Source:</strong>
           <span v-if="extractHttpsLink(model.source_url)">
-            <a :href="extractHttpsLink(model.source_url)!" target="_blank" rel="noopener noreferrer">
+            <a
+              :href="extractHttpsLink(model.source_url)!"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               {{ extractHttpsLink(model.source_url) }}
             </a>
           </span>
@@ -274,7 +278,7 @@ const related = computed(() => {
         </section>
 
         <div class="footer">
-          <button class="start-btn" @click="startRoutine">Done</button>
+          <button class="start-btn" @click="done">Done</button>
         </div>
       </div>
     </div>
