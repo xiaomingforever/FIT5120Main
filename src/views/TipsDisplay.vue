@@ -74,8 +74,9 @@ const fetchTipsForActivity = async (actId: string) => {
     if (match) {
       if (!activityName.value) activityName.value = match.name
       // keep only tips matching the selected age (unique by tip_id)
-      // const filtered: TipLite[] = (match.tips || [])
-      //   .filter((t: any) => !t.age_code || t.age_code === selectedAge)
+      const filtered = (match.tips || []).filter(
+        (t: any) => !t.age_code || t.age_code === selectedAge
+      )
       //   .map((t: any) => ({ tip_id: t.tip_id, tip: t.tip, age_code: t.age_code }))
 
       // const unique = Array.from(new Map(filtered.map((t) => [t.tip_id, t])).values())
@@ -84,7 +85,7 @@ const fetchTipsForActivity = async (actId: string) => {
       // merge same tip_id
       const tipMap = new Map<string, TipFull>()
 
-      for (const t of match.tips || []) {
+      for (const t of filtered) {
         const id = String(t.tip_id)
         if (!tipMap.has(id)) {
           tipMap.set(id, {
