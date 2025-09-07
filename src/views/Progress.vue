@@ -1,60 +1,90 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-// TODO: wire real stats/store
-const completedThisMonth = 5
-// Temporary history array
-interface HistoryItem {
-  date: string
-  skill: string
-  exercise: string
-  favorited: boolean
+import { computed, onMounted, ref } from 'vue'
+import { useProgressStore } from '@/stores/progress'
+
+const store = useProgressStore()
+onMounted(() => store.load())
+
+const activeTab = ref<'skills' | 'history'>('skills')
+
+// Skills tab data
+const skillsList = computed(() => {
+  const rows = Object.entries(store.skillsCount).map(([code, count]) => ({ code, count }))
+  // sort by count desc, then alpha
+  return rows.sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
+})
+
+// History tab data sorted by date desc in the getter
+const groupedHistory = computed(() => store.byDate)
+
+function fmtDate(isoDate: string) {
+  const [y, m, d] = isoDate.split('-').map((x) => parseInt(x, 10))
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
-// mockup data
-const history = ref<HistoryItem[]>([
-  { date: 'Fri 22 Aug', skill: 'Creativity', exercise: 'Teeth Together', favorited: true },
-  { date: 'Thu 21 Aug', skill: 'Memory', exercise: 'Number Recall', favorited: false },
-  { date: 'Wed 20 Aug', skill: 'Focus', exercise: 'Color Match', favorited: false },
-])
 </script>
 
 <template>
-  <div class="page-wrap">
-    <!-- HERO CARD -->
-    <section class="prog-hero">
-      <div class="prog-hero_inner">
-        <div class="prog-hero_copy">
-          <h1 class="prog-hero_title">Your Progress</h1>
-          <p class="prog-hero_sub">
-            Way to go! Every practice you complete helps children's brains grow strong and flexible.
-          </p>
-
-          <hr class="prog-hero_rule" />
-
-          <p class="prog-hero_stat">
-            You have completed
-            <span class="prog-hero_count">{{ completedThisMonth }}</span>
-            Exercises this month
-          </p>
-        </div>
-      </div>
+  <div class="progress">
+    <!-- Hero -->
+    <section class="hero">
+      <h1 class="title">Your progress</h1>
+      <p class="subtitle">You've completed</p>
+      <div class="counter">{{ store.total }}</div>
+      <p class="caption">total tips</p>
     </section>
 
-    <!-- (history, charts, etc.) -->
-    <section class="history-card">
-      <h2>History</h2>
-
-      <div class="history-header">
-        <span>Skills</span>
-        <span>Exercises</span>
-        <!-- add dropdowns for year/month here -->
+    <!-- Dashboard -->
+    <section class="panel">
+      <div class="tabs">
+        <button :class="['tab', { active: activeTab === 'skills' }]" @click="activeTab = 'skills'">
+          Skills
+        </button>
+        <button
+          :class="['tab', { active: activeTab === 'history' }]"
+          @click="activeTab = 'history'"
+        >
+          History
+        </button>
       </div>
 
-      <div class="history-list">
-        <div v-for="(item, index) in history" :key="index" class="history-item">
-          <div class="history-date">{{ item.date }}</div>
-          <span class="skill-tag">{{ item.skill }}</span>
-          <span class="exercise-name">{{ item.exercise }}</span>
-          <span class="favorite" :class="{ active: item.favorited }">♥</span>
+      <!-- Skills tab -->
+      <div v-if="activeTab === 'skills'" class="skills">
+        <p v-if="!skillsList.length" class="empty">
+          No finished tips yet - complete a tip to see your skill stats.
+        </p>
+        <ul v-else class="skill-list">
+          <li v-for="row in skillsList" :key="row.code" class="skill-row">
+            <span class="skill-tag">{{ row.code }}</span>
+            <span class="skill-count">{{ row.count }}</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- History tab -->
+      <div v-else class="history">
+        <p v-if="!groupedHistory.length" class="empty">
+          Nothing here yet - finish a tip to build your history.
+        </p>
+
+        <div v-for="[date, items] in groupedHistory" :key="date" class="day">
+          <h3 class="day-title">{{ fmtDate(date) }}</h3>
+          <ul class="day-list">
+            <li v-for="c in items" :key="c.completedAt + ':' + c.id" class="tip-item">
+              <div class="tip-line">
+                <span class="tip-name">{{ c.tip }}</span>
+                <span class="dot">.</span>
+                <span class="tip-activity">{{ c.activityName }}</span>
+              </div>
+              <ul v-if="c.skills?.length" class="tip-skills">
+                <li v-for="s in c.skills" :key="s.code" class="chip">{{ s.code }}</li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </section>
@@ -62,127 +92,147 @@ const history = ref<HistoryItem[]>([
 </template>
 
 <style scoped>
-.page-wrap {
-  padding: 0 12px 40px;
+.progress {
+  padding: 20px;
 }
 
-/* HERO */
-.prog-hero {
-  width: min(1100px, 92vw);
-  margin: 16px auto 28px;
-}
-.prog-hero_inner {
-  background: #fff;
-  border: 1px solid #e8e8e8;
-  border-radius: 24px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  padding: 28px;
-  display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  align-items: center;
-  gap: 18px;
-}
-
-.prog-hero_title {
-  font-size: clamp(30px, 3.4vw, 56px);
-  line-height: 1.05;
-  margin: 0 0 10px;
-}
-.prog-hero_sub {
-  margin: 0 0 16px;
-  font-size: 1.125rem;
-  color: #1f1f1fb3;
-}
-.prog-hero_rule {
-  border: none;
-  border-top: 3px solid #1f1f1f36;
-  margin: 14px 0 12px;
-}
-.prog-hero_stat {
-  margin: 0;
-  font-size: clamp(18px, 1.6vw, 26px);
-  font-weight: 700;
-}
-.prog-hero_count {
-  color: #2b8df5;
-  padding: 0 6px;
-}
-
-@media (max-width: 860px) {
-  .prog-hero_inner {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-  .prog-hero_art {
-    justify-self: center;
-    width: 180px;
-    margin-top: 8px;
-  }
-}
-.history-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  margin-top: 2rem;
-  width: min(960px, 88vw);
-  margin: 0 auto;
-}
-
-.history-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  font-weight: bold;
-}
-
-.history-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.history-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.history-date {
-  background: #f3f3f3;
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-}
-
-.skill-tag {
-  background: #d6f0f0;
-  padding: 0.25rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-}
-.exercise-name {
-  flex: 1;
-  font-weight: 500;
-}
-
-.favorite {
-  cursor: pointer;
-  color: #bbb;
-}
-
-.favorite.active {
-  color: red;
-}
-
-.card {
-  background: #fff;
-  border: 1px solid #e5e5e5;
+/* Hero */
+.hero {
+  background: #eef2ff;
   border-radius: 16px;
   padding: 22px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-  width: min(960px, 88vw);
-  margin: 0 auto;
+  text-align: center;
+  margin-bottom: 18px;
+}
+.title {
+  margin: 0 0 4px;
+  font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
+}
+.subtitle {
+  margin: 0;
+  color: #475569;
+}
+.counter {
+  font-size: clamp(2.25rem, 1.6rem + 3vw, 3.25rem);
+  font-weight: 800;
+  line-height: 1;
+  margin: 6px 0;
+}
+.caption {
+  margin: 0;
+  color: #64748b;
+}
+
+/* Panel & tabs */
+.panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 0;
+}
+.tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+}
+.tab {
+  flex: 1 1 0;
+  padding: 12px 14px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+.tab.active {
+  background: #f1f5f9;
+}
+
+/* Skills tab */
+.skills {
+  padding: 14px;
+}
+.skill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 8px;
+}
+.skill-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.skill-tag {
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.skill-count {
+  font-weight: 700;
+}
+
+/* History tab */
+.history {
+  padding: 14px;
+}
+.day + .day {
+  margin-top: 14px;
+}
+.day-title {
+  margin: 0 0 8px;
+  color: #334155;
+  font-weight: 700;
+}
+.day-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+.tip-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.tip-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: baseline;
+}
+.tip-name {
+  font-weight: 600;
+}
+.tip-activity {
+  color: #64748b;
+}
+.dot {
+  color: #cbd5e1;
+}
+.tip-skills {
+  list-style: none;
+  padding: 6px 0 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  font-size: 12px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+
+.empty {
+  color: #6b7280;
+  padding: 18px 8px;
+  text-align: center;
 }
 </style>

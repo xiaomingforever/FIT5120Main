@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useFavoritesStore } from '@/stores/favorites'
 import heartEmpty from '@/assets/Font icons/favorite_empty.png'
 import heartRed from '@/assets/Font icons/favorite_red.png'
+import { useProgressStore } from '@/stores/progress'
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
@@ -50,6 +51,26 @@ const toggleFavorite = () => {
     activityId: props.activityId,
     age_code: (model.value as any).age_code,
   })
+}
+
+const progress = useProgressStore()
+progress.load()
+const finished = computed(() => progress.isFinished(model.value.tip_id))
+
+function done() {
+  // Save the finished tip with skill tags and timestamp
+  if (!finished.value) {
+    progress.record({
+      id: model.value.tip_id,
+      tip: model.value.tip,
+      activityName: props.activityName,
+      activityId: props.activityId,
+      age_code: props.age as string,
+      skills: (model.value.skills ?? []) as any[],
+      source: model.value.source || '',
+    })
+  }
+  router.push({ name: 'TipsCongrats' })
 }
 
 const extractHttpsLink = (text?: string): string | null => {
@@ -189,19 +210,19 @@ const onKey = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-const done = () => {
-  router.push({
-    name: 'TipsCongrats',
-    params: { activityId: String(props.activityId) },
-    query: {
-      name: props.activityName,
-      age: props.age,
-      gender: props.gender,
-      period: props.period,
-      completedTipId: String(model.value.tip_id), // the tip just finished
-    },
-  })
-}
+// const done = () => {
+//   router.push({
+//     name: 'TipsCongrats',
+//     params: { activityId: String(props.activityId) },
+//     query: {
+//       name: props.activityName,
+//       age: props.age,
+//       gender: props.gender,
+//       period: props.period,
+//       completedTipId: String(model.value.tip_id),
+//     },
+//   })
+// }
 
 const related = computed(() => {
   const all = props.tips || []
@@ -278,7 +299,9 @@ const related = computed(() => {
         </section>
 
         <div class="footer">
-          <button class="start-btn" @click="done">Done</button>
+          <button class="start-btn" :disabled="finished" @click="done">
+            {{ finished ? 'Completed' : 'Done' }}
+          </button>
         </div>
       </div>
     </div>
