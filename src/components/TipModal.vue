@@ -7,7 +7,13 @@ import heartRed from '@/assets/Font icons/favorite_red.png'
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
-type TipFull = TipLite & { tip_des?: string; skills?: Skill[]; source?: string }
+type TipFull = TipLite & {
+  tip_des?: string
+  skills?: Skill[]
+  source?: string
+  brainy_background?: string
+  source_url?: string
+}
 
 const router = useRouter()
 const fav = useFavoritesStore()
@@ -145,6 +151,8 @@ const enrich = async () => {
       tip_des: act.tip_des || model.value.tip_des,
       skills: act.skills || model.value.skills || [],
       source: (act.source ?? '').trim() || (model.value.source ?? '').trim() || '',
+      brainy_background: act.brainy_background || model.value.brainy_background,
+      source_url: act.source_url || model.value.source_url,
     }
   } catch (e) {
     // fail-soft: keep what we have
@@ -236,16 +244,21 @@ const related = computed(() => {
         <ul v-if="model.skills?.length" class="skills">
           <li v-for="s in model.skills" :key="s.code" class="chip">{{ s.code }}</li>
         </ul>
+        <!-- Brainy Background -->
+        <section v-if="model.brainy_background" class="brainy">
+          <h3>Why it matters</h3>
+          <p>{{ model.brainy_background }}</p>
+        </section>
         <!-- Source-->
-        <p v-if="model.source" class="source">
+        <p v-if="model.source_url" class="source">
           <strong>Source:</strong>
-          <span v-if="extractHttpsLink(model.source)">
-            <a :href="extractHttpsLink(model.source)!" target="_blank" rel="noopener noreferrer">
-              {{ extractHttpsLink(model.source) }}
+          <span v-if="extractHttpsLink(model.source_url)">
+            <a :href="extractHttpsLink(model.source_url)!" target="_blank" rel="noopener noreferrer">
+              {{ extractHttpsLink(model.source_url) }}
             </a>
           </span>
           <span v-else>
-            {{ model.source }}
+            {{ model.source_url }}
           </span>
         </p>
 
@@ -340,6 +353,18 @@ const related = computed(() => {
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   padding: 4px 10px;
+}
+.brainy {
+  margin-top: 14px;
+  padding: 10px;
+  background: #f9fafb;
+  border-left: 4px solid #0ea641;
+  border-radius: 4px;
+}
+.brainy h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+  color: #065f46;
 }
 .source {
   margin-top: 14px;

@@ -14,6 +14,12 @@ export interface Exercise {
 
 export interface Tip {
   tip_id: string
-  tip: string
+  tip: string              // tip_name
+  tip_desc?: string
+  brainy_background?: string
+  source_url?: string
   age_code?: AgeGroup
+  act_name?: string
+  act_desc?: string
+  skills?: { code: string; weight?: number }[]
 }

@@ -15,7 +15,7 @@ function toggleFavorite(t: TipFull) {
     tip: t.tip,
     tip_des: t.tip_des,
     skills: t.skills,
-    source: t.source,
+    source: t.source_url,
     activityName: activityName.value || '',
     activityId: activityId.value,
     age_code: t.age_code,
@@ -24,11 +24,16 @@ function toggleFavorite(t: TipFull) {
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
-type TipFull = TipLite & {
-  tip_des?: string
-  skills?: Skill[]
-  source?: string
-  activityName: string
+type TipFull = {
+  tip_id: number | string
+  tip: string
+  tip_des: string
+  brainy_background: string
+  source_url: string
+  age_code: string
+  act_name: string
+  act_desc: string
+  skills: Skill[]
 }
 const route = useRoute()
 const router = useRouter()
@@ -51,7 +56,7 @@ const notFound = ref(false)
  * - /dev enriches a given activity+tip_id with tip_des & skills
  */
 const OPTION_URL = 'https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option'
-const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev'
+// const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev'
 
 // get tips (lite) for a specific activity id;
 // try multiple dayparts because backend may segment options by daypart.
@@ -69,65 +74,92 @@ const fetchTipsForActivity = async (actId: string) => {
     if (match) {
       if (!activityName.value) activityName.value = match.name
       // keep only tips matching the selected age (unique by tip_id)
-      const filtered: TipLite[] = (match.tips || [])
-        .filter((t: any) => !t.age_code || t.age_code === selectedAge)
-        .map((t: any) => ({ tip_id: t.tip_id, tip: t.tip, age_code: t.age_code }))
+      // const filtered: TipLite[] = (match.tips || [])
+      //   .filter((t: any) => !t.age_code || t.age_code === selectedAge)
+      //   .map((t: any) => ({ tip_id: t.tip_id, tip: t.tip, age_code: t.age_code }))
 
-      const unique = Array.from(new Map(filtered.map((t) => [t.tip_id, t])).values())
-      return unique
+      // const unique = Array.from(new Map(filtered.map((t) => [t.tip_id, t])).values())
+      // return unique
+
+      // merge same tip_id
+      const tipMap = new Map<string, TipFull>()
+
+      for (const t of match.tips || []) {
+        const id = String(t.tip_id)
+        if (!tipMap.has(id)) {
+          tipMap.set(id, {
+            tip_id: id,
+            tip: t.tip_name,
+            tip_des: t.tip_desc,
+            brainy_background: t.brainy_background,
+            source_url: t.source_url,
+            age_code: t.age_code,
+            act_name: t.act_name,
+            act_desc: t.act_desc,
+            skills: t.skill_code ? [{ code: t.skill_code }] : [],
+          })
+        } else {
+          // merge skills
+          const existing = tipMap.get(id)!
+          if (t.skill_code && !existing.skills.some(s => s.code === t.skill_code)) {
+            existing.skills.push({ code: t.skill_code })
+          }
+        }
+      }
+
+      return Array.from(tipMap.values())
     }
   }
   return null
 }
 
 // a single tip with description + skills using the /dev endpoint
-const hydrateTip = async (t: TipLite): Promise<TipFull> => {
-  try {
-    // pass back an explicit routine with the chosen activity+tip_id
-    const payload = {
-      age_code: selectedAge,
-      gender,
-      routine: [
-        {
-          period: 'Any',
-          activity: {
-            id: Number(activityId.value),
-            name: activityName.value || '',
-            tip_id: t.tip_id,
-          },
-        },
-      ],
-    }
-    const res = await fetch(DEV_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    })
-    const data = await res.json()
-    const act = data?.routine?.[0]?.activity ?? {}
+// const hydrateTip = async (t: TipLite): Promise<TipFull> => {
+//   try {
+//     // pass back an explicit routine with the chosen activity+tip_id
+//     const payload = {
+//       age_code: selectedAge,
+//       gender,
+//       routine: [
+//         {
+//           period: 'Any',
+//           activity: {
+//             id: Number(activityId.value),
+//             name: activityName.value || '',
+//             tip_id: t.tip_id,
+//           },
+//         },
+//       ],
+//     }
+//     const res = await fetch(DEV_URL, {
+//       method: 'POST',
+//       headers: { 'Content-Type': 'application/json' },
+//       body: JSON.stringify(payload),
+//     })
+//     const data = await res.json()
+//     const act = data?.routine?.[0]?.activity ?? {}
 
-    return {
-      ...t,
-      tip: act.tip || t.tip,
-      tip_des: act.tip_des || '',
-      skills: act.skills || [],
-      source: (act.source ?? '').trim(),
-      activityName: activityName.value,
-    }
-  } catch {
-    // graceful fallback: still render the lite tip
-    return { ...t, tip_des: '', skills: [], activityName: activityName.value }
-  }
-}
+//     return {
+//       ...t,
+//       tip: act.tip || t.tip,
+//       tip_des: act.tip_des || '',
+//       skills: act.skills || [],
+//       source: (act.source ?? '').trim(),
+//       activityName: activityName.value,
+//     }
+//   } catch {
+//     // graceful fallback: still render the lite tip
+//     return { ...t, tip_des: '', skills: [], activityName: activityName.value }
+//   }
+// }
 
 onMounted(async () => {
   try {
-    const lite = await fetchTipsForActivity(activityId.value)
-    if (!lite || lite.length === 0) {
+    const enriched = await fetchTipsForActivity(activityId.value)
+    if (!enriched || enriched.length === 0) {
       notFound.value = true
       return
     }
-    const enriched = await Promise.all(lite.map(hydrateTip))
     tips.value = enriched
   } finally {
     loading.value = false
@@ -189,7 +221,7 @@ const openRelated = (tipId: string | number) => {
           <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
         </button>
         <div class="tip-card-head">
-          <span class="activity-chip">{{ t.activityName }}</span>
+          <span class="activity-chip">{{ t.act_name }}</span>
         </div>
 
         <h3 class="tip-title">{{ t.tip }}</h3>

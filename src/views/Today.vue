@@ -111,11 +111,6 @@
           </div>
         </div>
       </div>
-
-      
-
-      
-
       <button class="done-btn">Done</button>
     </div>
 
