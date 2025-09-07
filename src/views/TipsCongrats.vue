@@ -150,10 +150,10 @@ function openTipsList() {
     <section class="more">
       <div class="more-head">
         <h2 class="more-title">More tips you may like</h2>
-        <button class="link" @click="openTipsList">See all {{ activityName }} tips →</button>
+        <button class="link" @click="openTipsList">See all {{ activityName }} tips</button>
       </div>
 
-      <div v-if="loading" class="state">Loading…</div>
+      <div v-if="loading" class="state">Loading...</div>
       <div v-else class="grid">
         <article
           v-for="t in moreTips"
