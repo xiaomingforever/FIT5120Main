@@ -1,197 +1,642 @@
 <template>
-  <div class="home">
-    <HeadBar />
+  <div class="home-page">
+    <!-- Navbar -->
+    <header class="navbar">
+      <div class="logo">Brain<span>Builder</span></div>
 
-    <!-- HERO -->
-    <main class="hero">
-      <section class="hero__left">
-        <!--  headline -->
-        <h1 class="pill pill--xl">Build your child's brains with everyday moments</h1>
+      <!-- hambuger button -->
+      <div class="hamburger" @click="toggleMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
-        <!-- subhead -->
-        <p class="pill pill--lg">Turn every minutes into mind-building fun.</p>
+      <!-- Nav menu -->
+      <ul :class="['nav-links', { 'active': isOpen }]">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#research">Research</a></li>
+        <li><a href="#resources">Resources</a></li>
+        <li><a href="#start" class="btn">Get Started</a></li>
+      </ul>
+    </header>
 
-        <!-- pill lines to echo the reference layout -->
-        <ul class="hero__list">
-          <li class="pill">Personalized ideas</li>
-          <li class="pill">zero stress</li>
-          <li class="pill">Backed by acadamic source</li>
-        </ul>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="overlay"></div>
+      <div class="hero-content">
+        <h1>Give your child the best start for a healthy brain</h1>
+        <p>
+          Early experiences shape the brain for life. We're here to support parents
+          and teachers with knowledge and tools that nurture children's development.
+        </p>
+        <button>Learn More</button>
+      </div>
+    </section>
 
-        <div class="hero__actions">
-          <RouterLink class="cta" to="/today" aria-label="Go to Today">Try Brainbuilder</RouterLink>
+    <!-- What is BrainBuilder -->
+    <section class="two-col">
+      <div>
+        <h2 class="section-title">What is BrainBuilder?</h2>
+        <p>
+          BrainBuilder is a non-profit education project. We're here to help parents and
+          teachers create a bright future for children. Our free, science-based resources
+          turn knowledge into simple daily exercise.
+        </p>
+        <a href="#">See resources →</a>
+      </div>
+      <div class="image-col">
+        <img src="/brain-illustration.png" alt="Brain Illustration" />
+      </div>
+    </section>
+
+    <!-- Why everyday moments -->
+    <section class="why" id="moments" aria-label="Why everyday moments build strong brains">
+      <div class="why-inner">
+        <h2 class="why-title">Why everyday moments build strong brains</h2>
+        <p class="why-sub">
+          Simple daily routines help your child's brain grow. Small actions today prepare them
+          for school, relationships, and lifelong learning.
+        </p>
+
+        <div class="why-grid" role="list">
+          <!-- first line -->
+          <div class="why-text left" role="listitem">
+            <p>
+              Spending time with your child makes a difference. Reading a story, setting the table,
+              or playing outside all help their brain develop. Even a few minutes each day create lasting impact.
+            </p>
+          </div>
+
+          <div class="why-image top-right" role="listitem">
+            <div class="circle-img">
+              <img src="/family1.png" alt="Parent and child playing" />
+            </div>
+          </div>
+
+          <!-- second line -->
+          <div class="why-image bottom-left" role="listitem">
+            <div class="circle-img small">
+              <img src="/family2.png" alt="Parent and child exercise" />
+            </div>
+          </div>
+
+          <div class="why-text right" role="listitem">
+            <p>
+              Children learn best from people they trust. Your attention and care give them confidence
+              and skills to thrive, turning ordinary moments into powerful brain-building experiences.
+            </p>
+          </div>
         </div>
-      </section>
 
-      <!-- Right visual area (large translucent card like the mock) -->
-      <aside class="hero__right" aria-hidden="true">
-        <div class="hero__panel"></div>
-      </aside>
-    </main>
+        <div class="research-link-wrap">
+          <a href="#research" class="research-link">See more relevant research →</a>
+        </div>
+
+        <!-- decorate shape -->
+        <span class="shape shape-yellow"></span>
+        <span class="shape shape-red"></span>
+        <span class="shape shape-green"></span>
+        <span class="shape shape-diamond"></span>
+      </div>
+    </section>
+
+    <!-- What BrainBuilder does -->
+    <section class="features">
+      <h2 class="section-title">What BrainBuilder does</h2>
+      <p>Turn science into simply daily actions.</p>
+      <div class="feature-cards">
+        <div class="card">
+          <h3>Today's Picks</h3>
+          <p>Discover fun activities to boost your child's brain development.</p>
+          <button>Explore</button>
+        </div>
+        <div class="card">
+          <h3>Browse Activities</h3>
+          <p>Search 100+ tips. Filter by age, place, and time.</p>
+          <button>Open library</button>
+        </div>
+        <div class="card">
+          <h3>Progress Tracking</h3>
+          <p>Monitor your child's progress and celebrate achievements.</p>
+          <button>View Progress</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <details>
+        <summary>Is BrainBuilder medical advice?</summary>
+        <p>No, it's for educational purposes only.</p>
+      </details>
+      <details>
+        <summary>Which ages does BrainBuilder support?</summary>
+        <p>It is designed for early childhood years.</p>
+      </details>
+      <details>
+        <summary>How long does a daily exercise tip take?</summary>
+        <p>Just a few minutes.</p>
+      </details>
+      <details>
+        <summary>Where do the exercise tips come from?</summary>
+        <p>All tips are science-based from research.</p>
+      </details>
+      <details>
+        <summary>What data do you store?</summary>
+        <p>Minimal data, only for tracking progress.</p>
+      </details>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+      <h2>Ready to begin?</h2>
+      <p>Turn science into simply daily actions.</p>
+      <button class="start-btn">Start Brain Builder</button>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <nav>
+        <a href="#">Behind the Research</a>
+        <a href="#">Terms of Use</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </nav>
+      <p>
+        BrainBuilder is a social good, non-profit project. It is free for education,
+        with no ads, no sales, and no tracking beyond what is needed to run the site.
+      </p>
+      <p>© 2025 BrainBuilder. A student-led project for social good.</p>
+    </footer>
   </div>
 </template>
 
-<script>
-import HeadBar from '@/components/HeadBar.vue'
-export default {
-  name: 'Home',
-  components: { HeadBar },
-}
+<script setup lang="ts">
+  import { ref } from 'vue'
+
+  const isOpen = ref(false)
+  const toggleMenu = () => {
+    isOpen.value = !isOpen.value
+  }
 </script>
 
 <style scoped>
-/* -----------------------------------------------------------
-   Page wrapper
------------------------------------------------------------ */
-.home {
-  background: #2f5bff;
-  min-height: 100vh;
+.home-page {
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
 }
 
-/* -----------------------------------------------------------
-   --hero-bg: url('/src/assets/hero.jpg');
-   --hero-bg: url('https://example.com/your-image.jpg');
------------------------------------------------------------ */
-.hero {
-  --hero-bg: url('/src/assets/Background/Background1.png'); /* <-- put your background image URL here */
-  position: relative;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  align-items: start;
-  gap: 40px;
-  min-height: clamp(560px, 84vh, 920px);
-  padding: clamp(24px, 4vw, 48px);
-  isolation: isolate; /* ensure overlay stacking works */
-  color: #0b1b3b;
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
-
-/* Background image layer */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image: var(--hero-bg);
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: -2;
+.logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #333;
 }
-
-/* A subtle color overlay for better contrast on top of the photo */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(243, 249, 140, 0.65); /* matches the blue in your reference */
-  z-index: -1;
+.logo span {
+  color: #f97316;
 }
-
-/* -----------------------------------------------------------
-   Left column: pill lines
------------------------------------------------------------ */
-.hero__left {
-  display: grid;
-  align-content: start;
-  gap: 16px;
-  max-width: 760px;
-}
-
-.pill {
-  display: inline-block;
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  line-height: 1.2;
-  box-shadow: none;
-  border: 0;
-  color: #000;
-}
-
-.pill--xl {
-  font-size: clamp(20px, 3.2vw, 34px);
-  font-weight: 800;
-  padding: 18px 22px;
-  max-width: 52ch;
-  margin-bottom: 8px;
-}
-
-.pill--lg {
-  font-size: clamp(16px, 2vw, 18px);
-  font-weight: 600;
-  max-width: 48ch;
-  margin-bottom: 8px;
-}
-
-.hero__list {
+.nav-links {
   list-style: none;
-  padding: 0;
-  margin: 6px 0 2px 0;
-  display: grid;
-  gap: 12px;
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
-.hero__list .pill {
-  font-size: 15px;
+.nav-links li {
+  display: inline-block;
+}
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
+}
+.nav-links a:hover {
+  color: #14b8a6;
+}
+.nav-links .btn {
+  background: #f97316;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+}
+.nav-links .btn:hover {
+  background: #ea580c;
+}
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
+}
+/* small screen */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 200px;
+    background: white;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    display: none;
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  height: 80vh;
+  background: url("/hero.png") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.hero .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  padding: 20px;
+}
+.hero h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+.hero p {
+  margin-bottom: 1.5rem;
+}
+.hero button {
+  background: #14b8a6;
+  border: none;
+  padding: 12px 24px;
+  color: white;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.hero button:hover {
+  background: #0d9488;
+}
+
+/* Sections */
+.section-title {
+  color: #f97316;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 3rem auto;
+  padding: 0 20px;
+  font-size: 18px;
+}
+.two-col a {
+  color:#0d9488;
   font-weight: 600;
-  max-width: 40ch;
+}
+.two-col a:hover {
+  color:#14b8a6;
+}
+.two-col img {
+  max-width: 100%;
+  border-radius: 8px;
+  width: 250px;
+}
+
+.image-col {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.center-text {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.image-grid img {
+  border-radius: 8px;
+  width: 100%;
+}
+
+.why {
+  background: #fbf6ef; 
+  position: relative;
+  padding: 72px 20px;
+  overflow: visible;
+}
+
+.why-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.why-title {
+  color: #f97316; 
+  font-size: 34px;
+  line-height: 1.05;
+  margin: 0 0 8px 0;
+  text-align: center;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.why-sub {
+  max-width: 760px;
+  margin: 0 auto 42px auto;
+  text-align: center;
+  color: #6b6b6b;
+  font-size: 16px;
+  padding-top: 10px;
+}
+
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 36px 40px;
+  align-items: center;
+}
+
+.why-text {
+  font-size: 20px;
+  color: #4a4a4a;
+  line-height: 1.7;
+  max-width: 420px;
+}
+
+.why-text.left {
+  text-align: left;
+  justify-self: start;
+}
+.why-text.right {
+  text-align: left; 
+  justify-self: end;
+}
+
+.why-image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.why-image .circle-img {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
+  display: inline-block;
+}
+
+.why-image .circle-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.why-image.small .circle-img,
+.why-image.bottom-left .circle-img {
+  width: 200px;
+  height: 200px;
+}
+
+.research-link-wrap {
+  text-align: center;
+  margin-top: 32px;
+}
+.research-link {
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 600;
+}
+.research-link:hover {
+  color: #14b8a6;
+}
+
+/* decorate shape */
+.shape {
+  position: absolute;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.shape-yellow {
+  left: 28px;
+  top: 80px;
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 22px solid #facc15; /* yellow */
+  transform: rotate(0deg);
+}
+
+.shape-red {
+  right: 40px;
+  top: 70px;
+  width: 22px;
+  height: 22px;
+  background: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(239,68,68,0.08);
+}
+
+.shape-green {
+  left: 50%;
+  top: 48%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: #10b981;
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.shape-diamond {
+  left: 42%;
+  bottom: 12%;
+  width: 18px;
+  height: 18px;
+  background: #f59e0b;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+/* small screen */
+@media (max-width: 768px) {
+  .why {
+    padding: 40px 16px;
+  }
+
+  .why-sub {
+    margin-bottom: 24px;
+    padding: 0 8px;
+  }
+
+  .why-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto auto;
+    gap: 18px;
+  }
+
+  .why-text.left { order: 1; text-align: left; justify-self: stretch; }
+  .why-image.top-right { order: 2; justify-self: center; }
+  .why-image.bottom-left { order: 3; justify-self: center; }
+  .why-text.right { order: 4; text-align: left; justify-self: stretch; }
+
+  .why-image .circle-img,
+  .why-image.small .circle-img {
+    width: 180px;
+    height: 180px;
+  }
+
+  /* hide decorate shape */
+  .shape-yellow, .shape-red, .shape-green, .shape-diamond {
+    display: none;
+  }
+}
+
+/* Features */
+.features {
+  padding: 3rem 20px;
+  text-align: center;
+}
+.feature-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 2rem auto;
+}
+.card {
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.card button {
+  margin-top: 1rem;
+  background: #14b8a6;
+  border: none;
+  padding: 8px 16px;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.card button:hover {
+  background: #0d9488;
+}
+
+/* FAQ */
+.faq {
+  max-width: 700px;
+  margin: 3rem auto;
+  padding: 0 20px;
+}
+.faq details {
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px 15px;
+}
+.faq summary {
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* CTA */
-.hero__actions {
-  margin-top: 18px;
-}
 .cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 160px;
-  height: 46px;
-  padding: 0 22px;
-  border-radius: 14px;
-  background: #ffffff;
-  color: #000000;
-  font-weight: 800;
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 120ms ease,
-    filter 120ms ease;
+  text-align: center;
+  padding: 3rem 20px;
+}
+.cta .start-btn {
+  background: #f97316;
+  border: none;
+  padding: 12px 24px;
+  color: white;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.cta .start-btn:hover {
+  background: #ea580c;
+}
+
+/* Footer */
+.footer {
+  background: #f9f9f9;
+  padding: 2rem 20px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+}
+.footer nav {
+  margin-bottom: 1rem;
+}
+.footer nav a {
+  margin: 0 10px;
+  color: #666;
   text-decoration: none;
 }
-.cta:hover {
-  filter: brightness(0.97);
-  transform: translateY(-1px);
+.footer nav a:hover {
+  text-decoration: underline;
 }
-
-/* Right column: big translucent panel */
-/* .hero__right {
-  display: grid;
-  place-items: center;
-  min-height: 380px;
-}
-.hero__panel {
-  width: min(640px, 95%);
-  height: min(440px, 56vh);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 12px 40px rgba(15, 40, 160, 0.15);
-  backdrop-filter: blur(2px);
-} */
 
 /* Responsive */
-@media (max-width: 960px) {
-  .hero {
+@media (max-width: 768px) {
+  .two-col,
+  .feature-cards {
     grid-template-columns: 1fr;
-    gap: 24px;
-  }
-  .hero__right {
-    order: 2;
-  }
-  .hero__left {
-    order: 1;
-  }
-  .hero__panel {
-    height: 36vh;
   }
 }
 </style>
