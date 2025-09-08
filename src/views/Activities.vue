@@ -9,16 +9,23 @@
         :class="{ active: selectedAge === t.value }"
         role="tab"
         :aria-selected="selectedAge === t.value"
-        @click="selectedAge = t.value"
+        @click="changeAge(t.value)"
       >
         {{ t.label }}
       </button>
     </nav>
     <h1 class="page-title">Tips Collection</h1>
 
-    <section class="grid">
-      <ExerciseCard v-for="ex in visible" :key="ex.id" :exercise="ex" @open="goToTips" />
-    </section>
+    <transition :name="direction === 'right' ? 'slide-left' : 'slide-right'" mode="out-in">
+      <section class="grid" :key="selectedAge">
+        <ExerciseCard
+          v-for="ex in visible"
+          :key="ex.id"
+          :exercise="ex"
+          @open="goToTips"
+        />
+      </section>
+    </transition>
   </div>
 </template>
 
@@ -187,6 +194,23 @@ const goToTips = (ex: Exercise) => {
 //     items: exercises.value.filter((e) => e.ageGroup === label),
 //   })).filter((g) => g.items.length),
 // )
+
+const prevAgeIndex = ref(0)
+const direction = ref<'left' | 'right'>('right')
+
+function changeAge(newAge: 'all' | AgeGroup) {
+  const newIndex =
+    newAge === 'all' ? -1 : AGE_ORDER.indexOf(newAge as AgeGroup)
+
+  if (newIndex > prevAgeIndex.value) {
+    direction.value = 'right'
+  } else {
+    direction.value = 'left'
+  }
+  prevAgeIndex.value = newIndex
+
+  selectedAge.value = newAge
+}
 </script>
 
 <style scoped>
@@ -224,6 +248,36 @@ const goToTips = (ex: Exercise) => {
   background: rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.45);
   opacity: 1;
+}
+
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.2s ease;
+  position: absolute;
+  width: 100%;
+}
+.slide-left-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+.slide-left-leave-to {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: all 0.2s ease;
+  position: absolute;
+  width: 100%;
+}
+.slide-right-enter-from {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+.slide-right-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
 .page-title {
