@@ -43,7 +43,7 @@ const enter = async () => {
       <button class="close" aria-label="Close" @click="router.push('/')">✕</button>
 
       <div class="header">
-        <img src="/selector-page/baby-1.webp" alt="Baby" class="icon" />
+        <img src="/selector-page/baby-1.png" alt="Baby" class="icon" />
         <h2>Select your child's<br />age and gender</h2>
       </div>
 
