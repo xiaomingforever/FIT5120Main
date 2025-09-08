@@ -267,6 +267,14 @@ function openTipsList() {
   padding: 14px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.tip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
 }
 .tip-card-head {
   display: flex;
