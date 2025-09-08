@@ -14,7 +14,10 @@
         {{ t.label }}
       </button>
     </nav>
+
     <h1 class="page-title">Tips Collection</h1>
+
+    <div v-if="loading" class="loading">Loading...</div>
 
     <transition :name="direction === 'right' ? 'slide-left' : 'slide-right'" mode="out-in">
       <section class="grid" :key="selectedAge">
@@ -38,6 +41,7 @@ import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 const router = useRouter()
 const exercises = ref<Exercise[]>([]) // API data from back-end
 const selectedAge = ref<'all' | AgeGroup>('all')
+const loading = ref(true)
 
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
@@ -50,6 +54,14 @@ const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
 
 // request to backend when loading
 onMounted(async () => {
+  // read age group selected last time
+  const savedAge = localStorage.getItem('selectedAge') as ('all' | AgeGroup) | null
+  if (savedAge) {
+    selectedAge.value = savedAge
+    prevAgeIndex.value = savedAge === 'all' ? -1 : AGE_ORDER.indexOf(savedAge as AgeGroup)
+  }
+  
+  loading.value = true
   try {
     const res = await fetch('https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option', {
       method: 'POST',
@@ -93,6 +105,8 @@ onMounted(async () => {
     }) 
     }  catch (err) {
     console.error('Failed to fetch exercises:', err)
+  } finally {
+    loading.value = false
   }
 })
 
@@ -199,23 +213,26 @@ const prevAgeIndex = ref(0)
 const direction = ref<'left' | 'right'>('right')
 
 function changeAge(newAge: 'all' | AgeGroup) {
-  const newIndex =
-    newAge === 'all' ? -1 : AGE_ORDER.indexOf(newAge as AgeGroup)
+  const newIndex = newAge === 'all' ? -1 : AGE_ORDER.indexOf(newAge as AgeGroup)
 
-  if (newIndex > prevAgeIndex.value) {
-    direction.value = 'right'
-  } else {
-    direction.value = 'left'
-  }
+  direction.value = newIndex > prevAgeIndex.value ? 'right' : 'left'
   prevAgeIndex.value = newIndex
 
   selectedAge.value = newAge
+  localStorage.setItem('selectedAge', newAge)
 }
 </script>
 
 <style scoped>
 .activities {
   padding: 1rem;
+}
+.loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.25rem;
+  color: #1ea672;
+  font-weight: bold;
 }
 /* age selection bar */
 .agebar {
