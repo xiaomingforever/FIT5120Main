@@ -76,7 +76,7 @@ const fetchTipsForActivity = async (actId: string) => {
       // keep only tips matching the selected age (unique by tip_id)
       const filtered =
         selectedAge === 'all'
-          ? (match.tips || [])
+          ? match.tips || []
           : (match.tips || []).filter((t: any) => !t.age_code || t.age_code === selectedAge)
       //   .map((t: any) => ({ tip_id: t.tip_id, tip: t.tip, age_code: t.age_code }))
 
@@ -103,7 +103,7 @@ const fetchTipsForActivity = async (actId: string) => {
         } else {
           // merge skills
           const existing = tipMap.get(id)!
-          if (t.skill_code && !existing.skills.some(s => s.code === t.skill_code)) {
+          if (t.skill_code && !existing.skills.some((s) => s.code === t.skill_code)) {
             existing.skills.push({ code: t.skill_code })
           }
         }
@@ -294,7 +294,16 @@ const openRelated = (tipId: string | number) => {
   padding: 14px;
   display: flex;
   flex-direction: column;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
+.tip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+}
+
 .tip-card-head {
   display: flex;
   justify-content: flex-end;

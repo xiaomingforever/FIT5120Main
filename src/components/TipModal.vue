@@ -55,21 +55,21 @@ const toggleFavorite = () => {
 
 const progress = useProgressStore()
 progress.load()
-const finished = computed(() => progress.isFinished(model.value.tip_id))
+// const finished = computed(() => progress.isFinished(model.value.tip_id))
 
 function done() {
   // Save the finished tip with skill tags and timestamp
-  if (!finished.value) {
-    progress.record({
-      id: model.value.tip_id,
-      tip: model.value.tip,
-      activityName: props.activityName,
-      activityId: props.activityId,
-      age_code: props.age as string,
-      skills: (model.value.skills ?? []) as any[],
-      source: model.value.source || '',
-    })
-  }
+
+  progress.record({
+    id: model.value.tip_id,
+    tip: model.value.tip,
+    activityName: props.activityName,
+    activityId: props.activityId,
+    age_code: props.age as string,
+    skills: (model.value.skills ?? []) as any[],
+    source: model.value.source || '',
+  })
+
   router.push({ name: 'TipsCongrats' })
 }
 
@@ -299,9 +299,7 @@ const related = computed(() => {
         </section>
 
         <div class="footer">
-          <button class="start-btn" :disabled="finished" @click="done">
-            {{ finished ? 'Completed' : 'Done' }}
-          </button>
+          <button class="start-btn" @click="done">Done</button>
         </div>
       </div>
     </div>
