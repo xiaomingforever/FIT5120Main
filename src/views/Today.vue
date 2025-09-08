@@ -101,17 +101,15 @@
     completedCounts.value[id] = (completedCounts.value[id] || 0) + 1
     localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
     
-    if (!progress.isFinished(id)) {
-      progress.record({
-        id: act.id,
-        tip: act.tip,
-        activityName: act.name,
-        activityId: act.id,
-        age_code: routineData.value.age_code,
-        skills: act.skills ?? [],
-        source: act.source || '',
-      })
-    }
+    progress.record({
+    id: act.id,
+    tip: act.tip,
+    activityName: act.name,
+    activityId: act.id,
+    age_code: routineData.value.age_code,
+    skills: act.skills ?? [],
+    source: act.source || '',
+  })
     router.push({
       name: 'TipsCongrats',
       params: {
