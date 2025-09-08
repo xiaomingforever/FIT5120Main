@@ -13,14 +13,15 @@
       </div>
 
       <!-- Nav menu -->
-      <ul :class="['nav-links', { 'active': isOpen }]">
-        <li><a href="#home">Home</a></li>
-        <li><a href="#about">About Us</a></li>
-        <li><a href="#research">Research</a></li>
-        <li><a href="#resources">Resources</a></li>
-      </ul>
-
-      <router-link to="/today" class="btn get-start-btn">Get Started</router-link>
+      <div class="nav-container">
+        <ul :class="['nav-links', { 'active': isOpen }]">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About Us</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#resources">Resources</a></li>
+        </ul>
+        <router-link to="/today" class="btn get-start-btn">Get Started</router-link>
+      </div>
     </header>
 
     <!-- Hero Section -->
@@ -32,7 +33,8 @@
           Early experiences shape the brain for life. We're here to support parents
           and teachers with knowledge and tools that nurture children's development.
         </p>
-        <button>Learn More</button>
+        <!-- <button>Learn More</button> -->
+        <router-link to="/today" class="btn">Learn More</router-link>
       </div>
     </section>
 
@@ -109,16 +111,19 @@
       <p>Turn science into simply daily actions.</p>
       <div class="feature-cards">
         <div class="card">
+          <img src="/public/today-pick.png" alt="today-pick">
           <h3>Today's Picks</h3>
           <p>Discover fun activities to boost your child's brain development.</p>
           <button>Explore</button>
         </div>
         <div class="card">
+          <img src="/public/browse-activity.png" alt="browse-activity">
           <h3>Browse Activities</h3>
           <p>Search 100+ tips. Filter by age, place, and time.</p>
           <button>Open library</button>
         </div>
         <div class="card">
+          <img src="/public/process.png" alt="browse-activity">
           <h3>Progress Tracking</h3>
           <p>Monitor your child's progress and celebrate achievements.</p>
           <button>View Progress</button>
@@ -206,24 +211,17 @@
   z-index: 1000;
   height: 100px;
 }
+.nav-container {
+  display: flex;
+  align-items: center;
+  gap: 20px; 
+}
 .logo {
   height: 130px;
   width: auto;
   flex: 0 0;
   margin-right: 200px;
   margin-left: 0;
-}
-.get-start-btn {
-  background: #f97316;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  margin-left: 20px;
-  text-decoration: none;
-}
-.get-start-btn:hover {
-  background: #ea580c;
 }
 .nav-links {
   list-style: none;
@@ -243,14 +241,16 @@
 .nav-links a:hover {
   color: #14b8a6;
 }
-.nav-links .btn {
+.get-start-btn {
   background: #f97316;
   color: white;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: bold;
+  margin-left: 20px;
+  text-decoration: none;
 }
-.nav-links .btn:hover {
+.get-start-btn:hover {
   background: #ea580c;
 }
 .hamburger {
@@ -259,7 +259,6 @@
   cursor: pointer;
   gap: 5px;
 }
-
 .hamburger span {
   width: 25px;
   height: 3px;
@@ -320,7 +319,7 @@
 .hero p {
   margin-bottom: 1.5rem;
 }
-.hero button {
+.hero .btn {
   background: #14b8a6;
   border: none;
   padding: 12px 24px;
@@ -328,8 +327,9 @@
   border-radius: 25px;
   font-weight: bold;
   cursor: pointer;
+  text-decoration: none;
 }
-.hero button:hover {
+.hero .btn:hover {
   background: #0d9488;
 }
 
@@ -568,6 +568,9 @@
   padding: 3rem 20px;
   text-align: center;
 }
+.features img {
+  width: 120px;
+}
 .feature-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -596,7 +599,7 @@
 /* FAQ */
 .faq {
   max-width: 700px;
-  margin: 3rem auto;
+  margin: 1rem auto;
   padding: 0 20px;
 }
 .faq details {
@@ -614,6 +617,7 @@
 .cta {
   text-align: center;
   padding: 3rem 20px;
+  padding-top: 1rem;
 }
 .cta .start-btn {
   background: #f97316;

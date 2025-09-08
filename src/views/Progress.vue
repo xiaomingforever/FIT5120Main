@@ -143,7 +143,7 @@ function fmtDate(isoDate: string) {
   font-weight: 600;
 }
 .tab.active {
-  background: #f1f5f9;
+  background: #d9f8f6;
 }
 
 /* Skills tab */
