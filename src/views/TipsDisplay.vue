@@ -194,7 +194,7 @@ const openRelated = (tipId: string | number) => {
   <div class="tips-display">
     <header class="header">
       <button class="back" @click="goBack" aria-label="Back to Activities">back</button>
-      <h1 class="title">{{ activityName || 'Activity' }}</h1>
+      <h1 class="title">{{ activityName.toUpperCase() || 'Activity' }}</h1>
       <p class="subtitle">
         All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
       </p>
