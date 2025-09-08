@@ -2,7 +2,8 @@
   <div class="home-page">
     <!-- Navbar -->
     <header class="navbar">
-      <div class="logo">Brain<span>Builder</span></div>
+      <!-- <div class="logo">Brain<span>Builder</span></div> -->
+      <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
 
       <!-- hambuger button -->
       <div class="hamburger" @click="toggleMenu">
@@ -17,8 +18,9 @@
         <li><a href="#about">About Us</a></li>
         <li><a href="#research">Research</a></li>
         <li><a href="#resources">Resources</a></li>
-        <li><a href="#start" class="btn">Get Started</a></li>
       </ul>
+
+      <router-link to="/today" class="btn get-start-btn">Get Started</router-link>
     </header>
 
     <!-- Hero Section -->
@@ -153,7 +155,8 @@
     <section class="cta">
       <h2>Ready to begin?</h2>
       <p>Turn science into simply daily actions.</p>
-      <button class="start-btn">Start Brain Builder</button>
+      <!-- <button class="start-btn">Start Brain Builder</button> -->
+      <router-link to="/today" class="start-btn">Start Brain Builder</router-link>
     </section>
 
     <!-- Footer -->
@@ -195,20 +198,32 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 40px;
+  padding: 0 40px;
   background: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
+  height: 100px;
 }
 .logo {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #333;
+  height: 130px;
+  width: auto;
+  flex: 0 0;
+  margin-right: 200px;
+  margin-left: 0;
 }
-.logo span {
-  color: #f97316;
+.get-start-btn {
+  background: #f97316;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-left: 20px;
+  text-decoration: none;
+}
+.get-start-btn:hover {
+  background: #ea580c;
 }
 .nav-links {
   list-style: none;
@@ -256,7 +271,9 @@
   .hamburger {
     display: flex;
   }
-
+  .get-start-btn {
+    margin-left: auto;
+  }
   .nav-links {
     position: absolute;
     top: 60px;
@@ -270,7 +287,6 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: none;
   }
-
   .nav-links.active {
     display: flex;
   }
@@ -607,6 +623,7 @@
   border-radius: 25px;
   font-weight: bold;
   cursor: pointer;
+  text-decoration: none;
 }
 .cta .start-btn:hover {
   background: #ea580c;
