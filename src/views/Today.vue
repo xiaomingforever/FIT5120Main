@@ -1,9 +1,15 @@
 <script setup lang="ts">
-  import { ref, onMounted } from 'vue'
+  import { ref, onMounted, computed } from 'vue'
   import { useRouter } from 'vue-router'
   import CategoryCloudCard from '@/components/CategoryCloudCard.vue'
+  import { useProgressStore } from '@/stores/progress'
+  import { useFavoritesStore } from '@/stores/favorites'
+  import heartEmpty from '@/assets/Font icons/favorite_empty.png'
+  import heartRed from '@/assets/Font icons/favorite_red.png'
 
   const router = useRouter()
+  const fav = useFavoritesStore()
+  const progress = useProgressStore()
 
   const routineData = ref<any>(null)
   // const showSelector = ref(false)
@@ -38,13 +44,6 @@
     }
   })
 
-  // function handleSubmit(payload: { age: string | null; gender: string | null }) {
-  //   if (payload.age && payload.gender) {
-  //     localStorage.setItem('bbProfile', JSON.stringify(payload))
-  //   }
-  //   showSelector.value = false
-  // }
-
   function editProfile() {
     // remove olad profile data
     localStorage.removeItem('age_code')
@@ -58,6 +57,104 @@
     const match = text.match(/https?:\/\/[^\s]+/i)
     return match ? match[0] : null
   }
+
+  // --- favorites
+  const isFavorited = computed(() => {
+    const act = routineData.value?.routine?.[0]?.activity
+    return act ? fav.isFavorite(act.id) : false
+  })
+  const toggleFavorite = () => {
+    const act = routineData.value?.routine?.[0]?.activity
+    if (!act) return
+    fav.toggle({
+      tip_id: act.id,
+      tip: act.tip,
+      tip_des: act.tip_des,
+      skills: act.skills,
+      source: act.source,
+      activityName: act.name,
+      activityId: act.id,
+      age_code: routineData.value.age_code,
+    })
+  }
+
+  // --- progress
+  progress.load()
+  // completed count of each activity
+  const completedCounts = ref<Record<string, number>>({})
+
+  onMounted(() => {
+    const savedCounts = localStorage.getItem('completedCounts')
+    if (savedCounts) {
+      completedCounts.value = JSON.parse(savedCounts)
+    }
+  })
+
+  const getCompletedCount = (id: string) => {
+    return completedCounts.value[id] || 0
+  }
+
+  function handleDone(activity: any) {
+    const act = routineData.value.routine[0].activity
+    const id = act.id
+
+    completedCounts.value[id] = (completedCounts.value[id] || 0) + 1
+    localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
+    
+    if (!progress.isFinished(id)) {
+      progress.record({
+        id: act.id,
+        tip: act.tip,
+        activityName: act.name,
+        activityId: act.id,
+        age_code: routineData.value.age_code,
+        skills: act.skills ?? [],
+        source: act.source || '',
+      })
+    }
+    router.push({
+      name: 'TipsCongrats',
+      params: {
+        activityId: act.id, 
+      },
+      query: {
+        name: act.name,
+        age: routineData.value.age_code,
+        gender: routineData.value.gender,
+      },
+    })
+}
+
+// --- image glob
+const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+const IMAGES_B = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+const IMAGE_MAP = { ...TIP_IMAGES, ...IMAGES_B }
+
+function slug(s: string) {
+  return s.toLowerCase().replace(/\s+/g, '-')
+}
+function toFileBase(name: string) {
+  return slug(name)
+}
+const imageUrl = computed(() => {
+  const act = routineData.value?.routine?.[0]?.activity
+  if (!act) return ''
+  const base = toFileBase(act.name)
+  const candidates = [
+    `../assets/Tips/${base}.png`,
+    `../assets/Activities/Excercise/${base}.png`,
+  ]
+  for (const k of candidates) if (IMAGE_MAP[k]) return IMAGE_MAP[k]
+  return ''
+})
 </script>
 
 <template>
@@ -75,11 +172,22 @@
         <p>Age Group: {{ routineData.age_code }}, Gender: {{ routineData.gender }}</p>
       
         <div v-for="(item, index) in routineData.routine" :key="item.activity.id" class="p-4 border rounded-lg bg-white">
-          <!-- skills tags -->
-          <div class="tags" v-if="item.activity.skills && item.activity.skills.length">
-            <span v-for="skill in item.activity.skills" :key="skill.code" class="tag">
-              {{ skill.code.toUpperCase() }}
-            </span>
+          <p class="activity-name">Activity: {{ item.activity.name.toUpperCase() }}</p>
+          <div class="card-header">
+            <div class="tags" v-if="item.activity.skills && item.activity.skills.length">
+              <span v-for="skill in item.activity.skills" :key="skill.code" class="tag">
+                {{ skill.code.toUpperCase() }}
+              </span>
+            </div>
+
+            <button
+              class="fav-btn"
+              :aria-pressed="isFavorited"
+              :title="isFavorited ? 'Remove from favorites' : 'Add to favorites'"
+              @click.stop="toggleFavorite"
+            >
+              <img :src="isFavorited ? heartRed : heartEmpty" alt="" />
+            </button>
           </div>
 
           <!-- title -->
@@ -95,7 +203,7 @@
           </div>
           <!-- source -->
           <div v-if="item.activity.source" class="source">
-            <strong>Source:</strong>
+            <strong>Source: </strong>
             <span v-if="extractHttpsLink(item.activity.source)">
               <a 
                 :href="extractHttpsLink(item.activity.source)!" 
@@ -111,7 +219,12 @@
           </div>
         </div>
       </div>
-      <button class="done-btn">Done</button>
+      <button class="done-btn" @click="handleDone">
+        Done
+      </button>
+      <p v-if="routineData" class="complete-count">
+        Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
+      </p>
     </div>
 
     <!-- Activity Grid -->
@@ -144,6 +257,11 @@
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
+  cursor: pointer;
+  font-size: 16px;
+  height: 50px;
+  width: 200px;
+  margin-top: -15px;
 }
 .edit-btn:hover {
   background: #1fab45;
@@ -155,19 +273,53 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  margin-top: -20px;
+}
+.exercise-card .activity-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: 300px;
+  text-align: center;
+}
+.card-header {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;          
+  margin-bottom: 8px;           
+}
+.tags {
+  display: flex;
+  gap: 6px;
+}
+.fav-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 999px;
+  margin-right: 40px;
+}
+.fav-btn img {
+  width: 36px;
+  height: 36px;
 }
 .exercise-card .tags {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: bold;
   color: #008080;
   background: #eaf7f7;
   display: inline-block;
   padding: 4px 8px;
   border-radius: 8px;
-  margin-bottom: 8px;
+  /* margin-bottom: 8px; */
 }
 .exercise-card .tag {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 600;
   color: #007070;
   background: #eaf7f7;
@@ -175,13 +327,14 @@
   border-radius: 6px;
 }
 .exercise-card .title {
-  font-size: 20px;
+  font-size: 30px;
   font-weight: bold;
   margin-bottom: 12px;
 }
 .exercise-card .desc {
   margin-bottom: 16px;
   line-height: 1.4;
+  font-size: 24px;
 }
 .exercise-card .illustration {
   width: 100px;
@@ -191,12 +344,27 @@
 .exercise-card .why h3 {
   color: #007070;
   margin-bottom: 6px;
+  font-size: 30px;
+}
+.exercise-card .why p {
+  font-size: 24px;
 }
 .source {
   margin-top: 12px;
-  font-size: 13px;
+  font-size: 20px;
+  color:#026060;
+}
+.source a {
+  text-decoration: none;
+  color:#007070;
+  font-size: 20px;
+}
+.source a:hover {
+  color: #2e9e55;
 }
 .exercise-card .done-btn {
+  width: 150px;
+  height: 40px;
   display: block;
   margin: 20px auto 0;
   background: #007070;
@@ -204,6 +372,13 @@
   padding: 8px 16px;
   border-radius: 8px;
   border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.exercise-card .done-btn:hover {
+  background:#1fab45
 }
 
 /* Activity grid */
@@ -225,5 +400,18 @@
   font-size: 14px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.complete-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  width: 200px;
+  text-align: center;
+  margin: 0 auto;
+  margin-top: 10px;
 }
 </style>

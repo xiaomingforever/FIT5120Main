@@ -99,13 +99,14 @@ const goToActivity = (c: Cat) => {
   text-decoration: none;
   color: inherit;
   font-weight: 600;
+  font-size: 14px;
   transition:
     background 0.15s,
     transform 0.05s,
     box-shadow 0.15s;
 }
 .pill:hover {
-  background: #fff;
+  background: #ceebd8;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
 }
 
