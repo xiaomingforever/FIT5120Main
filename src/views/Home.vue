@@ -136,23 +136,23 @@
       <h2 class="section-title">Frequently Asked Questions</h2>
       <details>
         <summary>Is BrainBuilder medical advice?</summary>
-        <p>No, it's for educational purposes only.</p>
+        <p>No. BrainBuilder gives education and guidance. For diagnosis or treatment, see a clinician.</p>
       </details>
       <details>
         <summary>Which ages does BrainBuilder support?</summary>
-        <p>It is designed for early childhood years.</p>
+        <p> Three stages now, 0-1, 1-3, and 3-5. Daily tips match the stage you pick.</p>
       </details>
       <details>
         <summary>How long does a daily exercise tip take?</summary>
-        <p>Just a few minutes.</p>
+        <p>Most tips take 3-10 minutes. They fit into real moments like mealtime, bath time, or bedtime.</p>
       </details>
       <details>
         <summary>Where do the exercise tips come from?</summary>
-        <p>All tips are science-based from research.</p>
+        <p>From child development research and expert guidance. Each card includes a short "why it helps" note.</p>
       </details>
       <details>
         <summary>What data do you store?</summary>
-        <p>Minimal data, only for tracking progress.</p>
+        <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No account needed.</p>
       </details>
     </section>
 
