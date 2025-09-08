@@ -69,19 +69,18 @@ export const useProgressStore = defineStore('progress', {
     //  de-duplicate legacy data on load
     load() {
       const raw = localStorage.getItem(STORAGE_KEY)
-      if (!raw) return
-      const arr = JSON.parse(raw) as Completion[]
-      const seen = new Set<string>()
-      const deduped: Completion[] = []
-      for (const c of arr) {
-        const key = String(c.id)
-        if (seen.has(key)) continue
-        seen.add(key)
-        deduped.push(c)
-      }
-      this.completions = deduped
-      // write back if removed anything
-      if (deduped.length !== arr.length) this._save()
+      if (raw) this.completions = JSON.parse(raw)
+      // const arr = JSON.parse(raw) as Completion[]
+      // const seen = new Set<string>()
+      // const deduped: Completion[] = []
+      // for (const c of arr) {
+      //   const key = String(c.id)
+      //   if (seen.has(key)) continue
+      //   seen.add(key)
+      //   deduped.push(c)
+      // }
+      // this.completions = deduped
+      // if (deduped.length !== arr.length) this._save()
     },
 
     clearAll() {
