@@ -75,10 +75,13 @@ const goToActivity = (c: Cat) => {
   box-shadow: var(--card-shadow);
   width: min(960px, 88vw);
   margin: 0 auto;
+  width: 702px;
 }
 .heading {
-  font-size: 1.4rem;
+  font-size: 2rem;
   margin-bottom: 14px;
+  text-align: center;
+  padding-bottom: 10px ;
 }
 .pill-grid {
   display: grid;
@@ -99,7 +102,7 @@ const goToActivity = (c: Cat) => {
   text-decoration: none;
   color: inherit;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 16px;
   transition:
     background 0.15s,
     transform 0.05s,

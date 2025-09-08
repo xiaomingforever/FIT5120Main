@@ -226,6 +226,8 @@ function changeAge(newAge: 'all' | AgeGroup) {
 <style scoped>
 .activities {
   padding: 1rem;
+  width: 750px;
+  margin: 0 auto;
 }
 .loading {
   text-align: center;
@@ -236,7 +238,7 @@ function changeAge(newAge: 'all' | AgeGroup) {
 }
 /* age selection bar */
 .agebar {
-  position: sticky; /* sits under header */
+  /* position: sticky; */
   top: 72px; /* adjust to header height */
   z-index: 5;
   display: flex;

@@ -241,6 +241,8 @@ const imageUrl = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  margin: 0 auto;
+  width: 750px;
 }
 
 .toolbar {

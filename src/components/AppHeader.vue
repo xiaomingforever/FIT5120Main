@@ -107,7 +107,7 @@
   background: #ffffff;
   border-bottom: 1px solid #e5e5e5;
   display: flex;
-  position: sticky;
+  /* position: sticky; */
   top: 0;
   justify-content: space-between;
   gap: 16px;
@@ -152,11 +152,12 @@
   display: flex;
   align-items: center;
   max-width: 700px;
-  margin: 0 48px;
+  margin: 0 auto;
   background: #fff;
   border: 2px solid #ccc;
   border-radius: 24px;
   padding: 10px 14px;
+  width: 400px;
 }
 .search input {
   width: 100%;

@@ -193,6 +193,8 @@ function openTipsList() {
 <style scoped>
 .congrats {
   padding: 18px 20px 40px;
+  width: 750px;
+  margin: 0 auto;
 }
 .hero {
   background: #eef2ff;

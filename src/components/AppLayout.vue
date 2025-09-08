@@ -19,7 +19,7 @@ import AppSidebar from '@/components/AppSidebar.vue'
 <style scoped>
 .page {
   min-height: 100vh;
-  background: var(--page-bg, #efecc9);
+  background: var(--page-bg, #fbf6ef);
 }
 .shell {
   width: 100%;

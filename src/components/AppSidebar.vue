@@ -37,10 +37,13 @@ const items: Item[] = [
 </template>
 
 <style scoped>
-.sidebar {
+.sidebar { 
+  position: sticky;
+  top: 108px; 
+  height: calc(100vh - 80px);
   width: 300px;
   padding: 24px 14px;
-  background: var(--sidebar-bg, #f1edcd);
+  background: var(--sidebar-bg, #fbf6ef);
   border-right: 1px solid #e5e5e5;
 }
 ul {
