@@ -38,7 +38,7 @@ const openRelated = (tipId: string | number) => {
       <div class="fav-hero_inner">
         <div class="fav-hero_copy">
           <h1 class="fav-hero_title">Your Favorites</h1>
-          <p class="fav-hero_sub">(come up with a better text)</p>
+          <p class="fav-hero_sub">Doing the same thing over and over again...</p>
           <span class="fav-hero_pill">{{ countLabel }}</span>
         </div>
         <img class="fav-hero_img" src="/src/assets/favorite page/favorite page.png" alt="" />

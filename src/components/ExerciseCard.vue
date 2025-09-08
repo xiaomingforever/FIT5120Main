@@ -5,7 +5,7 @@
     </div>
 
     <div class="body">
-      <h3 class="title">{{ exercise.title }}</h3>
+      <h3 class="title">{{ exercise.title.toUpperCase() }}</h3>
       <p class="desc">{{ exercise.description }}</p>
 
       <ul class="meta">
