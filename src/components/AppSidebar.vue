@@ -11,7 +11,7 @@ const items: Item[] = [
   { label: 'Today', to: '/today', icon: iconToday },
   { label: 'Activities', to: '/activities', icon: iconActivities },
   { label: 'Favorite', to: '/favorites', icon: iconFavorite },
-  { label: 'progress', to: '/progress', icon: iconProgress },
+  { label: 'Progress', to: '/progress', icon: iconProgress },
 ]
 </script>
 
@@ -45,6 +45,54 @@ const items: Item[] = [
   padding: 24px 14px;
   background: var(--sidebar-bg, #fbf6ef);
   border-right: 1px solid #e5e5e5;
+}
+/* 小屏幕时（宽度 <= 768px）改为底部导航 */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    top: auto;
+    width: 100%;
+    height: 70px;
+    padding: 0;
+    border-right: none;
+    border-top: 1px solid #e5e5e5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    z-index: 1000;
+  }
+
+  .sidebar nav ul {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+  }
+
+  .nav-btn {
+    flex-direction: column;
+    justify-content: center;
+    font-size: 0.75rem;
+    padding: 6px;
+    border-radius: 8px;
+  }
+
+  .icon-img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .nav-btn.active::before {
+    display: none; 
+  }
+
+  .nav-btn.active {
+    background: #ffe50033;
+    border-color: transparent;
+    box-shadow: none;
+  }
 }
 ul {
   list-style: none;
