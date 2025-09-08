@@ -132,36 +132,40 @@
     </section>
 
     <!-- FAQ -->
-    <section class="faq">
-      <h2 class="section-title">Frequently Asked Questions</h2>
-      <details>
-        <summary>Is BrainBuilder medical advice?</summary>
-        <p>No. BrainBuilder gives education and guidance. For diagnosis or treatment, see a clinician.</p>
-      </details>
-      <details>
-        <summary>Which ages does BrainBuilder support?</summary>
-        <p> Three stages now, 0-1, 1-3, and 3-5. Daily tips match the stage you pick.</p>
-      </details>
-      <details>
-        <summary>How long does a daily exercise tip take?</summary>
-        <p>Most tips take 3-10 minutes. They fit into real moments like mealtime, bath time, or bedtime.</p>
-      </details>
-      <details>
-        <summary>Where do the exercise tips come from?</summary>
-        <p>From child development research and expert guidance. Each card includes a short "why it helps" note.</p>
-      </details>
-      <details>
-        <summary>What data do you store?</summary>
-        <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No account needed.</p>
-      </details>
-    </section>
+    <div class="faq-div">
+      <section class="faq">
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <details>
+          <summary>Is BrainBuilder medical advice?</summary>
+          <p>No. BrainBuilder gives education and guidance. For diagnosis or treatment, see a clinician.</p>
+        </details>
+        <details>
+          <summary>Which ages does BrainBuilder support?</summary>
+          <p> Three stages now, 0-1, 1-3, and 3-5. Daily tips match the stage you pick.</p>
+        </details>
+        <details>
+          <summary>How long does a daily exercise tip take?</summary>
+          <p>Most tips take 3-10 minutes. They fit into real moments like mealtime, bath time, or bedtime.</p>
+        </details>
+        <details>
+          <summary>Where do the exercise tips come from?</summary>
+          <p>From child development research and expert guidance. Each card includes a short "why it helps" note.</p>
+        </details>
+        <details>
+          <summary>What data do you store?</summary>
+          <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No account needed.</p>
+        </details>
+      </section>
+    </div>
 
     <!-- Call to Action -->
     <section class="cta">
+      <hr>
       <h2>Ready to begin?</h2>
       <p>Turn science into simply daily actions.</p>
       <!-- <button class="start-btn">Start Brain Builder</button> -->
       <router-link to="/today" class="start-btn">Start Brain Builder</router-link>
+      <hr>
     </section>
 
     <!-- Footer -->
@@ -196,6 +200,7 @@
   font-family: Arial, sans-serif;
   color: #333;
   line-height: 1.6;
+  background-color: #fbf6ef;
 }
 
 /* Navbar */
@@ -336,7 +341,7 @@
 /* Sections */
 .section-title {
   color: #f97316;
-  font-size: 1.8rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
 
@@ -344,10 +349,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  max-width: 1000px;
-  margin: 3rem auto;
-  padding: 0 20px;
-  font-size: 18px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 100px 200px;
+  font-size: 24px;
+  background-color: #fbf6ef;
 }
 .two-col a {
   color:#0d9488;
@@ -359,7 +365,7 @@
 .two-col img {
   max-width: 100%;
   border-radius: 8px;
-  width: 250px;
+  width: 400px;
 }
 
 .image-col {
@@ -398,7 +404,7 @@
 
 .why-title {
   color: #f97316; 
-  font-size: 34px;
+  font-size: 40px;
   line-height: 1.05;
   margin: 0 0 8px 0;
   text-align: center;
@@ -411,7 +417,7 @@
   margin: 0 auto 42px auto;
   text-align: center;
   color: #6b6b6b;
-  font-size: 16px;
+  font-size: 20px;
   padding-top: 10px;
 }
 
@@ -446,8 +452,8 @@
 }
 
 .why-image .circle-img {
-  width: 240px;
-  height: 240px;
+  width: 300px;
+  height: 300px;
   border-radius: 50%;
   overflow: hidden;
   box-shadow: 0 8px 20px rgba(16, 24, 40, 0.08);
@@ -463,8 +469,8 @@
 
 .why-image.small .circle-img,
 .why-image.bottom-left .circle-img {
-  width: 200px;
-  height: 200px;
+  width: 300px;
+  height: 300px;
 }
 
 .research-link-wrap {
@@ -567,6 +573,7 @@
 .features {
   padding: 3rem 20px;
   text-align: center;
+  background-color: #fbf6ef;
 }
 .features img {
   width: 120px;
@@ -582,6 +589,7 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  background-color: white;
 }
 .card button {
   margin-top: 1rem;
@@ -607,6 +615,7 @@
   border: 1px solid #ddd;
   border-radius: 6px;
   padding: 10px 15px;
+  background-color: white;
 }
 .faq summary {
   font-weight: bold;
@@ -618,6 +627,15 @@
   text-align: center;
   padding: 3rem 20px;
   padding-top: 1rem;
+  /* margin-top: 30px; */
+  background-color: #fbf6ef;
+}
+.cta h2 {
+  font-size: 40px;
+}
+.cta p {
+  padding-bottom: 20px;
+  font-size: 18px;
 }
 .cta .start-btn {
   background: #f97316;
@@ -631,6 +649,10 @@
 }
 .cta .start-btn:hover {
   background: #ea580c;
+}
+hr {
+  width: 700px;
+  margin-top: 50px;
 }
 
 /* Footer */
