@@ -91,6 +91,8 @@ const openRelated = (tipId: string | number) => {
 <style scoped>
 .page-wrap {
   padding: 16px 20px 28px;
+  width: 750px;
+  margin: 0 auto;
 }
 
 .fav-hero {

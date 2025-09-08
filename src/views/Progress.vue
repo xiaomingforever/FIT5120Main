@@ -94,6 +94,8 @@ function fmtDate(isoDate: string) {
 <style scoped>
 .progress {
   padding: 20px;
+  width: 750px;
+  margin: 0 auto;
 }
 
 /* Hero */
