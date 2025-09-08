@@ -1,11 +1,12 @@
 <script setup lang="ts">
-  import { ref, computed, onMounted } from "vue"
+  import { ref, computed, onMounted, onBeforeUnmount } from "vue"
   import { useRouter } from "vue-router"
 
   const router = useRouter()
   const query = ref("")
   const allActivities = ref<any[]>([])
   const showDropdown = ref(false)
+  const searchRef = ref<HTMLElement | null>(null)
 
   onMounted(async () => {
     const res = await fetch("https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option", {
@@ -42,6 +43,20 @@
     }})   // jump to tips page
     showDropdown.value = false
   }
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (searchRef.value && !searchRef.value.contains(e.target as Node)) {
+      showDropdown.value = false
+    }
+  }
+
+  onMounted(() => {
+    document.addEventListener("click", handleClickOutside)
+  })
+
+  onBeforeUnmount(() => {
+    document.removeEventListener("click", handleClickOutside)
+  })
 </script>
 
 <template>
@@ -53,7 +68,7 @@
         </router-link>
       </div>
 
-      <div class="search">
+      <div class="search" ref="searchRef">
         <img
           class="search-icon"
           src="/src/assets/Font icons/search_200dp_999999.png"
@@ -64,7 +79,6 @@
           v-model="query"
           placeholder="Search activities"
           @focus="showDropdown = true"
-          aria-label="Search activities"
         />
 
         <!-- drop down box -->
