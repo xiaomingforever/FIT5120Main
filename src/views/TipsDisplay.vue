@@ -192,13 +192,18 @@ const openRelated = (tipId: string | number) => {
 
 <template>
   <div class="tips-display">
-    <header class="header">
-      <button class="back" @click="goBack" aria-label="Back to Activities">back</button>
-      <h1 class="title">{{ activityName.toUpperCase() || 'Activity' }}</h1>
-      <p class="subtitle">
-        All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
-      </p>
-    </header>
+    <section class="hero" role="banner">
+      <button class="btn-back" @click="goBack" aria-label="Back to Activities">
+        <span>Back</span>
+      </button>
+
+      <div class="hero-inner">
+        <h1 class="hero-title">{{ (activityName || 'Activity').toUpperCase() }}</h1>
+        <p class="hero-subtitle">
+          All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
+        </p>
+      </div>
+    </section>
 
     <section v-if="loading" class="state">Loading tips...</section>
     <section v-else-if="notFound" class="state">No tips found for this activity.</section>
@@ -255,9 +260,69 @@ const openRelated = (tipId: string | number) => {
 .tips-display {
   padding: 16px 20px 28px;
 }
-.header {
+/* hero section */
+.hero {
+  position: relative;
+  margin: 0 0 18px;
+  padding: clamp(28px, 6vw, 56px) clamp(16px, 5vw, 32px);
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.btn-back {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #111827;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease;
+}
+
+.btn-back .icon {
+  width: 18px;
+  height: 18px;
+}
+
+.btn-back:hover {
+  transform: translateX(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.btn-back:focus {
+  outline: 3px solid #bfdbfe;
+  outline-offset: 2px;
+}
+
+.hero-inner {
+  max-width: 900px;
+  margin: 0 auto;
   text-align: center;
-  margin-bottom: 18px;
+}
+
+.hero-title {
+  margin: 0;
+  font-size: clamp(1.8rem, 1.2rem + 2vw, 2.6rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.hero-subtitle {
+  margin: 8px 0 0;
+  color: #4b5563;
+  font-size: 0.95rem;
 }
 .back {
   border: 0;

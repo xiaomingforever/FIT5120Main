@@ -100,7 +100,7 @@ function fmtDate(isoDate: string) {
 
 /* Hero */
 .hero {
-  background: #eef2ff;
+  background: #ffffff;
   border-radius: 16px;
   padding: 22px;
   text-align: center;
