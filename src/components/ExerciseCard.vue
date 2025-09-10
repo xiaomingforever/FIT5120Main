@@ -10,7 +10,7 @@
 
       <ul class="meta">
         <span class="pill">Age {{ exercise.currentAgeGroup }}</span>
-        <span class="badge">{{ exercise.practiceCount }} Practices</span>
+        <span class="badge">{{ exercise.practiceCount }} Tips</span>
       </ul>
     </div>
   </article>
