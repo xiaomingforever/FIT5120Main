@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import AppHeader from '@/components/AppHeader.vue'
+// import AppHeader from '@/components/AppHeader.vue'
 import AppSidebar from '@/components/AppSidebar.vue'
+import HeadBar from './HeadBar.vue';
 </script>
 
 <template>
   <div class="page">
-    <AppHeader />
+    <HeadBar />
     <div class="shell">
       <AppSidebar />
       <main class="main">

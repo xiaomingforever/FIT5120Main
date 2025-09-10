@@ -1,49 +1,66 @@
 <template>
-  <header class="headbar">
-    <div class="brand" @click="$router.push('/')">
-      <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
-    </div>
+  <div class="home-page">
+    <!-- Navbar -->
+    <header class="navbar">
+      <!-- <div class="logo">Brain<span>Builder</span></div> -->
+      <router-link to="/Home" aria-label="Go to Today">
+        <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
+      </router-link>
 
-    <nav class="nav">
-      <!-- The only live action today -->
-      <RouterLink class="btn primary" to="/today" aria-label="Go to Today"> Today </RouterLink>
+      <!-- hambuger button -->
+      <div class="hamburger" @click="toggleMenu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
 
-      <!-- Reserved for future features -->
-      <button class="btn ghost" disabled aria-disabled="true" title="Coming soon">
-        Features 2
-      </button>
-      <button class="btn ghost" disabled aria-disabled="true" title="Coming soon">
-        Features 3
-      </button>
-      <button class="btn ghost" disabled aria-disabled="true" title="Coming soon">
-        Features 4
-      </button>
-    </nav>
-  </header>
+      <!-- Nav menu -->
+      <div class="nav-container">
+        <ul :class="['nav-links', { 'active': isOpen }]">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About This Project</a></li>
+          <li><a href="#research">Research</a></li>
+          <li><a href="#resources">Resources</a></li>
+        </ul>
+      </div>
+    </header>
+  </div>
 </template>
 
-<script>
-export default { name: 'HeadBar' }
+<script setup lang="ts">
+  import { ref } from 'vue'
+
+  const isOpen = ref(false)
+  const toggleMenu = () => {
+    isOpen.value = !isOpen.value
+  }
 </script>
 
 <style scoped>
-.headbar {
+.home-page {
+  font-family: Arial, sans-serif;
+  color: #333;
+  line-height: 1.6;
+  background-color: #fbf6ef;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  background: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: #ffffff;
-  border-bottom: 1px solid #e9e9e9;
+  z-index: 1000;
+  height: 100px;
 }
-.brand {
+.nav-container {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
+  gap: 20px; 
 }
 .logo {
   height: 130px;
@@ -52,49 +69,56 @@ export default { name: 'HeadBar' }
   margin-right: 200px;
   margin-left: 0;
 }
-.name {
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  color: #117a7a;
-}
-.nav {
+.nav-links {
+  list-style: none;
   display: flex;
+  gap: 20px;
   align-items: center;
-  gap: 10px;
 }
-
-.btn {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 999px;
-  font-weight: 600;
-  border: 1px solid transparent;
-  transition: transform 0.05s ease;
+.nav-links li {
+  display: inline-block;
 }
-.btn:active {
-  transform: translateY(1px);
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  font-size: 16px;
 }
-
-/* live primary button to Today */
-.primary {
-  background: #117a7a;
-  color: white;
+.nav-links a:hover {
+  color: #14b8a6;
 }
-.primary:hover {
-  filter: brightness(0.98);
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
 }
-
-/* reserved placeholders */
-.ghost {
-  background: #ffffff;
-  color: #9aa4ad;
-  border-color: #e3e6ea;
-  cursor: not-allowed;
-  opacity: 0.65;
+.hamburger span {
+  width: 25px;
+  height: 3px;
+  background: #333;
+  border-radius: 2px;
 }
-@media (max-width: 640px) {
-  .name {
+/* small screen */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+  .nav-links {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 200px;
+    background: white;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    gap: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     display: none;
+  }
+  .nav-links.active {
+    display: flex;
   }
 }
 </style>
