@@ -16,11 +16,20 @@
       <div class="nav-container">
         <ul :class="['nav-links', { 'active': isOpen }]">
           <li><a href="#home">Home</a></li>
-          <li><a href="#about">About Us</a></li>
+          <li><a href="#about">About This Project</a></li>
           <li><a href="#research">Research</a></li>
           <li><a href="#resources">Resources</a></li>
         </ul>
-        <router-link to="/today" class="btn get-start-btn">Get Started</router-link>
+        <!-- <router-link to="/today" class="btn get-start-btn">Get Started</router-link> -->
+        <button class="btn get-start-btn" @click="handleGetStarted">
+          Get Started
+        </button>
+        <ConfirmModal
+          v-if="showConfirm"
+          @close="showConfirm = false"
+          @confirm="goToday"
+          @cancel="goSelector"
+        />
       </div>
     </header>
 
@@ -34,7 +43,7 @@
           and teachers with knowledge and tools that nurture children's development.
         </p>
         <!-- <button>Learn More</button> -->
-        <router-link to="/today" class="btn">Learn More</router-link>
+        <router-link to="/today" class="btn">Learn More About the Project</router-link>
       </div>
     </section>
 
@@ -188,11 +197,30 @@
 
 <script setup lang="ts">
   import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
+  import ConfirmModal from '@/components/ConfirmModal.vue'
+
+  const router = useRouter()
+  const showConfirm = ref(false)
 
   const isOpen = ref(false)
   const toggleMenu = () => {
     isOpen.value = !isOpen.value
   }
+
+  const handleGetStarted = () => {
+    showConfirm.value = true
+  }
+
+  const goToday = () => {
+    showConfirm.value = false
+    router.push('/today')
+  }
+
+  const goSelector = () => {
+    showConfirm.value = false
+    router.push('/selector')
+}
 </script>
 
 <style scoped>
@@ -247,6 +275,7 @@
   color: #14b8a6;
 }
 .get-start-btn {
+  all: unset;
   background: #f97316;
   color: white;
   padding: 8px 16px;
@@ -254,6 +283,7 @@
   font-weight: bold;
   margin-left: 20px;
   text-decoration: none;
+  cursor: pointer;
 }
 .get-start-btn:hover {
   background: #ea580c;
@@ -318,11 +348,13 @@
   padding: 20px;
 }
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
 }
 .hero p {
   margin-bottom: 1.5rem;
+  font-size: 22px;
+  font-weight: 500;
 }
 .hero .btn {
   background: #14b8a6;
@@ -599,6 +631,7 @@
   color: white;
   border-radius: 20px;
   cursor: pointer;
+  font-size: 16px;
 }
 .card button:hover {
   background: #0d9488;

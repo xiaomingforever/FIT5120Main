@@ -1,40 +1,40 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+  import { ref } from 'vue'
+  import { useRouter } from 'vue-router'
 
-const router = useRouter()
+  const router = useRouter()
 
-const age = ref<string | null>(null)
-const gender = ref<string | null>(null)
+  const age = ref<string | null>(null)
+  const gender = ref<string | null>(null)
 
-const selectAge = (a: string) => (age.value = a)
-const selectGender = (g: string) => (gender.value = g)
+  const selectAge = (a: string) => (age.value = a)
+  const selectGender = (g: string) => (gender.value = g)
 
-// generate routine
-const enter = async () => {
-  if (!age.value || ! gender.value) {
-    alert('Please select both age and gender.')
-    return
+  // generate routine
+  const enter = async () => {
+    if (!age.value || ! gender.value) {
+      alert('Please select both age and gender.')
+      return
+    }
+
+    try {
+      const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ age_code: age.value, gender: gender.value })
+      })
+      const data = await res.json()
+      // save to localStorage
+      localStorage.setItem('routine', JSON.stringify(data))
+      localStorage.setItem('age_code', age.value)
+      localStorage.setItem('gender', gender.value)
+      // jump to display routine
+      router.push('/today')
+    } catch (err) {
+      console.error(err)
+      alert('Failed to generate routine.')
+    }
   }
-
-  try {
-    const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ age_code: age.value, gender: gender.value })
-    })
-    const data = await res.json()
-    // save to localStorage
-    localStorage.setItem('routine', JSON.stringify(data))
-    localStorage.setItem('age_code', age.value)
-    localStorage.setItem('gender', gender.value)
-    // jump to display routine
-    router.push('/today')
-  } catch (err) {
-    console.error(err)
-    alert('Failed to generate routine.')
-  }
-}
 </script>
 
 <template>

@@ -14,11 +14,11 @@
   const routineData = ref<any>(null)
   // const showSelector = ref(false)
 
-  const activityImages: Record<string, string> = {
-  "diaper-change": "src/assets/Activities/Excercise/diaper-change2.png",
-  "playtime": "src\assets\Activities\Excercise\playtime2.png",
-  "bath-time": "src\assets\Activities\Excercise\bathtime2.png"
-}
+//   const activityImages: Record<string, string> = {
+//   "diaper-change": "src/assets/Activities/Excercise/diaper-change2.png",
+//   "playtime": "src\assets\Activities\Excercise\playtime2.png",
+//   "bath-time": "src\assets\Activities\Excercise\bathtime2.png"
+// }
 
   onMounted(() => {
     const ageSaved = localStorage.getItem('age_code')
