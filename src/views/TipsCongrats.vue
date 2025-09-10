@@ -296,6 +296,14 @@ function openTipsList() {
   margin: 0 0 10px;
   color: #4b5563;
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+
+  max-height: calc(1.45em * 4);
+  white-space: normal;
+  word-break: break-word;
 }
 .skills {
   margin: 0;
