@@ -313,7 +313,7 @@ const related = computed(() => {
   background: rgba(0, 0, 0, 0.35);
   display: grid;
   place-items: center;
-  z-index: 60;
+  z-index: 100;
 }
 .tipmodal {
   width: min(720px, 92vw);
