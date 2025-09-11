@@ -16,8 +16,8 @@
 
       <!-- Nav menu -->
       <div class="nav-container">
-        <ul :class="['nav-links', { 'active': isOpen }]">
-          <li><a href="#home">Home</a></li>
+        <ul :class="['nav-links', { active: isOpen }]">
+          <li><router-link to="Home">Home</router-link></li>
           <li><a href="#about">About This Project</a></li>
           <li><a href="#research">Research</a></li>
           <li><a href="#resources">Resources</a></li>
@@ -28,12 +28,12 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
+import { ref } from 'vue'
 
-  const isOpen = ref(false)
-  const toggleMenu = () => {
-    isOpen.value = !isOpen.value
-  }
+const isOpen = ref(false)
+const toggleMenu = () => {
+  isOpen.value = !isOpen.value
+}
 </script>
 
 <style scoped>
@@ -60,7 +60,7 @@
 .nav-container {
   display: flex;
   align-items: center;
-  gap: 20px; 
+  gap: 20px;
 }
 .logo {
   height: 130px;

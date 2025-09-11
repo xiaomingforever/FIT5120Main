@@ -37,16 +37,16 @@ const items: Item[] = [
 </template>
 
 <style scoped>
-.sidebar { 
+.sidebar {
   position: sticky;
-  top: 108px; 
+  top: 108px;
   height: calc(100vh - 80px);
   width: 300px;
   padding: 24px 14px;
   background: var(--sidebar-bg, #fbf6ef);
   border-right: 1px solid #e5e5e5;
 }
-/* 小屏幕时（宽度 <= 768px）改为底部导航 */
+
 @media (max-width: 768px) {
   .sidebar {
     position: fixed;
@@ -85,7 +85,7 @@ const items: Item[] = [
   }
 
   .nav-btn.active::before {
-    display: none; 
+    display: none;
   }
 
   .nav-btn.active {
@@ -119,7 +119,8 @@ ul {
   border-color: #e5e5e5;
 }
 .nav-btn.active {
-  background: #fff;
+  background: #f97316;
+  color: #fff;
   border-color: #e5e5e5;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
   position: relative;
