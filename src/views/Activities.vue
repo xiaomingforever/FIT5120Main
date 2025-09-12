@@ -1,4 +1,14 @@
 <template>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Activities</h1>
+      <p>
+        Parents can view tips for different types of activities tailored to each age group, 
+        helping to promote their child's overall brain development.
+      </p>
+    </div>
+  </section>
   <div class="activities">
     <!-- Age selector bar -->
     <nav class="agebar" role="tablist" aria-label="Filter by age group">
@@ -224,9 +234,46 @@ function changeAge(newAge: 'all' | AgeGroup) {
 </script>
 
 <style scoped>
+.hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: url("../assets/Activity.png") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0; 
+  background: rgba(36, 36, 36, 0.4); 
+  z-index: 0;
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  margin: 20px;
+}
+.hero h1 {
+  font-size: 3rem;
+}
+.hero p {
+  margin-bottom: 1.5rem;
+  font-size: 24px;
+  font-weight: 500;
+}
 .activities {
   padding: 1rem;
-  width: 750px;
+  width: 900px;
   margin: 0 auto;
 }
 .loading {
