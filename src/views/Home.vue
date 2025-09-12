@@ -1,27 +1,24 @@
 <template>
   <div class="home-page">
     <!-- Navbar -->
-    <header class="navbar">
+    <!-- <header class="navbar"> -->
       <!-- <div class="logo">Brain<span>Builder</span></div> -->
-      <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
+      <!-- <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" /> -->
 
       <!-- hambuger button -->
-      <div class="hamburger" @click="toggleMenu">
+      <!-- <div class="hamburger" @click="toggleMenu">
         <span></span>
         <span></span>
         <span></span>
-      </div>
+      </div> -->
 
       <!-- Nav menu -->
-      <div class="nav-container">
-        <ul :class="['nav-links', { 'active': isOpen }]">
-          <li><a href="#home">Home</a></li>
-          <li><a href="#about">About This Project</a></li>
+      <HeadBar />
+          <!-- <li><a href="#about">About This Project</a></li>
           <li><a href="#research">Research</a></li>
-          <li><a href="#resources">Resources</a></li>
-        </ul>
+          <li><a href="#resources">Resources</a></li> -->
         <!-- <router-link to="/today" class="btn get-start-btn">Get Started</router-link> -->
-        <button class="btn get-start-btn" @click="handleGetStarted">
+        <!-- <button class="btn get-start-btn" @click="handleGetStarted">
           Get Started
         </button>
         <ConfirmModal
@@ -29,9 +26,8 @@
           @close="showConfirm = false"
           @confirm="goToday"
           @cancel="goSelector"
-        />
-      </div>
-    </header>
+        /> -->
+    <!-- </header> -->
 
     <!-- Hero Section -->
     <section class="hero">
@@ -198,10 +194,12 @@
 <script setup lang="ts">
   import { ref } from 'vue'
   import { useRouter } from 'vue-router'
-  import ConfirmModal from '@/components/ConfirmModal.vue'
+  // import ConfirmModal from '@/components/ConfirmModal.vue'
+  import HeadBar from '@/components/HeadBar.vue';
 
   const router = useRouter()
   const showConfirm = ref(false)
+  const showDropdown = ref(false)
 
   const isOpen = ref(false)
   const toggleMenu = () => {
@@ -231,105 +229,10 @@
   background-color: #fbf6ef;
 }
 
-/* Navbar */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 40px;
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  height: 100px;
-}
-.nav-container {
-  display: flex;
-  align-items: center;
-  gap: 20px; 
-}
-.logo {
-  height: 130px;
-  width: auto;
-  flex: 0 0;
-  margin-right: 200px;
-  margin-left: 0;
-}
-.nav-links {
-  list-style: none;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-}
-.nav-links li {
-  display: inline-block;
-}
-.nav-links a {
-  text-decoration: none;
-  color: #333;
-  font-weight: 500;
-  font-size: 16px;
-}
-.nav-links a:hover {
-  color: #14b8a6;
-}
-.get-start-btn {
-  all: unset;
-  background: #f97316;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-weight: bold;
-  margin-left: 20px;
-  text-decoration: none;
-  cursor: pointer;
-}
-.get-start-btn:hover {
-  background: #ea580c;
-}
-.hamburger {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-  gap: 5px;
-}
-.hamburger span {
-  width: 25px;
-  height: 3px;
-  background: #333;
-  border-radius: 2px;
-}
-/* small screen */
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-  .get-start-btn {
-    margin-left: auto;
-  }
-  .nav-links {
-    position: absolute;
-    top: 60px;
-    right: 0;
-    width: 200px;
-    background: white;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 15px;
-    gap: 15px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    display: none;
-  }
-  .nav-links.active {
-    display: flex;
-  }
-}
-
 /* Hero Section */
 .hero {
   position: relative;
-  height: 80vh;
+  height: 90vh;
   background: url("/hero.png") center/cover no-repeat;
   display: flex;
   align-items: center;
@@ -462,7 +365,7 @@
 }
 
 .why-text {
-  font-size: 20px;
+  font-size: 22px;
   color: #4a4a4a;
   line-height: 1.7;
   max-width: 420px;
@@ -622,6 +525,7 @@
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
+  font-size: 20px;
 }
 .card button {
   margin-top: 1rem;
@@ -649,6 +553,7 @@
   border-radius: 6px;
   padding: 10px 15px;
   background-color: white;
+  font-size: 20px;
 }
 .faq summary {
   font-weight: bold;

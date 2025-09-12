@@ -32,6 +32,16 @@ const openRelated = (tipId: string | number) => {
 </script>
 
 <template>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Favorite Tips</h1>
+      <p>
+        Collection of your favorite tips,
+        do the same thing again and again...
+      </p>
+    </div>
+  </section>
   <div class="page-wrap">
     <!-- HERO CARD -->
     <section class="fav-hero">
@@ -89,6 +99,43 @@ const openRelated = (tipId: string | number) => {
 </template>
 
 <style scoped>
+.hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: url("../assets/favorite.png") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0; 
+  background: rgba(23, 23, 23, 0.5); 
+  z-index: 0;
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  margin: 20px;
+}
+.hero h1 {
+  font-size: 3rem;
+}
+.hero p {
+  margin-bottom: 1.5rem;
+  font-size: 24px;
+  font-weight: 500;
+}
 .page-wrap {
   padding: 16px 20px 28px;
   width: 750px;

@@ -29,6 +29,16 @@ function fmtDate(isoDate: string) {
 </script>
 
 <template>
+  <!-- Hero Section -->
+  <section class="hero-top">
+    <div class="hero-content">
+      <h1>Progress</h1>
+      <p>
+        Monitor your child's progress and celebrate achievements.
+        Easily track your child's growing skills and browse the full history of personalized tips.
+      </p>
+    </div>
+  </section>
   <div class="progress">
     <!-- Hero -->
     <section class="hero">
@@ -92,6 +102,43 @@ function fmtDate(isoDate: string) {
 </template>
 
 <style scoped>
+.hero-top {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: url("../assets/progress.png") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #333;
+}
+.hero-top::before {
+  content: "";
+  position: absolute;
+  inset: 0; 
+  background: rgba(36, 36, 36, 0.4); 
+  z-index: 0;
+}
+.hero-top > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  margin: 20px;
+}
+.hero-top h1 {
+  font-size: 3rem;
+}
+.hero-top p {
+  margin-bottom: 1.5rem;
+  font-size: 24px;
+  font-weight: 500;
+}
 .progress {
   padding: 20px;
   width: 750px;

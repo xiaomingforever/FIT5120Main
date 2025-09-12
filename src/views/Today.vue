@@ -158,11 +158,22 @@ const imageUrl = computed(() => {
 <template>
   <main class="main">
     <!-- tool bar -->
-    <div class="toolbar">
+    <!-- <div class="toolbar">
       <button class="edit-btn" @click="editProfile">
         Edit Child's Profile
       </button>
-    </div>
+    </div> -->
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Today's Tips</h1>
+        <p>
+          These tips are updated daily.
+          Discover fun activities to boost your child's brain development. 
+        </p>
+      </div>
+    </section>
 
     <!-- Exercise Card -->
     <div class="exercise-card">
@@ -235,18 +246,56 @@ const imageUrl = computed(() => {
 
 <style scoped>
 .main {
-  padding: 16px;
+  font-family: Arial, sans-serif;
+  color: #333;
+  background-color: #fbf6ef;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  margin: 0 auto;
-  width: 750px;
+  align-items: center;
+  width: 100%;  
+  min-height: 100vh;
 }
 
-.toolbar {
+/* .toolbar {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 16px;
+} */
+
+.hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: url("../assets/hero-bg.png") center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0; 
+  background: rgba(36, 36, 36, 0.4); 
+  z-index: 0;
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  margin: 20px;
+}
+.hero h1 {
+  font-size: 3rem;
+}
+.hero p {
+  margin-bottom: 1.5rem;
+  font-size: 24px;
+  font-weight: 500;
 }
 
 .edit-btn {
@@ -269,11 +318,11 @@ const imageUrl = computed(() => {
 
 /* Exercise card */
 .exercise-card {
-  background: #fff;
+  background: #fbf6ef;
   border-radius: 12px;
+  margin: 100px 200px;
   padding: 20px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  margin-top: -20px;
 }
 .exercise-card .activity-name {
   font-size: 16px;
