@@ -219,7 +219,7 @@ const imageUrl = computed(() => {
                 target="_blank" 
                 rel="noopener noreferrer"
               >
-                {{ extractHttpsLink(item.activity.source) }}
+                View related research
               </a>
             </span>
             <span v-else>
@@ -318,7 +318,7 @@ const imageUrl = computed(() => {
 
 /* Exercise card */
 .exercise-card {
-  background: #fbf6ef;
+  background: #fff;
   border-radius: 12px;
   margin: 100px 200px;
   padding: 20px;
@@ -404,7 +404,7 @@ const imageUrl = computed(() => {
   color:#026060;
 }
 .source a {
-  text-decoration: none;
+  text-decoration: underline;
   color:#007070;
   font-size: 20px;
 }

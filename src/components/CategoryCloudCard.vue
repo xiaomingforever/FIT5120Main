@@ -73,9 +73,10 @@ const goToActivity = (c: Cat) => {
   border-radius: 16px;
   padding: 22px;
   box-shadow: var(--card-shadow);
-  width: min(960px, 88vw);
+  width: min(1060px, 88vw);
   margin: 0 auto;
-  width: 702px;
+  margin-bottom: 20px;
+  margin-top: -50px;
 }
 .heading {
   font-size: 2rem;
