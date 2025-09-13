@@ -270,21 +270,16 @@ const related = computed(() => {
           <h3>Why it matters</h3>
           <p>{{ model.brainy_background }}</p>
         </section>
-        <!-- Source-->
+        <!-- Source -->
         <p v-if="model.source_url" class="source">
-          <strong>Source:</strong>
-          <span v-if="extractHttpsLink(model.source_url)">
-            <a
-              :href="extractHttpsLink(model.source_url)!"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {{ extractHttpsLink(model.source_url) }}
-            </a>
-          </span>
-          <span v-else>
-            {{ model.source_url }}
-          </span>
+          <a
+            :href="extractHttpsLink(model.source_url) || model.source_url"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="source-link"
+          >
+            <strong>Source</strong>
+          </a>
         </p>
 
         <section v-if="related.length" class="related">
