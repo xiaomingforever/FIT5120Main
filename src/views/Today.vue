@@ -15,10 +15,12 @@ const progress = useProgressStore()
 const routineData = ref<any>(null)
 const loading = ref(false)
 
-// 年龄和性别
+// age and gender
 const AGE_TABS: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
-const selectedAge = ref<AgeGroup>('1-3y') // 默认 1-3y
-const selectedGender = ref<'girl' | 'boy'>('girl') // 默认 girl
+const selectedAge = ref<AgeGroup>('1-3y') 
+const selectedGender = ref<'girl' | 'boy'>('girl') 
+const selectorTop = ref<HTMLElement | null>(null)
+const erexerciseCardRef = ref<HTMLElement | null>(null)
 
 onMounted(() => {
   const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
@@ -72,10 +74,23 @@ async function generateRoutine() {
   }
 }
 
+function scrollToSelector() {
+  if (selectorTop.value) {
+    selectorTop.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+function scrollToExerciseCard() {
+  if (erexerciseCardRef.value) {
+    erexerciseCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
 function changeAge(age: AgeGroup) {
   selectedAge.value = age
   localStorage.setItem('age_code', age)
   generateRoutine()
+  scrollToExerciseCard()
 }
 
 function changeGender(g: 'girl' | 'boy') {
@@ -210,28 +225,62 @@ function prevCard() {
       </div>
     </section>
 
-    <!-- Age Selector -->
-    <div class="age-selector">
-      <p>Select your child's age group:</p>
-      <div class="age-tabs">
-        <button v-for="age in AGE_TABS" :key="age" :class="['age-tab', { active: selectedAge === age }]"
-          @click="changeAge(age)">
+    <!-- age selector -->
+    <div class="selector-block" ref="selectorTop">
+      <h2 class="section-title">Choose an Age Group</h2>
+      <p class="selector-sub">
+        Activities are tailored to your child's developmental stage.
+      </p>
+      <div class="selector">
+        <div
+          v-for="age in AGE_TABS"
+          :key="age"
+          :class="['selector-card', { active: selectedAge === age }]"
+          @click="changeAge(age)"
+        >
           {{ age.replace('y', '') }}
-        </button>
+        </div>
       </div>
+      <!-- decorate shape -->
+      <span class="shape shape-yellow"></span>
+      <span class="shape shape-red"></span>
+      <span class="shape shape-green"></span>
+      <span class="shape shape-diamond"></span>
     </div>
 
-    <!-- Gender Selector -->
-    <div class="gender-selector">
-      <p>Select your child's gender:</p>
-      <div class="gender-tabs">
-        <button :class="['gender-tab', { active: selectedGender === 'girl' }]" @click="changeGender('girl')">
-          Girl
-        </button>
-        <button :class="['gender-tab', { active: selectedGender === 'boy' }]" @click="changeGender('boy')">
-          Boy
-        </button>
+    <!-- gender selector -->
+    <div class="selector-block">
+      <h2 class="section-title">Select Gender</h2>
+      <p class="selector-sub">
+        Personalize tips to better match your child's experience.
+      </p>
+      <div class="selector">
+        <div
+          :class="['selector-card', { active: selectedGender === 'girl' }]"
+          @click="changeGender('girl')"
+        >
+          <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" />Girl
+        </div>
+        <div
+          :class="['selector-card', { active: selectedGender === 'boy' }]"
+          @click="changeGender('boy')"
+        >
+          <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" />Boy
+        </div>
       </div>
+      <!-- shapes decoration -->
+      <span class="shape shape-blue"></span>
+      <span class="shape shape-orange"></span>
+      <span class="shape shape-purple"></span>
+    </div>
+
+    <!-- Exercise Section Intro -->
+    <div class="exercise-intro" ref="erexerciseCardRef">
+      <h2 class="section-title">Daily Exercise Tips</h2>
+      <p class="exercise-sub">
+        Each card gives you a fun and simple activity designed to nurture your childs brain.
+        Browse through, save favorites, and mark them as done to track progress.
+      </p>
     </div>
 
     <!-- Exercise Card Carousel -->
@@ -243,6 +292,7 @@ function prevCard() {
       <div v-if="routineData" class="carousel">
         <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
           <div v-for="(item, index) in routineData.routine" :key="item.activity.id" class="carousel-item">
+            <p style="font-size: 18px;">Age Group: {{ routineData.age_code }}, Gender: {{ routineData.gender }}</p>
             <p class="activity-name">Activity: {{ item.activity.name.toUpperCase() }}</p>
 
             <div class="card-header">
@@ -298,7 +348,19 @@ function prevCard() {
       </p>
     </div>
 
+    <!-- Sidebar with Back button -->
+    <div class="sidebar">
+      <button class="back-btn" @click="scrollToSelector">Back to selector↑</button>
+    </div>
 
+    <!-- Exercise Section Intro -->
+    <div class="exercise-intro">
+      <h2 class="section-title">Browse Tips by Activity type</h2>
+      <p class="exercise-sub">
+        Browse tips by different activity types to discover ideas that match your child's needs. 
+      </p>
+    </div>
+  
     <!-- Activity Grid -->
     <CategoryCloudCard />
   </main>
@@ -357,44 +419,160 @@ function prevCard() {
   font-weight: 500;
 }
 
-.age-selector,
-.gender-selector {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.age-tabs,
-.gender-tabs {
+.selector {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 2rem;
+  margin: 40px 0;
 }
-
-.age-tab,
-.gender-tab {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: 1px solid #007070;
-  background-color: #eaf7f7;
+.selector-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  text-align: center;
+  font-size: 22px;
   cursor: pointer;
-  font-weight: 600;
-  color: #007070;
+  transition: transform 0.2s ease;
+}
+.selector-card:hover {
+  transform: translateY(-5px);
+}
+.selector-card.active {
+  background: #14b8a6;
+  color: white;
+}
+.selector-block {
+  text-align: center;
+  margin: 20px auto;
 }
 
-.age-tab.active,
-.gender-tab.active {
-  background-color: #007070;
-  color: white;
+.section-title {
+  color: #f97316;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.selector-sub {
+  color: #555;
+  font-size: 22px;
+  margin-bottom: 1.5rem;
+}
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+/* decorate shape */
+.shape {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.9;
+  z-index: 0;
+}
+
+.selector-block {
+  position: relative;
+  /* padding: 60px 20px; */
+}
+
+.shape-yellow {
+  left: -100px;
+  top: 80px;
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 22px solid #facc15; /* yellow */
+  transform: rotate(0deg);
+}
+
+.shape-red {
+  right: -140px;
+  top: 70px;
+  width: 22px;
+  height: 22px;
+  background: #ef4444;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(239,68,68,0.08);
+}
+
+.shape-green {
+  right: -50px;
+  top: 70%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  background: #10b981;
+  border-radius: 3px;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.shape-diamond {
+  left: 42%;
+  bottom: -20px;
+  width: 18px;
+  height: 18px;
+  background: #f59e0b;
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.shape-blue {
+  left: -250px;
+  top: 30px;
+  width: 24px;
+  height: 24px;
+  background: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(59,130,246,0.2);
+}
+
+.shape-orange {
+  right: -260px;
+  top: 80px;
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-bottom: 26px solid #fb923c; 
+}
+
+.shape-purple {
+  left: 0;
+  bottom: 60px;
+  width: 22px;
+  height: 22px;
+  background: #a855f7;
+  transform: rotate(45deg);
+  border-radius: 3px;
 }
 
 .exercise-card {
   background: #fff;
-  border-radius: 12px;
-  margin: 100px auto;
-  padding: 20px;
+  border-radius: 20px;
+  margin: 20px auto;
+  padding: 40px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  max-width: 700px;
+  max-width: 1200px;
+  width: 1050px;
+}
+.exercise-intro {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.exercise-intro .section-title {
+  color: #f97316;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.exercise-sub {
+  color: #555;
+  font-size: 22px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .exercise-card .activity-name {
@@ -403,7 +581,7 @@ function prevCard() {
   color: #065f46;
   background: #d1fae5;
   border: 1px solid #a7f3d0;
-  padding: 3px 10px;
+  padding: 3px 0;
   border-radius: 999px;
   width: 300px;
   text-align: center;
@@ -412,7 +590,7 @@ function prevCard() {
   position: relative;
   overflow: hidden;
   width: 100%;
-  max-width: 600px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -425,10 +603,11 @@ function prevCard() {
   min-width: 100%;
   box-sizing: border-box;
   padding: 20px;
+  padding-top: 0;
 }
 .carousel-controls {
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 0;
   right: 0;
   transform: translateY(-50%);
@@ -567,4 +746,34 @@ function prevCard() {
   margin: 0 auto;
   margin-top: 10px;
 }
+/* Sidebar container */
+.sidebar {
+  position: fixed;
+  top: 50%;
+  right: 20px;   /* 你可以改成 left: 20px 如果想放在左边 */
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+}
+
+/* Back button */
+.back-btn {
+  background: #14b8a6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: background 0.2s;
+}
+
+.back-btn:hover {
+  background: #0d9488;
+}
+
 </style>

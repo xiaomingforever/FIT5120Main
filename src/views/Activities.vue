@@ -50,12 +50,12 @@ import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 
 const router = useRouter()
 const exercises = ref<Exercise[]>([]) // API data from back-end
-const selectedAge = ref<'all' | AgeGroup>('all')
+const selectedAge = ref<AgeGroup>('0-1y')
 const loading = ref(true)
 
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
-const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
+const AGE_TABS: Array<{ label: string; value: '0-1y' | AgeGroup }> = [
   // { label: 'All Ages', value: 'all' },
   { label: '0-1', value: '0-1y' },
   { label: '1-3', value: '1-3y' },
@@ -203,8 +203,7 @@ const visible = computed<Exercise[]>(() => {
 // }
 
 const goToTips = (ex: Exercise) => {
-  const raw = selectedAge.value
-  const normalizedAge = raw === 'all' ? localStorage.getItem('age_code') || '1-3y' : raw
+  const normalizedAge = selectedAge.value
 
   router.push({
     name: 'TipsDisplay',
