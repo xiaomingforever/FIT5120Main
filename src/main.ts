@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 import { faHouse, faLightbulb, faClipboardList, faStar, faChartLine, faBook, faFolder } from '@fortawesome/free-solid-svg-icons'
 
+
 library.add(faHouse, faLightbulb, faClipboardList, faStar, faChartLine, faBook, faFolder)
 
 const app = createApp(App)
