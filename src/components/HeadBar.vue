@@ -164,10 +164,10 @@ const toggleMenu = () => {
   }
 }
 .router-link-exact-active {
-  background-color: #e0eff7; 
-  border-radius: 6px;       
-  padding: 6px 10px;        
-  color: #14b8a6 !important; 
+  background-color: #e0eff7;
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: #14b8a6 !important;
   font-weight: bold;
 }
 </style>

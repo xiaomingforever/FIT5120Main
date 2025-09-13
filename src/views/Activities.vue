@@ -4,7 +4,7 @@
     <div class="hero-content">
       <h1>Activities</h1>
       <p>
-        Parents can view tips for different types of activities tailored to each age group, 
+        Parents can view tips for different types of activities tailored to each age group,
         helping to promote their child's overall brain development.
       </p>
     </div>
@@ -73,7 +73,7 @@ onMounted(async () => {
     selectedAge.value = AGE_ORDER[0]
     prevAgeIndex.value = 0
   }
-  
+
   loading.value = true
   try {
     const res = await fetch('https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option', {
@@ -104,7 +104,7 @@ onMounted(async () => {
 
       // compute unique tip count (dedupe by tip_id) for practiceCount
       const uniqueTipCount = new Set(rawTips.map((rt: { tip_id: any }) => rt.tip_id)).size
-      
+
       return {
         id: String(act.id),
         title: act.name,
@@ -115,7 +115,7 @@ onMounted(async () => {
         // set initial practiceCount to unique count
         practiceCount: uniqueTipCount,
       } as Exercise
-    }) 
+    })
     }  catch (err) {
     console.error('Failed to fetch exercises:', err)
   } finally {
@@ -212,6 +212,8 @@ const goToTips = (ex: Exercise) => {
     query: {
       name: ex.title, // header label on TipsDisplay
       age: normalizedAge,
+      act_desc: ex.description,
+      image: ex.image,
     },
   })
 }
@@ -252,8 +254,8 @@ function changeAge(newAge: AgeGroup) {
 .hero::before {
   content: "";
   position: absolute;
-  inset: 0; 
-  background: rgba(36, 36, 36, 0.4); 
+  inset: 0;
+  background: rgba(36, 36, 36, 0.4);
   z-index: 0;
 }
 .hero > * {

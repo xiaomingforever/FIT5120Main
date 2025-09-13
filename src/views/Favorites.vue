@@ -67,9 +67,9 @@ const openRelated = (tipId: string | number) => {
         @keydown.enter="openTip(t)"
         @keydown.space.prevent="openTip(t)"
       >
-        <div class="tip-card-head">
+        <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.activityName }}</span>
-        </div>
+        </div> -->
         <h3 class="tip-title">{{ t.tip }}</h3>
         <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
         <ul v-if="t.skills && t.skills.length" class="skills">
@@ -114,8 +114,8 @@ const openRelated = (tipId: string | number) => {
 .hero::before {
   content: "";
   position: absolute;
-  inset: 0; 
-  background: rgba(23, 23, 23, 0.5); 
+  inset: 0;
+  background: rgba(23, 23, 23, 0.5);
   z-index: 0;
 }
 .hero > * {
