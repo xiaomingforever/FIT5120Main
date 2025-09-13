@@ -104,7 +104,7 @@ const imageSrc = computed(() => {
 }
 .meta .pill {
   text-transform: capitalize;
-  background: #f2f2f2;
+  background: #b7d4d6;
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
 }
