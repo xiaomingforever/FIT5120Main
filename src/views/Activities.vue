@@ -56,7 +56,7 @@ const loading = ref(true)
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
 const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
-  { label: 'All Ages', value: 'all' },
+  // { label: 'All Ages', value: 'all' },
   { label: '0-1', value: '0-1y' },
   { label: '1-3', value: '1-3y' },
   { label: '3-5', value: '3-5y' },
@@ -65,10 +65,13 @@ const AGE_TABS: Array<{ label: string; value: 'all' | AgeGroup }> = [
 // request to backend when loading
 onMounted(async () => {
   // read age group selected last time
-  const savedAge = localStorage.getItem('selectedAge') as ('all' | AgeGroup) | null
+  const savedAge = localStorage.getItem('selectedAge') as AgeGroup | null
   if (savedAge) {
     selectedAge.value = savedAge
-    prevAgeIndex.value = savedAge === 'all' ? -1 : AGE_ORDER.indexOf(savedAge as AgeGroup)
+    prevAgeIndex.value = AGE_ORDER.indexOf(savedAge as AgeGroup)
+  } else {
+    selectedAge.value = AGE_ORDER[0]
+    prevAgeIndex.value = 0
   }
   
   loading.value = true
@@ -77,7 +80,7 @@ onMounted(async () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        age_code: '1-3y', // default
+        age_code: selectedAge.value, // default
         gender: 'girl', // default
         daypart: 'morning', // default
       }),
@@ -172,14 +175,14 @@ const grouped = computed(() => {
 // })
 
 const visible = computed<Exercise[]>(() => {
-  if (selectedAge.value === 'all') {
-    // for 'all' show every activity and practiceCount is unique tip count across all ages
-    return exercises.value.map((ex) => ({
-      ...ex,
-      practiceCount: new Set((ex.tips || []).map((t: any) => String(t.tip_id))).size,
-      currentAgeGroup: 'all',
-    }))
-  }
+  // if (selectedAge.value === 'all') {
+  //   // for 'all' show every activity and practiceCount is unique tip count across all ages
+  //   return exercises.value.map((ex) => ({
+  //     ...ex,
+  //     practiceCount: new Set((ex.tips || []).map((t: any) => String(t.tip_id))).size,
+  //     currentAgeGroup: 'all',
+  //   }))
+  // }
   // display current age group
   const group = grouped.value.find((g) => g.label === selectedAge.value)
   if (!group) return []
@@ -222,8 +225,8 @@ const goToTips = (ex: Exercise) => {
 const prevAgeIndex = ref(0)
 const direction = ref<'left' | 'right'>('right')
 
-function changeAge(newAge: 'all' | AgeGroup) {
-  const newIndex = newAge === 'all' ? -1 : AGE_ORDER.indexOf(newAge as AgeGroup)
+function changeAge(newAge: AgeGroup) {
+  const newIndex = AGE_ORDER.indexOf(newAge as AgeGroup)
 
   direction.value = newIndex > prevAgeIndex.value ? 'right' : 'left'
   prevAgeIndex.value = newIndex
