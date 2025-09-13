@@ -225,29 +225,6 @@ function prevCard() {
       </div>
     </section>
 
-    <!-- age selector -->
-    <div class="selector-block" ref="selectorTop">
-      <h2 class="section-title">Choose an Age Group</h2>
-      <p class="selector-sub">
-        Activities are tailored to your child's developmental stage.
-      </p>
-      <div class="selector">
-        <div
-          v-for="age in AGE_TABS"
-          :key="age"
-          :class="['selector-card', { active: selectedAge === age }]"
-          @click="changeAge(age)"
-        >
-          {{ age.replace('y', '') }}
-        </div>
-      </div>
-      <!-- decorate shape -->
-      <span class="shape shape-yellow"></span>
-      <span class="shape shape-red"></span>
-      <span class="shape shape-green"></span>
-      <span class="shape shape-diamond"></span>
-    </div>
-
     <!-- gender selector -->
     <div class="selector-block">
       <h2 class="section-title">Select Gender</h2>
@@ -272,6 +249,29 @@ function prevCard() {
       <span class="shape shape-blue"></span>
       <span class="shape shape-orange"></span>
       <span class="shape shape-purple"></span>
+    </div>
+
+    <!-- age selector -->
+    <div class="selector-block" ref="selectorTop">
+      <h2 class="section-title">Choose an Age Group</h2>
+      <p class="selector-sub">
+        Activities are tailored to your child's developmental stage.
+      </p>
+      <div class="selector">
+        <div
+          v-for="age in AGE_TABS"
+          :key="age"
+          :class="['selector-card', { active: selectedAge === age }]"
+          @click="changeAge(age)"
+        >
+          {{ age.replace('y', '') }}
+        </div>
+      </div>
+      <!-- decorate shape -->
+      <span class="shape shape-yellow"></span>
+      <span class="shape shape-red"></span>
+      <span class="shape shape-green"></span>
+      <span class="shape shape-diamond"></span>
     </div>
 
     <!-- Exercise Section Intro -->
