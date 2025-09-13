@@ -316,9 +316,9 @@ const headerImage = computed(() => {
 </div>
 
         <div class="tip-content">
-        <div class="tip-card-head">
+        <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.act_name }}</span>
-        </div>
+        </div> -->
 
 
         <h3 class="tip-title">{{ t.tip }}</h3>
@@ -523,7 +523,7 @@ const headerImage = computed(() => {
 
 .tip-content { padding: 0.9rem 1rem 1.1rem; }
 
-.activity-chip {
+/* .activity-chip {
   font-size: 12px;
   font-weight: 600;
   color: #065f46;
@@ -531,7 +531,7 @@ const headerImage = computed(() => {
   border: 1px solid #a7f3d0;
   border-radius: 999px;
   padding: 2px 10px;
-}
+} */
 .tip-title {
   font-size: 18px;
   margin: 8px 0 6px;
@@ -561,7 +561,7 @@ const headerImage = computed(() => {
 }
 .skill {
   font-size: 12px;
-  background: #f3f4f6;
+  background: #b7d4d6;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
