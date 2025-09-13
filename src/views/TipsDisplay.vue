@@ -41,7 +41,7 @@ const router = useRouter()
 // passed via route
 const activityId = computed(() => String(route.params.activityId ?? ''))
 const activityName = ref<string>(String(route.query.name ?? ''))
-const activityImage = ref<string>(String(route.query.image ?? ''))
+const tipsImage = ref<string>(String(route.query.image ?? ''))
 const activityDesc = ref<string>(String(route.query.act_desc ?? ''))
 const selectedAge = String(route.query.age ?? (localStorage.getItem('age_code') || '1-3y'))
 const gender = String(localStorage.getItem('gender') || 'girl')
@@ -111,9 +111,9 @@ const fetchTipsForActivity = async (actId: string) => {
         } else {
           // merge skills
           const existing = tipMap.get(id)!
-          if (t.skill_code && !existing.skills.some((s) => s.code === t.skill_code)) {
-            existing.skills.push({ code: t.skill_code })
-          }
+  if ((!existing.skills || existing.skills.length === 0) && t.skill_code) {
+    existing.skills = [{ code: t.skill_code }]
+  }
         }
       }
 
@@ -122,7 +122,27 @@ const fetchTipsForActivity = async (actId: string) => {
   }
   return null
 }
-
+// CARD IMAGE LOGIC
+const CARD_IMAGES = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+// return image url for a tip card based on its activity name
+const tipImage = (actName: string): string => {
+  if (!actName) return ''
+  const target = (actName + '2').toLowerCase().replace(/[^a-z0-9]/g, '')
+  for (const [path, url] of Object.entries(CARD_IMAGES)) {
+    const file = path.split('/').pop() || ''
+    const base = file.replace(/\.[^.]+$/, '')
+    const normalized = base.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (normalized === target) return url
+  }
+  // fallback
+  const kebab = actName.trim().toLowerCase().replace(/\s+/g, '-') + '2.'
+  const hit = Object.keys(CARD_IMAGES).find(k => k.toLowerCase().includes('/' + kebab))
+  return hit ? CARD_IMAGES[hit] : ''
+}
 // a single tip with description + skills using the /dev endpoint
 // const hydrateTip = async (t: TipLite): Promise<TipFull> => {
 //   try {
@@ -286,9 +306,20 @@ const headerImage = computed(() => {
         >
           <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
         </button>
+
+<div class="tip-media" v-if="tipImage(t.act_name)">
+  <img
+    :src="tipImage(t.act_name)"
+    :alt="`${t.act_name} illustration`"
+    loading="lazy"
+  />
+</div>
+
+        <div class="tip-content">
         <div class="tip-card-head">
           <span class="activity-chip">{{ t.act_name }}</span>
         </div>
+
 
         <h3 class="tip-title">{{ t.tip }}</h3>
         <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
@@ -296,6 +327,7 @@ const headerImage = computed(() => {
         <ul v-if="t.skills && t.skills.length" class="skills">
           <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
         </ul>
+        </div>
       </article>
     </section>
     <!-- tip modal -->
@@ -457,7 +489,8 @@ const headerImage = computed(() => {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
-  padding: 14px;
+  padding: 0px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -474,6 +507,22 @@ const headerImage = computed(() => {
   display: flex;
   justify-content: flex-end;
 }
+.tip-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #f6f6f6;
+}
+.tip-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.tip-content { padding: 0.9rem 1rem 1.1rem; }
+
 .activity-chip {
   font-size: 12px;
   font-weight: 600;
