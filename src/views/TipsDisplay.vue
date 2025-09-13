@@ -41,6 +41,8 @@ const router = useRouter()
 // passed via route
 const activityId = computed(() => String(route.params.activityId ?? ''))
 const activityName = ref<string>(String(route.query.name ?? ''))
+const tipsImage = ref<string>(String(route.query.image ?? ''))
+const activityDesc = ref<string>(String(route.query.act_desc ?? ''))
 const selectedAge = String(route.query.age ?? (localStorage.getItem('age_code') || '1-3y'))
 const gender = String(localStorage.getItem('gender') || 'girl')
 const age = ref<string>(String(route.query.age ?? ''))
@@ -50,6 +52,12 @@ const period = ref<string>(String(route.query.period ?? ''))
 const loading = ref(true)
 const tips = ref<TipFull[]>([])
 const notFound = ref(false)
+
+// header data
+const tipCount = computed(() => tips.value.length)
+const resolvedDesc = computed(
+  () => activityDesc.value || (tips.value.find(t => t.act_desc)?.act_desc ?? '')
+)
 
 /**
  * - /option returns activities + (tip_id, tip, age_code) lists
@@ -103,9 +111,9 @@ const fetchTipsForActivity = async (actId: string) => {
         } else {
           // merge skills
           const existing = tipMap.get(id)!
-          if (t.skill_code && !existing.skills.some((s) => s.code === t.skill_code)) {
-            existing.skills.push({ code: t.skill_code })
-          }
+  if ((!existing.skills || existing.skills.length === 0) && t.skill_code) {
+    existing.skills = [{ code: t.skill_code }]
+  }
         }
       }
 
@@ -114,7 +122,27 @@ const fetchTipsForActivity = async (actId: string) => {
   }
   return null
 }
-
+// CARD IMAGE LOGIC
+const CARD_IMAGES = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+// return image url for a tip card based on its activity name
+const tipImage = (actName: string): string => {
+  if (!actName) return ''
+  const target = (actName + '2').toLowerCase().replace(/[^a-z0-9]/g, '')
+  for (const [path, url] of Object.entries(CARD_IMAGES)) {
+    const file = path.split('/').pop() || ''
+    const base = file.replace(/\.[^.]+$/, '')
+    const normalized = base.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (normalized === target) return url
+  }
+  // fallback
+  const kebab = actName.trim().toLowerCase().replace(/\s+/g, '-') + '2.'
+  const hit = Object.keys(CARD_IMAGES).find(k => k.toLowerCase().includes('/' + kebab))
+  return hit ? CARD_IMAGES[hit] : ''
+}
 // a single tip with description + skills using the /dev endpoint
 // const hydrateTip = async (t: TipLite): Promise<TipFull> => {
 //   try {
@@ -188,22 +216,73 @@ const openRelated = (tipId: string | number) => {
   const found = tips.value.find((t: any) => String(t.tip_id) === String(tipId))
   if (found) selectedTip.value = found
 }
+
+// HEADER IMAGE LOGIC
+const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+
+// normalize activity names to file bases
+const FILENAME_ALIASES: Record<string, string> = {
+  'anytime anywhere': 'anytime-anywhere',
+  'getting dressed': 'getting-dressed',
+  'diaper change': 'diaper-change',
+  'cleaning up': 'cleaning-up',
+  'bath time': 'bathtime',
+  'meal time': 'mealtime',
+  'play time': 'playtime',
+}
+const toFileBase = (s: string) =>
+  FILENAME_ALIASES[s.trim().toLowerCase()] ?? s.trim().toLowerCase().replace(/\s+/g, '-')
+
+// compute the URL for the header image
+const headerImage = computed(() => {
+  const base = toFileBase(activityName.value || '')
+  if (!base) return ''
+
+  const candidates = [
+    `../assets/Tips/${base}.png`,
+    `../assets/Tips/${base}.jpg`,
+    `../assets/Tips/${base}.jpeg`,
+    `../assets/Tips/${base}.webp`,
+    `../assets/Tips/${base}.svg`,
+  ]
+  for (const k of candidates) {
+    if (TIP_IMAGES[k]) return TIP_IMAGES[k]
+  }
+  // last resort: any image that contains the base
+  // const hit = Object.keys(TIP_IMAGES).find(k => k.toLowerCase().includes(`/${base}.`))
+  // return hit ? TIP_IMAGES[hit] : ''
+})
+
+
 </script>
 
 <template>
   <div class="tips-display">
     <section class="hero" role="banner">
-      <button class="btn-back" @click="goBack" aria-label="Back to Activities">
-        <span>Back</span>
-      </button>
+  <button class="btn-back" @click="goBack" aria-label="Back to Activities">
+    <span>Back</span>
+  </button>
 
-      <div class="hero-inner">
-        <h1 class="hero-title">{{ (activityName || 'Activity').toUpperCase() }}</h1>
-        <p class="hero-subtitle">
-          All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
-        </p>
+   <div class="hero-inner hero-split">
+    <!-- LEFT: text -->
+    <div class="hero-copy">
+      <h1 class="hero-title">{{ activityName || 'Activity' }}</h1>
+      <p v-if="resolvedDesc" class="hero-desc">{{ resolvedDesc }}</p>
+      <div class="hero-meta">
+        <span class="pill tips-pill">{{ tipCount }} Tips</span>
       </div>
-    </section>
+    </div>
+
+    <!-- RIGHT: image -->
+    <div v-if="headerImage" class="hero-media" aria-hidden="true">
+      <img class="hero-image" :src="headerImage" :alt="`${activityName} illustration`" />
+    </div>
+  </div>
+</section>
 
     <section v-if="loading" class="state">Loading tips...</section>
     <section v-else-if="notFound" class="state">No tips found for this activity.</section>
@@ -227,9 +306,20 @@ const openRelated = (tipId: string | number) => {
         >
           <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
         </button>
-        <div class="tip-card-head">
+
+<div class="tip-media" v-if="tipImage(t.act_name)">
+  <img
+    :src="tipImage(t.act_name)"
+    :alt="`${t.act_name} illustration`"
+    loading="lazy"
+  />
+</div>
+
+        <div class="tip-content">
+        <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.act_name }}</span>
-        </div>
+        </div> -->
+
 
         <h3 class="tip-title">{{ t.tip }}</h3>
         <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
@@ -237,6 +327,7 @@ const openRelated = (tipId: string | number) => {
         <ul v-if="t.skills && t.skills.length" class="skills">
           <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
         </ul>
+        </div>
       </article>
     </section>
     <!-- tip modal -->
@@ -258,7 +349,9 @@ const openRelated = (tipId: string | number) => {
 
 <style scoped>
 .tips-display {
-  padding: 16px 20px 28px;
+  padding: 1rem;
+  width: 900px;
+  margin: 0 auto;
 }
 /* hero section */
 .hero {
@@ -312,18 +405,58 @@ const openRelated = (tipId: string | number) => {
   text-align: center;
 }
 
-.hero-title {
-  margin: 0;
-  font-size: clamp(1.8rem, 1.2rem + 2vw, 2.6rem);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.hero-split {
+  display: grid;
+  grid-template-columns: 1fr minmax(140px, 240px);
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.hero-subtitle {
-  margin: 8px 0 0;
-  color: #4b5563;
-  font-size: 0.95rem;
+.hero-copy { text-align: left; }
+
+.hero-title {
+  margin: 0 0 8px;
+  line-height: 1.15;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 44px);
 }
+
+.hero-desc {
+  margin: 4px 0 14px;
+  color: #2f2f2f;
+  max-width: 48ch;
+  white-space: pre-line;
+  font-size: 20px;
+}
+
+.hero-media { justify-self: end; }
+
+.hero-image {
+  width: clamp(120px, 18vw, 200px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid #efe8b5;
+  background: #f7f4d6;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .hero-split { grid-template-columns: 1fr; }
+  .hero-media { justify-self: start; } /* image will sit under text on small screens */
+}
+
 .back {
   border: 0;
   background: transparent;
@@ -356,7 +489,8 @@ const openRelated = (tipId: string | number) => {
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
-  padding: 14px;
+  padding: 0px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   cursor: pointer;
@@ -373,7 +507,23 @@ const openRelated = (tipId: string | number) => {
   display: flex;
   justify-content: flex-end;
 }
-.activity-chip {
+.tip-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #f6f6f6;
+}
+.tip-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.tip-content { padding: 0.9rem 1rem 1.1rem; }
+
+/* .activity-chip {
   font-size: 12px;
   font-weight: 600;
   color: #065f46;
@@ -381,7 +531,7 @@ const openRelated = (tipId: string | number) => {
   border: 1px solid #a7f3d0;
   border-radius: 999px;
   padding: 2px 10px;
-}
+} */
 .tip-title {
   font-size: 18px;
   margin: 8px 0 6px;
@@ -411,7 +561,7 @@ const openRelated = (tipId: string | number) => {
 }
 .skill {
   font-size: 12px;
-  background: #f3f4f6;
+  background: #b7d4d6;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
