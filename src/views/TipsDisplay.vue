@@ -41,6 +41,8 @@ const router = useRouter()
 // passed via route
 const activityId = computed(() => String(route.params.activityId ?? ''))
 const activityName = ref<string>(String(route.query.name ?? ''))
+const activityImage = ref<string>(String(route.query.image ?? ''))
+const activityDesc = ref<string>(String(route.query.act_desc ?? ''))
 const selectedAge = String(route.query.age ?? (localStorage.getItem('age_code') || '1-3y'))
 const gender = String(localStorage.getItem('gender') || 'girl')
 const age = ref<string>(String(route.query.age ?? ''))
@@ -50,6 +52,12 @@ const period = ref<string>(String(route.query.period ?? ''))
 const loading = ref(true)
 const tips = ref<TipFull[]>([])
 const notFound = ref(false)
+
+// header data
+const tipCount = computed(() => tips.value.length)
+const resolvedDesc = computed(
+  () => activityDesc.value || (tips.value.find(t => t.act_desc)?.act_desc ?? '')
+)
 
 /**
  * - /option returns activities + (tip_id, tip, age_code) lists
@@ -188,22 +196,73 @@ const openRelated = (tipId: string | number) => {
   const found = tips.value.find((t: any) => String(t.tip_id) === String(tipId))
   if (found) selectedTip.value = found
 }
+
+// HEADER IMAGE LOGIC
+const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+
+// normalize activity names to file bases
+const FILENAME_ALIASES: Record<string, string> = {
+  'anytime anywhere': 'anytime-anywhere',
+  'getting dressed': 'getting-dressed',
+  'diaper change': 'diaper-change',
+  'cleaning up': 'cleaning-up',
+  'bath time': 'bathtime',
+  'meal time': 'mealtime',
+  'play time': 'playtime',
+}
+const toFileBase = (s: string) =>
+  FILENAME_ALIASES[s.trim().toLowerCase()] ?? s.trim().toLowerCase().replace(/\s+/g, '-')
+
+// compute the URL for the header image
+const headerImage = computed(() => {
+  const base = toFileBase(activityName.value || '')
+  if (!base) return ''
+
+  const candidates = [
+    `../assets/Tips/${base}.png`,
+    `../assets/Tips/${base}.jpg`,
+    `../assets/Tips/${base}.jpeg`,
+    `../assets/Tips/${base}.webp`,
+    `../assets/Tips/${base}.svg`,
+  ]
+  for (const k of candidates) {
+    if (TIP_IMAGES[k]) return TIP_IMAGES[k]
+  }
+  // last resort: any image that contains the base
+  // const hit = Object.keys(TIP_IMAGES).find(k => k.toLowerCase().includes(`/${base}.`))
+  // return hit ? TIP_IMAGES[hit] : ''
+})
+
+
 </script>
 
 <template>
   <div class="tips-display">
     <section class="hero" role="banner">
-      <button class="btn-back" @click="goBack" aria-label="Back to Activities">
-        <span>Back</span>
-      </button>
+  <button class="btn-back" @click="goBack" aria-label="Back to Activities">
+    <span>Back</span>
+  </button>
 
-      <div class="hero-inner">
-        <h1 class="hero-title">{{ (activityName || 'Activity').toUpperCase() }}</h1>
-        <p class="hero-subtitle">
-          All tips for <span class="chip">{{ activityName || 'Activity' }}</span>
-        </p>
+   <div class="hero-inner hero-split">
+    <!-- LEFT: text -->
+    <div class="hero-copy">
+      <h1 class="hero-title">{{ activityName || 'Activity' }}</h1>
+      <p v-if="resolvedDesc" class="hero-desc">{{ resolvedDesc }}</p>
+      <div class="hero-meta">
+        <span class="pill tips-pill">{{ tipCount }} Tips</span>
       </div>
-    </section>
+    </div>
+
+    <!-- RIGHT: image -->
+    <div v-if="headerImage" class="hero-media" aria-hidden="true">
+      <img class="hero-image" :src="headerImage" :alt="`${activityName} illustration`" />
+    </div>
+  </div>
+</section>
 
     <section v-if="loading" class="state">Loading tips...</section>
     <section v-else-if="notFound" class="state">No tips found for this activity.</section>
@@ -258,7 +317,9 @@ const openRelated = (tipId: string | number) => {
 
 <style scoped>
 .tips-display {
-  padding: 16px 20px 28px;
+  padding: 1rem;
+  width: 900px;
+  margin: 0 auto;
 }
 /* hero section */
 .hero {
@@ -312,18 +373,58 @@ const openRelated = (tipId: string | number) => {
   text-align: center;
 }
 
-.hero-title {
-  margin: 0;
-  font-size: clamp(1.8rem, 1.2rem + 2vw, 2.6rem);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+.hero-split {
+  display: grid;
+  grid-template-columns: 1fr minmax(140px, 240px);
+  align-items: center;
+  gap: clamp(16px, 3vw, 32px);
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
-.hero-subtitle {
-  margin: 8px 0 0;
-  color: #4b5563;
-  font-size: 0.95rem;
+.hero-copy { text-align: left; }
+
+.hero-title {
+  margin: 0 0 8px;
+  line-height: 1.15;
+  font-weight: 800;
+  font-size: clamp(28px, 5vw, 44px);
 }
+
+.hero-desc {
+  margin: 4px 0 14px;
+  color: #2f2f2f;
+  max-width: 48ch;
+  white-space: pre-line;
+  font-size: 20px;
+}
+
+.hero-media { justify-self: end; }
+
+.hero-image {
+  width: clamp(120px, 18vw, 200px);
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid #efe8b5;
+  background: #f7f4d6;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .hero-split { grid-template-columns: 1fr; }
+  .hero-media { justify-self: start; } /* image will sit under text on small screens */
+}
+
 .back {
   border: 0;
   background: transparent;
