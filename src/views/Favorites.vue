@@ -29,6 +29,28 @@ const openRelated = (tipId: string | number) => {
   const found = favorites.value.find((t) => String(t.tip_id) === String(tipId))
   if (found) selectedTip.value = found
 }
+
+const FAV_IMAGES = import.meta.glob(
+  '../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}',
+  { eager: true, import: 'default', query: '?url' }
+) as Record<string, string>
+
+const favImage = (actName?: string): string => {
+  if (!actName) return ''
+  const variants = [
+    actName + '2',
+    actName.replace(/\s+/g, '-') + '2',
+    actName.replace(/\s+/g, '') + '2',
+  ].map(v => v.toLowerCase().replace(/[^a-z0-9]/g, ''))
+
+  for (const [path, url] of Object.entries(FAV_IMAGES)) {
+    const file = path.split('/').pop() || ''
+    const stem = file.replace(/\.[^.]+$/, '')
+    const normalized = stem.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (variants.includes(normalized)) return url
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -67,14 +89,23 @@ const openRelated = (tipId: string | number) => {
         @keydown.enter="openTip(t)"
         @keydown.space.prevent="openTip(t)"
       >
+      <div class="fav-media" v-if="favImage(t.activityName || (t as any).act_name)">
+        <img
+          :src="favImage(t.activityName || (t as any).act_name)"
+          :alt="`${t.activityName || (t as any).act_name} illustration`"
+          loading="lazy"
+        />
+      </div>
         <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.activityName }}</span>
         </div> -->
-        <h3 class="tip-title">{{ t.tip }}</h3>
-        <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
-        <ul v-if="t.skills && t.skills.length" class="skills">
-          <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
-        </ul>
+        <div class="fav-content">
+          <h3 class="tip-title">{{ t.tip }}</h3>
+          <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
+          <ul v-if="t.skills && t.skills.length" class="skills">
+            <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
+          </ul>
+        </div>
       </article>
     </section>
 
@@ -177,6 +208,23 @@ const openRelated = (tipId: string | number) => {
   width: 160px;
   justify-self: end;
 }
+ /* Image for fav tips */
+.fav-media {
+  position: relative;
+  width: 100%;
+  height: 200px;  /* tweak to change the height of the image  */
+  background: #f7f7f7;
+}
+.fav-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+.fav-content {
+  padding: 12px 16px 16px;
+}
 
 /* LIST GRID */
 .grid {
@@ -188,8 +236,11 @@ const openRelated = (tipId: string | number) => {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
-  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
   cursor: pointer;
   transition:
     transform 0.12s ease,
