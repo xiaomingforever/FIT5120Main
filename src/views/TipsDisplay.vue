@@ -573,8 +573,8 @@ const headerImage = computed(() => {
 }
 .fav-btn {
   position: absolute;
-  top: 12px;
-  left: 10px;
+  bottom: 12px;
+  right: 10px;
   z-index: 1;
   border: 0;
   background: transparent;
