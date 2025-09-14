@@ -26,6 +26,7 @@ export default createRouter({
           name: 'TipsDisplay',
           component: TipsDisplay,
           props: true,
+          meta: { parent: 'Activities' } 
         },
         {
           path: 'activities/:activityId/congrats',
