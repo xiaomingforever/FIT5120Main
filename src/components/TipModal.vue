@@ -5,6 +5,9 @@ import { useFavoritesStore } from '@/stores/favorites'
 import heartEmpty from '@/assets/Font icons/favorite_empty.png'
 import heartRed from '@/assets/Font icons/favorite_red.png'
 import { useProgressStore } from '@/stores/progress'
+import TipsCongrats from '@/views/TipsCongrats.vue'  //congrats modal
+
+const showCongrats = ref(false)
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
@@ -70,7 +73,7 @@ function done() {
     source: model.value.source || '',
   })
 
-  router.push({ name: 'TipsCongrats' })
+  showCongrats.value = true //show the congrats modal
 }
 
 const extractHttpsLink = (text?: string): string | null => {
@@ -299,6 +302,12 @@ const related = computed(() => {
       </div>
     </div>
   </teleport>
+  <TipsCongrats
+   :open="showCongrats"
+   :activity-name="activityName"
+   :activity-id="activityId"
+   @close="showCongrats = false"
+  />
 </template>
 
 <style scoped>
