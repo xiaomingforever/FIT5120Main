@@ -11,6 +11,7 @@ import HeadBar from './HeadBar.vue';
       <!-- <AppSidebar /> -->
       <main class="main">
         <!-- Child pages render  -->
+         <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
         <RouterView />
       </main>
     </div>
@@ -20,6 +21,10 @@ import HeadBar from './HeadBar.vue';
 <style scoped>
 .shell {
   margin-top: 80px;
+}
+.main {
+  font-family: 'Nunito', sans-serif;
+  background: #fbf6ef;
 }
 /* .page {
   min-height: 100vh;

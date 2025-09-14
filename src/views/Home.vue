@@ -86,12 +86,12 @@
     <!-- What BrainBuilder does -->
     <section class="features">
       <h2 class="section-title">What BrainBuilder does</h2>
-      <p>Turn science into simply daily actions.</p>
+      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
       <div class="feature-cards">
         <div class="card">
           <img src="/public/today-pick.png" alt="today-pick">
           <h3>Today's Picks</h3>
-          <p>Discover fun activities to boost your child's brain development.</p>
+          <p>Discover fun activities to boost child's brain development.</p>
           <!-- <button>Explore</button> -->
           <router-link to="/today" class="card-btn">Explore</router-link>
         </div>
@@ -143,7 +143,7 @@
     <section class="cta">
       <hr>
       <h2>Ready to begin?</h2>
-      <p>Turn science into simply daily actions.</p>
+      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
       <!-- <button class="start-btn">Start Brain Builder</button> -->
       <router-link to="/today" class="start-btn">Start Brain Builder</router-link>
       <hr>
@@ -165,6 +165,7 @@
       <p>© 2025 BrainBuilder. A student-led project for social good.</p>
     </footer>
   </div>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <script setup lang="ts">
@@ -199,7 +200,7 @@
 
 <style scoped>
 .home-page {
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
   line-height: 1.6;
   background-color: #fbf6ef;
@@ -232,7 +233,7 @@
 }
 .hero p {
   margin-bottom: 1.5rem;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 500;
 }
 .hero .btn {
@@ -244,6 +245,7 @@
   font-weight: bold;
   cursor: pointer;
   text-decoration: none;
+  font-size: 20px;
 }
 .hero .btn:hover {
   background: #0d9488;
@@ -267,8 +269,9 @@
   background-color: #fbf6ef;
 }
 .two-col a {
-  color:#0d9488;
+  color:#0f766e;
   font-weight: 600;
+  text-decoration: none;
 }
 .two-col a:hover {
   color:#14b8a6;
@@ -328,7 +331,7 @@
   margin: 0 auto 42px auto;
   text-align: center;
   color: #6b6b6b;
-  font-size: 20px;
+  font-size: 22px;
   padding-top: 10px;
 }
 
@@ -341,7 +344,7 @@
 }
 
 .why-text {
-  font-size: 22px;
+  font-size: 24px;
   color: #4a4a4a;
   line-height: 1.7;
   max-width: 420px;
@@ -392,6 +395,7 @@
   color: #0f766e;
   text-decoration: none;
   font-weight: 600;
+  font-size: 24px;
 }
 .research-link:hover {
   color: #14b8a6;
@@ -561,6 +565,7 @@
   font-weight: bold;
   cursor: pointer;
   text-decoration: none;
+  font-size: 24px;
 }
 .cta .start-btn:hover {
   background: #ea580c;

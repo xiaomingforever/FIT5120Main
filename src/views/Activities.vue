@@ -1,47 +1,3 @@
-<template>
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>Activities</h1>
-      <p>
-        Parents can view tips for different types of activities tailored to each age group,
-        helping to promote their child's overall brain development.
-      </p>
-    </div>
-  </section>
-  <div class="activities">
-    <!-- Age selector bar -->
-    <nav class="agebar" role="tablist" aria-label="Filter by age group">
-      <button
-        v-for="t in AGE_TABS"
-        :key="t.value"
-        class="age-tab"
-        :class="{ active: selectedAge === t.value }"
-        role="tab"
-        :aria-selected="selectedAge === t.value"
-        @click="changeAge(t.value)"
-      >
-        {{ t.label }}
-      </button>
-    </nav>
-
-    <h1 class="page-title">Tips Collection</h1>
-
-    <div v-if="loading" class="loading">Loading...</div>
-
-    <transition :name="direction === 'right' ? 'slide-left' : 'slide-right'" mode="out-in">
-      <section class="grid" :key="selectedAge">
-        <ExerciseCard
-          v-for="ex in visible"
-          :key="ex.id"
-          :exercise="ex"
-          @open="goToTips"
-        />
-      </section>
-    </transition>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -52,6 +8,9 @@ const router = useRouter()
 const exercises = ref<Exercise[]>([]) // API data from back-end
 const selectedAge = ref<AgeGroup>('0-1y')
 const loading = ref(true)
+
+const currentAge = computed(() => selectedAge.value)
+const gender = computed(() => localStorage.getItem('gender') || 'girl')
 
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
@@ -65,7 +24,7 @@ const AGE_TABS: Array<{ label: string; value: '0-1y' | AgeGroup }> = [
 // request to backend when loading
 onMounted(async () => {
   // read age group selected last time
-  const savedAge = localStorage.getItem('selectedAge') as AgeGroup | null
+  const savedAge = localStorage.getItem('age_code') as AgeGroup | null
   if (savedAge) {
     selectedAge.value = savedAge
     prevAgeIndex.value = AGE_ORDER.indexOf(savedAge as AgeGroup)
@@ -233,9 +192,72 @@ function changeAge(newAge: AgeGroup) {
   prevAgeIndex.value = newIndex
 
   selectedAge.value = newAge
-  localStorage.setItem('selectedAge', newAge)
+  localStorage.setItem('age_code', newAge)
 }
 </script>
+
+<template>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Activities</h1>
+      <p>
+        Parents can view tips for different types of activities tailored to each age group,
+        helping to promote their child's overall brain development.
+      </p>
+    </div>
+  </section>
+
+  <!-- HERO CARD -->
+  <section class="act-hero">
+    <div class="act-hero_inner">
+      <div class="act-hero_copy">
+        <h1 class="act-hero_title">Explore Activities</h1>
+        <p class="act-hero_sub">
+          Activities tailored for different age groups
+          to boost learning and fun.
+        </p>
+        <span class="act-hero_pill">
+          {{ gender }} · {{ currentAge }}
+        </span>
+      </div>
+      <img class="act-hero_img" src="/src/assets/Activities/OutdoorPlay/exercise-headline.png" alt="Activities illustration" />
+    </div>
+  </section>
+
+  <div class="activities">
+    <!-- Age selector bar -->
+    <nav class="agebar" role="tablist" aria-label="Filter by age group">
+      <button
+        v-for="t in AGE_TABS"
+        :key="t.value"
+        class="age-tab"
+        :class="{ active: selectedAge === t.value }"
+        role="tab"
+        :aria-selected="selectedAge === t.value"
+        @click="changeAge(t.value)"
+      >
+        {{ t.label }}
+      </button>
+    </nav>
+
+    <h1 class="page-title">Tips Collection</h1>
+
+    <div v-if="loading" class="loading">Loading...</div>
+
+    <transition :name="direction === 'right' ? 'slide-left' : 'slide-right'" mode="out-in">
+      <section class="grid" :key="selectedAge">
+        <ExerciseCard
+          v-for="ex in visible"
+          :key="ex.id"
+          :exercise="ex"
+          @open="goToTips"
+        />
+      </section>
+    </transition>
+  </div>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+</template>
 
 <style scoped>
 .hero {
@@ -247,7 +269,7 @@ function changeAge(newAge: AgeGroup) {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
 }
 .hero::before {
@@ -275,6 +297,44 @@ function changeAge(newAge: AgeGroup) {
   font-size: 24px;
   font-weight: 500;
 }
+.act-hero {
+  margin: 20px auto;
+  width: 900px;
+}
+.act-hero_inner {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 24px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 16px;
+}
+.act-hero_title {
+  font-size: clamp(1.6rem, 1.2rem + 1vw, 2.2rem);
+  margin: 0;
+}
+.act-hero_sub {
+  margin: 6px 0 10px;
+  color: #6b7280;
+  font-size: clamp(1.2rem, 0.5rem + 1vw, 2rem);
+}
+.act-hero_pill {
+  display: inline-block;
+  background: #f0f4ff;
+  border: 1px solid #dbeafe;
+  color: #1e3a8a;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+}
+.act-hero_img {
+  width: 160px;
+  justify-self: end;
+}
+
 .activities {
   padding: 1rem;
   width: 900px;
@@ -312,6 +372,7 @@ function changeAge(newAge: AgeGroup) {
   letter-spacing: 0.2px;
   opacity: 0.9;
   cursor: pointer;
+  font-size: 20px;
 }
 
 .age-tab.active {

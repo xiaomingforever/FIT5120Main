@@ -61,6 +61,7 @@
 
 <template>
   <header class="app-header">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
     <div class="header-inner">
       <div class="brand">
         <router-link to="/Home" aria-label="Go to Today">
@@ -112,6 +113,7 @@
   justify-content: space-between;
   gap: 16px;
   z-index: 10;
+  font-family: 'Quicksand', sans-serif;
 }
 .brand {
   display: flex;

@@ -56,7 +56,7 @@ const notFound = ref(false)
 // header data
 const tipCount = computed(() => tips.value.length)
 const resolvedDesc = computed(
-  () => activityDesc.value || (tips.value.find(t => t.act_desc)?.act_desc ?? '')
+  () => activityDesc.value || (tips.value.find((t) => t.act_desc)?.act_desc ?? ''),
 )
 
 /**
@@ -111,9 +111,9 @@ const fetchTipsForActivity = async (actId: string) => {
         } else {
           // merge skills
           const existing = tipMap.get(id)!
-  if ((!existing.skills || existing.skills.length === 0) && t.skill_code) {
-    existing.skills = [{ code: t.skill_code }]
-  }
+          if ((!existing.skills || existing.skills.length === 0) && t.skill_code) {
+            existing.skills = [{ code: t.skill_code }]
+          }
         }
       }
 
@@ -140,7 +140,7 @@ const tipImage = (actName: string): string => {
   }
   // fallback
   const kebab = actName.trim().toLowerCase().replace(/\s+/g, '-') + '2.'
-  const hit = Object.keys(CARD_IMAGES).find(k => k.toLowerCase().includes('/' + kebab))
+  const hit = Object.keys(CARD_IMAGES).find((k) => k.toLowerCase().includes('/' + kebab))
   return hit ? CARD_IMAGES[hit] : ''
 }
 // a single tip with description + skills using the /dev endpoint
@@ -256,33 +256,31 @@ const headerImage = computed(() => {
   // const hit = Object.keys(TIP_IMAGES).find(k => k.toLowerCase().includes(`/${base}.`))
   // return hit ? TIP_IMAGES[hit] : ''
 })
-
-
 </script>
 
 <template>
   <div class="tips-display">
     <section class="hero" role="banner">
-  <button class="btn-back" @click="goBack" aria-label="Back to Activities">
-    <span>Back</span>
-  </button>
+      <button class="btn-back" @click="goBack" aria-label="Back to Activities">
+        <span>Back</span>
+      </button>
 
-   <div class="hero-inner hero-split">
-    <!-- LEFT: text -->
-    <div class="hero-copy">
-      <h1 class="hero-title">{{ activityName || 'Activity' }}</h1>
-      <p v-if="resolvedDesc" class="hero-desc">{{ resolvedDesc }}</p>
-      <div class="hero-meta">
-        <span class="pill tips-pill">{{ tipCount }} Tips</span>
+      <div class="hero-inner hero-split">
+        <!-- LEFT: text -->
+        <div class="hero-copy">
+          <h1 class="hero-title">{{ activityName || 'Activity' }}</h1>
+          <p v-if="resolvedDesc" class="hero-desc">{{ resolvedDesc }}</p>
+          <div class="hero-meta">
+            <span class="pill tips-pill">{{ tipCount }} Tips</span>
+          </div>
+        </div>
+
+        <!-- RIGHT: image -->
+        <div v-if="headerImage" class="hero-media" aria-hidden="true">
+          <img class="hero-image" :src="headerImage" :alt="`${activityName} illustration`" />
+        </div>
       </div>
-    </div>
-
-    <!-- RIGHT: image -->
-    <div v-if="headerImage" class="hero-media" aria-hidden="true">
-      <img class="hero-image" :src="headerImage" :alt="`${activityName} illustration`" />
-    </div>
-  </div>
-</section>
+    </section>
 
     <section v-if="loading" class="state">Loading tips...</section>
     <section v-else-if="notFound" class="state">No tips found for this activity.</section>
@@ -307,26 +305,21 @@ const headerImage = computed(() => {
           <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
         </button>
 
-<div class="tip-media" v-if="tipImage(t.act_name)">
-  <img
-    :src="tipImage(t.act_name)"
-    :alt="`${t.act_name} illustration`"
-    loading="lazy"
-  />
-</div>
+        <div class="tip-media" v-if="tipImage(t.act_name)">
+          <img :src="tipImage(t.act_name)" :alt="`${t.act_name} illustration`" loading="lazy" />
+        </div>
 
         <div class="tip-content">
-        <!-- <div class="tip-card-head">
+          <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.act_name }}</span>
         </div> -->
 
+          <h3 class="tip-title">{{ t.tip }}</h3>
+          <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
 
-        <h3 class="tip-title">{{ t.tip }}</h3>
-        <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
-
-        <ul v-if="t.skills && t.skills.length" class="skills">
-          <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
-        </ul>
+          <ul v-if="t.skills && t.skills.length" class="skills">
+            <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
+          </ul>
         </div>
       </article>
     </section>
@@ -353,6 +346,7 @@ const headerImage = computed(() => {
   width: 900px;
   margin: 0 auto;
 }
+
 /* hero section */
 .hero {
   position: relative;
@@ -414,7 +408,9 @@ const headerImage = computed(() => {
   margin: 0 auto;
 }
 
-.hero-copy { text-align: left; }
+.hero-copy {
+  text-align: left;
+}
 
 .hero-title {
   margin: 0 0 8px;
@@ -431,7 +427,9 @@ const headerImage = computed(() => {
   font-size: 20px;
 }
 
-.hero-media { justify-self: end; }
+.hero-media {
+  justify-self: end;
+}
 
 .hero-image {
   width: clamp(120px, 18vw, 200px);
@@ -448,13 +446,20 @@ const headerImage = computed(() => {
   line-height: 1;
   border: 1px solid #efe8b5;
   background: #f7f4d6;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
   color: #333;
 }
 
 @media (max-width: 768px) {
-  .hero-split { grid-template-columns: 1fr; }
-  .hero-media { justify-self: start; } /* image will sit under text on small screens */
+  .hero-split {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-media {
+    justify-self: start;
+  }
+
+  /* image will sit under text on small screens */
 }
 
 .back {
@@ -465,25 +470,30 @@ const headerImage = computed(() => {
   color: #4b5563;
   margin-bottom: 6px;
 }
+
 .title {
   font-size: clamp(1.4rem, 1.1rem + 1vw, 2rem);
   margin: 0;
 }
+
 .subtitle {
   margin: 6px 0 0;
   color: #6b7280;
 }
+
 .chip {
   background: #eef2ff;
   border-radius: 8px;
   padding: 2px 8px;
 }
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 14px;
   align-items: stretch;
 }
+
 .tip-card {
   position: relative;
   background: #fff;
@@ -498,6 +508,7 @@ const headerImage = computed(() => {
     transform 0.12s ease,
     box-shadow 0.12s ease;
 }
+
 .tip-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
@@ -507,12 +518,14 @@ const headerImage = computed(() => {
   display: flex;
   justify-content: flex-end;
 }
+
 .tip-media {
   position: relative;
   width: 100%;
   aspect-ratio: 16/9;
   background: #f6f6f6;
 }
+
 .tip-media img {
   width: 100%;
   height: 100%;
@@ -521,7 +534,9 @@ const headerImage = computed(() => {
   display: block;
 }
 
-.tip-content { padding: 0.9rem 1rem 1.1rem; }
+.tip-content {
+  padding: 0.9rem 1rem 1.1rem;
+}
 
 /* .activity-chip {
   font-size: 12px;
@@ -536,6 +551,7 @@ const headerImage = computed(() => {
   font-size: 18px;
   margin: 8px 0 6px;
 }
+
 /* clamp to 4 lines */
 .tip-descr {
   margin: 0 0 10px;
@@ -550,6 +566,7 @@ const headerImage = computed(() => {
   white-space: normal;
   word-break: break-word;
 }
+
 .skills {
   margin: 0;
   padding: 0;
@@ -559,6 +576,7 @@ const headerImage = computed(() => {
   gap: 6px;
   margin-top: auto;
 }
+
 .skill {
   font-size: 12px;
   background: #b7d4d6;
@@ -566,11 +584,13 @@ const headerImage = computed(() => {
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
 }
+
 .state {
   text-align: center;
   padding: 40px 0;
   color: #6b7280;
 }
+
 .fav-btn {
   position: absolute;
   bottom: 12px;
@@ -582,10 +602,12 @@ const headerImage = computed(() => {
   padding: 6px;
   border-radius: 999px;
 }
+
 .fav-btn:focus {
   outline: 2px solid #a7f3d0;
   outline-offset: 2px;
 }
+
 .fav-btn img {
   width: 20px;
   height: 20px;
