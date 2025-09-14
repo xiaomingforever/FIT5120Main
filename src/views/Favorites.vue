@@ -290,7 +290,7 @@ const favImage = (actName?: string): string => {
 }
 .skill {
   font-size: 12px;
-  background: #f3f4f6;
+  background: #b7d4d6;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
