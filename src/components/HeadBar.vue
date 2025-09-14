@@ -1,4 +1,5 @@
 <template>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
   <div class="home-page">
     <!-- Navbar -->
     <header class="navbar">
@@ -70,10 +71,11 @@ const toggleMenu = () => {
 
 <style scoped>
 .home-page {
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
   line-height: 1.6;
   background-color: #fbf6ef;
+  font-weight: 700;
 }
 
 /* Navbar */

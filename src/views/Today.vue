@@ -29,7 +29,7 @@ const showTooltip = ref(false)
 onMounted(() => {
   const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
   const genderSaved = localStorage.getItem('gender') as 'girl' | 'boy' | null
-  const routineSaved = localStorage.getItem('routine')
+  // const routineSaved = localStorage.getItem('routine')
 
   if (ageSaved && AGE_TABS.includes(ageSaved)) {
     selectedAge.value = ageSaved
@@ -38,16 +38,17 @@ onMounted(() => {
     selectedGender.value = genderSaved
   }
 
-  if (routineSaved) {
-    try {
-      routineData.value = JSON.parse(routineSaved)
-    } catch (e) {
-      console.error("Failed to parse routine from localStorage:", e)
-      generateRoutine()
-    }
-  } else {
-    generateRoutine()
-  }
+  // if (routineSaved) {
+  //   try {
+  //     routineData.value = JSON.parse(routineSaved)
+  //   } catch (e) {
+  //     console.error("Failed to parse routine from localStorage:", e)
+  //     generateRoutine()
+  //   }
+  // } else {
+  //   generateRoutine()
+  // }
+  generateRoutine()
 })
 
 async function generateRoutine() {
@@ -424,11 +425,12 @@ function prevCard() {
     <!-- Activity Grid -->
     <CategoryCloudCard />
   </main>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <style scoped>
 .main {
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
   background-color: #fbf6ef;
   display: flex;
@@ -817,15 +819,15 @@ function prevCard() {
   position: relative;
   display: inline-block;
   right: 38%;
-  margin-top: 10px;
+  margin-top: 7px;
 }
 .info-icon {
   cursor: pointer;
-  font-size: 16px;
+  font-size: 20px;
 }
 .tooltip {
   position: absolute;
-  top: -390%;
+  top: -320%;
   left: -20%;
   /* transform: translateX(-50%); */  
   white-space: normal; 

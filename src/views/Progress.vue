@@ -112,6 +112,7 @@ function fmtDate(isoDate: string) {
 </div>
     </section>
   </div>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <style scoped>
@@ -124,7 +125,7 @@ function fmtDate(isoDate: string) {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
 }
 .hero-top::before {

@@ -127,6 +127,7 @@ const favImage = (actName?: string): string => {
       @open-related="openRelated"
     />
   </div>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <style scoped>
@@ -139,7 +140,7 @@ const favImage = (actName?: string): string => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-family: Arial, sans-serif;
+  font-family: 'Nunito', sans-serif;
   color: #333;
 }
 .hero::before {
@@ -169,7 +170,7 @@ const favImage = (actName?: string): string => {
 }
 .page-wrap {
   padding: 16px 20px 28px;
-  width: 750px;
+  width: 900px;
   margin: 0 auto;
 }
 
@@ -194,6 +195,7 @@ const favImage = (actName?: string): string => {
 .fav-hero_sub {
   margin: 6px 0 10px;
   color: #6b7280;
+  font-size: clamp(1.2rem, 0.5rem + 1vw, 2rem);
 }
 .fav-hero_pill {
   display: inline-block;
@@ -273,7 +275,7 @@ const favImage = (actName?: string): string => {
   line-height: 1.45;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   overflow: hidden;
 
   max-height: calc(1.45em * 4);
@@ -290,15 +292,17 @@ const favImage = (actName?: string): string => {
 }
 .skill {
   font-size: 12px;
-  background: #b7d4d6;
+  background: #d1fae5;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
+  font-weight: 600;
 }
 
 .empty {
   text-align: center;
   padding: 40px 0;
-  color: #6b7280;
+  color: #727373;
+  font-size: 20px;
 }
 </style>
