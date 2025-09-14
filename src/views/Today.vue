@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted, Transition } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryCloudCard from '@/components/CategoryCloudCard.vue'
 import { useProgressStore } from '@/stores/progress'
@@ -19,8 +19,12 @@ const loading = ref(false)
 const AGE_TABS: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
 const selectedAge = ref<AgeGroup>('1-3y') 
 const selectedGender = ref<'girl' | 'boy'>('girl') 
+
 const selectorTop = ref<HTMLElement | null>(null)
 const erexerciseCardRef = ref<HTMLElement | null>(null)
+
+const showBackBtn = ref(false) 
+const showTooltip = ref(false)
 
 onMounted(() => {
   const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
@@ -85,6 +89,21 @@ function scrollToExerciseCard() {
     erexerciseCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 }
+
+function handleScroll() {
+  if (!selectorTop.value) return
+  const rect = selectorTop.value.getBoundingClientRect()
+  // if age selector scroll to top, display button
+  showBackBtn.value = rect.top < 0
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
 
 function changeAge(age: AgeGroup) {
   selectedAge.value = age
@@ -185,17 +204,31 @@ function slug(s: string) {
 function toFileBase(name: string) {
   return slug(name)
 }
-const imageUrl = computed(() => {
-  const act = routineData.value?.routine?.[0]?.activity
-  if (!act) return ''
-  const base = toFileBase(act.name)
+// const imageUrl = computed(() => {
+//   const act = routineData.value?.routine?.[0]?.activity
+//   if (!act) return ''
+//   const base = toFileBase(act.name)
+//   const candidates = [
+//     `../assets/Tips/${base}.png`,
+//     `../assets/Activities/ActivityCard/${base}1.png`,
+//   ]
+//   for (const k of candidates) {
+//     if (IMAGE_MAP[k]) return IMAGE_MAP[k]
+//   } 
+//   return ''
+// })
+
+function getImageUrl(actName: string) {
+  const base = toFileBase(actName)
   const candidates = [
-    `../assets/Tips/${base}.png`,
-    `../assets/Activities/Excercise/${base}.png`,
+     `../assets/Tips/${base}.png`,
+    `../assets/Activities/ActivityCard/${base}.png`,
   ]
-  for (const k of candidates) if (IMAGE_MAP[k]) return IMAGE_MAP[k]
+  for (const k of candidates) {
+    if (IMAGE_MAP[k]) return IMAGE_MAP[k]
+  }
   return ''
-})
+}
 
 const currentIndex = ref(0)
 
@@ -219,14 +252,14 @@ function prevCard() {
       <div class="hero-content">
         <h1>Today's Tips</h1>
         <p>
-          These tips are updated daily.
+          These tips are updated daily and based on your child's age group.
           Discover fun activities to boost your child's brain development.
         </p>
       </div>
     </section>
 
     <!-- gender selector -->
-    <div class="selector-block">
+    <div class="selector-block" ref="selectorTop">
       <h2 class="section-title">Select Gender</h2>
       <p class="selector-sub">
         Personalize tips to better match your child's experience.
@@ -252,7 +285,7 @@ function prevCard() {
     </div>
 
     <!-- age selector -->
-    <div class="selector-block" ref="selectorTop">
+    <div class="selector-block">
       <h2 class="section-title">Choose an Age Group</h2>
       <p class="selector-sub">
         Activities are tailored to your child's developmental stage.
@@ -312,7 +345,12 @@ function prevCard() {
             <!-- description -->
             <p class="desc" v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
             <!-- Image -->
-            <img class="illustration" src="/src/assets/Activities/ActivityCard/LearningTime1.png" alt="image" />
+            <!-- <img class="illustration" src="/src/assets/Activities/ActivityCard/LearningTime1.png" alt="image" /> -->
+             <img
+              class="illustration"
+              :src="getImageUrl(item.activity.name)"
+              :alt="item.activity.name"
+            />
             <!-- Why this matters -->
             <div class="why" v-if="item.activity.brainyBackground">
               <h3>Why this matters</h3>
@@ -343,15 +381,37 @@ function prevCard() {
       <button class="done-btn" @click="handleDone">
         Done
       </button>
-      <p v-if="routineData" class="complete-count">
-        Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
-      </p>
+
+      <!-- Completed times -->
+      <div class="completed-times">
+        <p v-if="routineData" class="complete-count">
+          Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
+        </p>
+        <div class="info-wrapper"
+              @mouseenter="showTooltip = true" 
+              @mouseleave="showTooltip = false" 
+              @click="showTooltip = !showTooltip">
+          <!-- info icon -->
+          <span class="info-icon">ℹ️</span>
+
+          <!-- info -->
+          <transition name="fade">
+            <div v-if="showTooltip" class="tooltip">
+              <p>The number of times you have completed the activity, </p>
+              <p>used to track progress.</p>
+              <div class="tooltip-arrow"></div>
+            </div>
+          </transition>
+        </div>
+      </div>
     </div>
 
     <!-- Sidebar with Back button -->
-    <div class="sidebar">
-      <button class="back-btn" @click="scrollToSelector">Back to selector↑</button>
-    </div>
+    <Transition name="fade-slide">
+      <div class="sidebar" v-if="showBackBtn">
+        <button class="back-btn" @click="scrollToSelector">Back to selector↑</button>
+      </div>
+    </Transition>
 
     <!-- Exercise Section Intro -->
     <div class="exercise-intro">
@@ -684,7 +744,7 @@ function prevCard() {
 }
 
 .exercise-card .illustration {
-  width: 100px;
+  width: 150px;
   margin: 0 auto 16px;
   display: block;
 }
@@ -734,6 +794,12 @@ function prevCard() {
   background: #0d9488
 }
 
+.completed-times {
+  display: flex;
+  align-items: center;
+  /* gap: 6px; */
+  /* position: relative; */
+}
 .complete-count {
   font-size: 18px;
   font-weight: 700;
@@ -747,12 +813,46 @@ function prevCard() {
   margin: 0 auto;
   margin-top: 10px;
 }
+.info-wrapper {
+  position: relative;
+  display: inline-block;
+  right: 38%;
+  margin-top: 10px;
+}
+.info-icon {
+  cursor: pointer;
+  font-size: 16px;
+}
+.tooltip {
+  position: absolute;
+  top: -390%;
+  left: -20%;
+  /* transform: translateX(-50%); */  
+  white-space: normal; 
+  text-align: center; 
+  background: #fff;
+  color: #333;
+  padding: 0 10px;
+  border-radius: 20px;
+  font-size: 16px;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 /* Sidebar container */
 .sidebar {
   position: fixed;
   top: 50%;
-  right: 20px;   /* 你可以改成 left: 20px 如果想放在左边 */
-  transform: translateY(-50%);
+  right: 20px;   
+  /* transform: translateY(-50%); */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -777,4 +877,21 @@ function prevCard() {
   background: #0d9488;
 }
 
+/* transition of enter and leave */
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+  transition: all 0.4s ease;
+}
+
+.fade-slide-enter-from,
+.fade-slide-leave-to {
+  opacity: 0;
+  transform: translateY(20px); 
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+  opacity: 1;
+  transform: translateY(0);
+}
 </style>
