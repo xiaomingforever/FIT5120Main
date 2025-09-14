@@ -22,7 +22,13 @@
               <font-awesome-icon icon="house" style="color: yellowgreen;" /> Home
             </router-link>
           </li>
-          <li>
+
+          <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+            <a href="#">
+              <font-awesome-icon icon="book" style="color: brown;" /> Why Brain Builder ▾
+            </a>
+            <ul v-if="showDropdown" class="dropdown-menu">
+              <li>
             <router-link to="/today">
               <font-awesome-icon icon="lightbulb" style="color: orange;" /> Today's Tips
             </router-link>
@@ -42,13 +48,6 @@
               <font-awesome-icon icon="chart-line" style="color: skyblue;" /> Activity Progress
             </router-link>
           </li>
-          <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
-            <a href="#">
-              <font-awesome-icon icon="book" style="color: brown;" /> Why Brain Builder ▾
-            </a>
-            <ul v-if="showDropdown" class="dropdown-menu">
-              <li><router-link to="/research">Research</router-link></li>
-              <li><router-link to="/resources">Resources</router-link></li>
             </ul>
           </li>
 
@@ -139,17 +138,39 @@ const toggleMenu = () => {
   top: 100%;
   left: 0;
   background-color: white;
+  margin: 0;
   list-style: none;
-  padding: 0.5rem 0;
+  padding: 8px 0;
+  min-width: 260px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
 }
 
 .dropdown-menu li {
-  padding: 0.5rem 1rem;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 .dropdown-menu li:hover {
   background-color: #f0f0f0;
+}
+
+.dropdown-menu a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 16px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0;
+}
+.dropdown-menu a:hover,
+.dropdown-menu a:focus {
+  background-color: #f2f2f2;
 }
 
 .hamburger {
@@ -192,10 +213,10 @@ const toggleMenu = () => {
 }
 
 .router-link-active {
-  background-color: #e0eff7;
+  background-color: transparent;
   border-radius: 6px;
-  padding: 6px 10px;
-  color: #14b8a6 !important;
+  padding: 10px 16px;
+  color: inherit !important;
   font-weight: bold;
 }
 </style>

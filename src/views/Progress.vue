@@ -2,6 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import { useProgressStore } from '@/stores/progress'
 
+
+
+
+
 const store = useProgressStore()
 onMounted(() => store.load())
 
@@ -76,27 +80,36 @@ function fmtDate(isoDate: string) {
       </div>
 
       <!-- History tab -->
-      <div v-else class="history">
-        <p v-if="!groupedHistory.length" class="empty">
-          Nothing here yet - finish a tip to build your history.
-        </p>
+<div v-else class="history">
+  <p v-if="!groupedHistory.length" class="empty">
+    Nothing here yet - finish a tip to build your history.
+  </p>
 
-        <div v-for="[date, items] in groupedHistory" :key="date" class="day">
-          <h3 class="day-title">{{ fmtDate(date) }}</h3>
-          <ul class="day-list">
-            <li v-for="c in items" :key="c.completedAt + ':' + c.id" class="tip-item">
-              <div class="tip-line">
-                <span class="tip-name">{{ c.tip }}</span>
-                <span class="dot">.</span>
-                <span class="tip-activity">{{ c.activityName }}</span>
-              </div>
-              <ul v-if="c.skills?.length" class="tip-skills">
-                <li v-for="s in c.skills" :key="s.code" class="chip">{{ s.code }}</li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-      </div>
+  <div v-for="[date, items] in groupedHistory" :key="date" class="day">
+    <div class="day-header">{{ fmtDate(date) }}</div>
+
+    <!-- Card grid -->
+    <div class="tip-grid">
+      <article
+        v-for="c in items"
+        :key="c.completedAt + ':' + c.id"
+        class="tip-card"
+        aria-label="Completed tip"
+      >
+        <header class="tip-card__head">
+
+          <h4 class="tip-card__title">{{ c.tip }}</h4>
+          <span class="tip-card__dot" aria-hidden="true">•</span>
+          <span class="tip-card__activity">{{ c.activityName }}</span>
+        </header>
+
+        <ul v-if="c.skills?.length" class="tip-card__skills">
+          <li v-for="s in c.skills" :key="s.code" class="chip">{{ s.code }}</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</div>
     </section>
   </div>
 </template>
@@ -117,8 +130,8 @@ function fmtDate(isoDate: string) {
 .hero-top::before {
   content: "";
   position: absolute;
-  inset: 0; 
-  background: rgba(36, 36, 36, 0.4); 
+  inset: 0;
+  background: rgba(36, 36, 36, 0.4);
   z-index: 0;
 }
 .hero-top > * {
@@ -224,53 +237,89 @@ function fmtDate(isoDate: string) {
   font-weight: 700;
 }
 
-/* History tab */
+/* History tab (cards) */
 .history {
   padding: 14px;
 }
+
+/* Day header */
 .day + .day {
-  margin-top: 14px;
+  margin-top: 18px;
 }
-.day-title {
-  margin: 0 0 8px;
+.day-header {
+  margin: 0 0 10px;
   color: #334155;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
-.day-list {
+
+/* Card grid */
+.tip-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .tip-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .tip-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Individual tip card */
+.tip-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow 120ms ease, transform 120ms ease;
+}
+.tip-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 24, 40, 0.08);
+}
+
+/* Card header */
+.tip-card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 6px;
+  row-gap: 4px;
+}
+.tip-card__title {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #0f172a;
+}
+.tip-card__dot {
+  opacity: 0.6;
+}
+.tip-card__activity {
+  font-size: 14px;
+  color: #475569;
+}
+
+/* Skill chips row */
+.tip-card__skills {
   list-style: none;
   padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 10px;
-}
-.tip-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 12px;
-}
-.tip-line {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: baseline;
-}
-.tip-name {
-  font-weight: 600;
-}
-.tip-activity {
-  color: #64748b;
-}
-.dot {
-  color: #cbd5e1;
-}
-.tip-skills {
-  list-style: none;
-  padding: 6px 0 0;
-  margin: 0;
+  margin: 10px 0 0;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
+
+
 .chip {
   font-size: 12px;
   background: #f3f4f6;
@@ -279,9 +328,11 @@ function fmtDate(isoDate: string) {
   padding: 2px 8px;
 }
 
+/* Empty state */
 .empty {
   color: #6b7280;
   padding: 18px 8px;
   text-align: center;
 }
+
 </style>
