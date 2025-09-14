@@ -559,6 +559,7 @@ function prevCard() {
 .exercise-intro {
   text-align: center;
   margin-bottom: 24px;
+  margin-top: 40px;
 }
 
 .exercise-intro .section-title {

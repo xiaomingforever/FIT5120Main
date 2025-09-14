@@ -1,33 +1,6 @@
 <template>
   <div class="home-page">
-    <!-- Navbar -->
-    <!-- <header class="navbar"> -->
-      <!-- <div class="logo">Brain<span>Builder</span></div> -->
-      <!-- <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" /> -->
-
-      <!-- hambuger button -->
-      <!-- <div class="hamburger" @click="toggleMenu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </div> -->
-
-      <!-- Nav menu -->
       <HeadBar />
-          <!-- <li><a href="#about">About This Project</a></li>
-          <li><a href="#research">Research</a></li>
-          <li><a href="#resources">Resources</a></li> -->
-        <!-- <router-link to="/today" class="btn get-start-btn">Get Started</router-link> -->
-        <!-- <button class="btn get-start-btn" @click="handleGetStarted">
-          Get Started
-        </button>
-        <ConfirmModal
-          v-if="showConfirm"
-          @close="showConfirm = false"
-          @confirm="goToday"
-          @cancel="goSelector"
-        /> -->
-    <!-- </header> -->
 
     <!-- Hero Section -->
     <section class="hero">
@@ -39,7 +12,7 @@
           and teachers with knowledge and tools that nurture children's development.
         </p>
         <!-- <button>Learn More</button> -->
-        <router-link to="/today" class="btn">Learn More About the Project</router-link>
+        <router-link to="/today" class="btn">Learn More About Brain Builder</router-link>
       </div>
     </section>
 
@@ -119,19 +92,22 @@
           <img src="/public/today-pick.png" alt="today-pick">
           <h3>Today's Picks</h3>
           <p>Discover fun activities to boost your child's brain development.</p>
-          <button>Explore</button>
+          <!-- <button>Explore</button> -->
+          <router-link to="/today" class="card-btn">Explore</router-link>
         </div>
         <div class="card">
           <img src="/public/browse-activity.png" alt="browse-activity">
           <h3>Browse Activities</h3>
           <p>Search 100+ tips. Filter by age, place, and time.</p>
-          <button>Open library</button>
+          <!-- <button>Open library</button> -->
+          <router-link to="/activities" class="card-btn">Open library</router-link>
         </div>
         <div class="card">
           <img src="/public/process.png" alt="browse-activity">
           <h3>Progress Tracking</h3>
           <p>Monitor your child's progress and celebrate achievements.</p>
-          <button>View Progress</button>
+          <!-- <button>View Progress</button> -->
+          <router-link to="/progress" class="card-btn">View Progress</router-link>
         </div>
       </div>
     </section>
@@ -527,7 +503,7 @@
   background-color: white;
   font-size: 20px;
 }
-.card button {
+.card .card-btn {
   margin-top: 1rem;
   background: #14b8a6;
   border: none;
@@ -536,8 +512,9 @@
   border-radius: 20px;
   cursor: pointer;
   font-size: 16px;
+  text-decoration: none;
 }
-.card button:hover {
+.card .card-btn:hover {
   background: #0d9488;
 }
 
