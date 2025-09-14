@@ -4,11 +4,11 @@ import bedtime from '@/assets/Activities/ActivityCard/Bedtime1.png'
 import mealtime from '@/assets/Activities/ActivityCard/Mealtime1.png'
 import bathtime from '@/assets/Activities/ActivityCard/Bathtime1.png'
 import learning from '@/assets/Activities/ActivityCard/LearningTime1.png'
-import outdoor from '@/assets/Activities/ActivityCard/Outdoor1.png'
-import problem from '@/assets/Activities/ActivityCard/Problem1.png'
-import language from '@/assets/Activities/ActivityCard/Language1.png'
+import outdoor from '@/assets/Activities/ActivityCard/anytime-anywhere1.png'
+import problem from '@/assets/Activities/ActivityCard/diaper-change1.png'
+import language from '@/assets/Activities/ActivityCard/cleaning-up1.png'
 import gardening from '@/assets/Activities/ActivityCard/Gardening1.png'
-import dressing from '@/assets/Activities/ActivityCard/Dressing1.png'
+import dressing from '@/assets/Activities/ActivityCard/getting-dressed1.png'
 
 type Cat = { key: string; label: string; icon: string }
 const cats: Cat[] = [
