@@ -360,8 +360,9 @@ const headerImage = computed(() => {
 
 .btn-back {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  font-size: 16px;
+  top: 15px;
+  left: 22px;
   display: inline-flex;
   align-items: center;
   gap: 8px;

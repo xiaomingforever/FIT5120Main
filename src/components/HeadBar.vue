@@ -101,7 +101,7 @@ const toggleMenu = () => {
 }
 
 .logo {
-  height: 130px;
+  height: 60px;
   width: auto;
   flex: 0 0;
   margin-right: 200px;
