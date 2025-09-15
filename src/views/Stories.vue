@@ -27,7 +27,14 @@
             <img v-if="leadStory.image" :src="leadStory.image" :alt="leadStory.title" class="lead-img" />
             <div v-else class="media-ph"><span>image</span></div>
           </figure>
-          <h1 id="lead-heading" class="lead-title">{{ leadStory.title }}</h1>
+          <h1 id="lead-heading" class="lead-title">
+            <RouterLink
+            class="lead-title-link"
+            :to="{ name: 'Story1', params: { id: leadStory.id } }"
+            >
+            {{ leadStory.title }}
+          </RouterLink>
+          </h1>
           <p class="lead-dek">{{ leadStory.excerpt }}</p>
           <p class="lead-byline">By {{ leadStory.author }}</p>
         </div>
@@ -87,6 +94,8 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+const router = useRouter()
 
 type Story = {
   id: number
@@ -212,6 +221,16 @@ function openRelated(r: RelatedStory) {
   line-height: 1.25;
   margin: 0 0 0.5rem 0;
   font-weight: 800;
+}
+.lead-title-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+}
+.lead-title-link:hover,
+.lead-title-link:focus {
+  text-decoration: underline;
+  outline: none;
 }
 .lead-dek {
   margin: 0 0 0.75rem;
