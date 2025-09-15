@@ -24,6 +24,12 @@
             </router-link>
           </li>
 
+          <li>
+            <router-link to="/Stories">
+              <font-awesome-icon icon="clipboard-list" style="color: yellowgreen;" /> Stories
+            </router-link>
+          </li>
+
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
               <font-awesome-icon icon="book" style="color: brown;" /> Why Brain Builder ▾
