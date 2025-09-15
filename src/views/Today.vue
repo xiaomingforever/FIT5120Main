@@ -761,7 +761,7 @@ function prevCard() {
 }
 
 .exercise-card .illustration {
-  width: 150px;
+  width: 200px;
   margin: 0 auto 16px;
   display: block;
 }
