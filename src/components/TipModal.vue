@@ -50,10 +50,11 @@ const toggleFavorite = () => {
     tip: model.value.tip,
     tip_des: model.value.tip_des,
     skills: model.value.skills,
-    source: model.value.source,
+    source_url: model.value.source,
     activityName: props.activityName,
     activityId: props.activityId,
     age_code: (model.value as any).age_code,
+    brainy_background: model.value.brainy_background
   })
 }
 
@@ -81,11 +82,13 @@ function done() {
   progress.record({
     id: model.value.tip_id,
     tip: model.value.tip,
+    tip_des: model.value.tip_des,
     activityName: props.activityName,
     activityId: props.activityId,
     age_code: props.age as string,
     skills: (model.value.skills ?? []) as any[],
-    source: model.value.source || '',
+    source_url: model.value.source || '',
+    brainy_background: model.value.brainy_background
   })
 
   // fireworks animation
@@ -318,7 +321,7 @@ const nextTip = computed(() => {
         <!-- Source -->
         <p v-if="model.source_url" class="source">
           <a
-            :href="extractHttpsLink(model.source_url) || model.source_url"
+            :href="extractHttpsLink(model.source_url || model.source) || model.source_url || model.source"
             target="_blank"
             rel="noopener noreferrer"
             class="source-link"

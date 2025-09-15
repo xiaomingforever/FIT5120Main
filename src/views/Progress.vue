@@ -1,25 +1,61 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useProgressStore } from '@/stores/progress'
+// import TipModal from '@/components/TipModal.vue'
 
+const showTip = ref(false)
+const selectedTip = ref<any | null>(null)
 
+const activityName = computed(() => selectedTip.value?.activityName || '')
+const activityId = computed(() => selectedTip.value?.activityId || '')
+const gender = String(localStorage.getItem('gender') || 'girl')
+const age = String(localStorage.getItem('age_code') || '1-3y')
+const period = 'Any'
 
+const progress = useProgressStore()
+progress.load()
+const completions = computed(() => progress.completions)
 
+const normalizeCompletion = (c: any) => ({
+  tip_id: c.id,
+  tip: c.tip,
+  tip_des: c.tip_des || '',
+  brainy_background: c.brainy_background || '',
+  source_url: c.source_url || c.source || '',
+  skills: c.skills || [],
+  age_code: c.age_code || '',
+  act_name: c.activityName || '',
+  activityName: c.activityName || '',
+  activityId: c.activityId ?? ''
+})
 
-const store = useProgressStore()
-onMounted(() => store.load())
+const openFromCompletion = (c: any) => {
+  selectedTip.value = normalizeCompletion(c)
+  showTip.value = true
+}
+const closeTip = () => {
+  showTip.value = false
+  selectedTip.value = null
+}
+const openRelated = (tipId: string | number) => {
+  const found = completions.value.find((t) => String(t.id) === String(tipId))
+  if (found) selectedTip.value = found
+}
 
 const activeTab = ref<'skills' | 'history'>('skills')
 
 // Skills tab data
 const skillsList = computed(() => {
-  const rows = Object.entries(store.skillsCount).map(([code, count]) => ({ code, count }))
+  const rows = Object.entries(progress.skillsCount).map(([code, count]) => ({ code, count }))
   // sort by count desc, then alpha
   return rows.sort((a, b) => b.count - a.count || a.code.localeCompare(b.code))
 })
 
 // History tab data sorted by date desc in the getter
-const groupedHistory = computed(() => store.byDate)
+const groupedHistory = computed(() => progress.byDate)
+
+// flat all tips, use for prev/next
+const allTips = computed(() => Object.values(groupedHistory.value).flat())
 
 function fmtDate(isoDate: string) {
   const [y, m, d] = isoDate.split('-').map((x) => parseInt(x, 10))
@@ -30,6 +66,28 @@ function fmtDate(isoDate: string) {
     year: 'numeric',
   })
 }
+// load activity image
+const PROGRESS_IMAGES = import.meta.glob(
+  '../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}',
+  { eager: true, import: 'default', query: '?url' }
+) as Record<string, string>
+
+const progressImage = (actName?: string): string => {
+  if (!actName) return ''
+  const variants = [
+    actName + '2',
+    actName.replace(/\s+/g, '-') + '2',
+    actName.replace(/\s+/g, '') + '2',
+  ].map(v => v.toLowerCase().replace(/[^a-z0-9]/g, ''))
+
+  for (const [path, url] of Object.entries(PROGRESS_IMAGES)) {
+    const file = path.split('/').pop() || ''
+    const stem = file.replace(/\.[^.]+$/, '')
+    const normalized = stem.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (variants.includes(normalized)) return url
+  }
+  return ''
+}
 </script>
 
 <template>
@@ -38,18 +96,27 @@ function fmtDate(isoDate: string) {
     <div class="hero-content">
       <h1>Progress</h1>
       <p>
-        Monitor your child's progress and celebrate achievements.
-        Easily track your child's growing skills and browse the full history of personalized tips.
+        Monitor your child's progress and celebrate achievements. Easily track your child's growing
+        skills and browse the full history of personalized tips.
       </p>
     </div>
   </section>
   <div class="progress">
     <!-- Hero -->
-    <section class="hero">
-      <h1 class="title">Your progress</h1>
-      <p class="subtitle">You've completed</p>
-      <div class="counter">{{ store.total }}</div>
-      <p class="caption">total tips</p>
+    <section class="progress-hero">
+      <div class="progress-hero_inner">
+        <div class="progress-hero_copy">
+          <h1 class="progress-hero_title">Your Progress</h1>
+          <p class="progress-hero_sub">Track your achievements and celebrate growth!</p>
+          <span class="progress-hero_pill"
+            >You've completed <span style="font-size: 28px">{{ progress.total }}</span> Tips
+          </span>
+          <p class="storage-hint">
+            💡 Your progress is stored locally in your browser (localStorage).
+          </p>
+        </div>
+        <img class="progress-hero_img" src="/public/process.png" alt="" />
+      </div>
     </section>
 
     <!-- Dashboard -->
@@ -74,45 +141,85 @@ function fmtDate(isoDate: string) {
         <ul v-else class="skill-list">
           <li v-for="row in skillsList" :key="row.code" class="skill-row">
             <span class="skill-tag">{{ row.code }}</span>
-            <span class="skill-count">{{ row.count }}</span>
+            <div class="skill-bar">
+              <div
+                class="skill-bar-fill"
+                :style="{ width: (row.count / skillsList[0].count) * 100 + '%' }"
+              ></div>
+              <span class="skill-count">{{ row.count }}</span>
+            </div>
           </li>
         </ul>
       </div>
 
       <!-- History tab -->
-<div v-else class="history">
-  <p v-if="!groupedHistory.length" class="empty">
-    Nothing here yet - finish a tip to build your history.
-  </p>
+      <div v-else class="history">
+        <p v-if="!groupedHistory.length" class="empty">
+          Nothing here yet - finish a tip to build your history.
+        </p>
 
-  <div v-for="[date, items] in groupedHistory" :key="date" class="day">
-    <div class="day-header">{{ fmtDate(date) }}</div>
+        <div v-for="[date, items] in groupedHistory" :key="date" class="day">
+          <div class="day-header">{{ fmtDate(date) }}</div>
 
-    <!-- Card grid -->
-    <div class="tip-grid">
-      <article
-        v-for="c in items"
-        :key="c.completedAt + ':' + c.id"
-        class="tip-card"
-        aria-label="Completed tip"
-      >
-        <header class="tip-card__head">
+          <!-- Card grid -->
+          <div class="tip-grid">
+            <article
+              v-for="c in [...items].sort((a, b) => b.completedAt.localeCompare(a.completedAt))"
+              :key="c.completedAt + ':' + c.id"
+              class="tip-card"
+              role="button"
+              tabindex="0"
+              @click="openFromCompletion(c)"
+              @keydown.enter="openFromCompletion(c)"
+              @keydown.space.prevent="openFromCompletion(c)"
+            >
+    
+              <div class="fav-media" v-if="progressImage(c.activityName)">
+                <img
+                  :src="progressImage(c.activityName)"
+                  :alt="`${c.activityName} illustration`"
+                  loading="lazy"
+                />
+              </div>
+              <div class="fav-media" v-else>
+                <img
+                  src="/public/process.png"
+                  alt="default progress illustration"
+                  loading="lazy"
+                />
+              </div>
 
-          <h4 class="tip-card__title">{{ c.tip }}</h4>
-          <span class="tip-card__dot" aria-hidden="true">•</span>
-          <span class="tip-card__activity">{{ c.activityName }}</span>
-        </header>
-
-        <ul v-if="c.skills?.length" class="tip-card__skills">
-          <li v-for="s in c.skills" :key="s.code" class="chip">{{ s.code }}</li>
-        </ul>
-      </article>
-    </div>
-  </div>
-</div>
+              <div class="fav-content">
+                <h3 class="tip-title">{{ c.tip }}</h3>
+                <p class="tip-activity">{{ c.activityName }}</p>
+                <p></p>
+                <ul v-if="c.skills?.length" class="history-skills">
+                  <li v-for="s in c.skills" :key="s.code" class="history-skill">{{ s.code }}</li>
+                </ul>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
     </section>
+    <!-- <TipModal
+      v-if="showTip && selectedTip"
+      :open="showTip"
+      :tip="selectedTip"
+      :tips=[]
+      :activity-name="activityName"
+      :activity-id="activityId"
+      :age="age"
+      :gender="gender"
+      :period="period"
+      @close="closeTip"
+      @open-related="openRelated"
+    /> -->
   </div>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
 </template>
 
 <style scoped>
@@ -120,7 +227,7 @@ function fmtDate(isoDate: string) {
   position: relative;
   width: 100%;
   height: 300px;
-  background: url("../assets/progress.png") center/cover no-repeat;
+  background: url('../assets/progress.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -129,7 +236,7 @@ function fmtDate(isoDate: string) {
   color: #333;
 }
 .hero-top::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: rgba(36, 36, 36, 0.4);
@@ -146,44 +253,66 @@ function fmtDate(isoDate: string) {
   margin: 20px;
 }
 .hero-top h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
 }
 .hero-top p {
   margin-bottom: 1.5rem;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 500;
 }
 .progress {
   padding: 20px;
-  width: 750px;
+  width: 900px;
   margin: 0 auto;
 }
 
 /* Hero */
-.hero {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 22px;
-  text-align: center;
-  margin-bottom: 18px;
+.progress-hero {
+  margin: 0 0 18px;
 }
-.title {
-  margin: 0 0 4px;
-  font-size: clamp(1.25rem, 0.9rem + 1vw, 1.75rem);
+
+.progress-hero_inner {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 24px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  padding: 28px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 16px;
 }
-.subtitle {
+
+.progress-hero_title {
+  font-size: clamp(1.6rem, 1.2rem + 1vw, 2.2rem);
   margin: 0;
-  color: #475569;
 }
-.counter {
-  font-size: clamp(2.25rem, 1.6rem + 3vw, 3.25rem);
-  font-weight: 800;
-  line-height: 1;
-  margin: 6px 0;
+
+.progress-hero_sub {
+  margin: 6px 0 10px;
+  color: #6b7280;
+  font-size: clamp(1.2rem, 0.5rem + 1vw, 2rem);
 }
-.caption {
-  margin: 0;
-  color: #64748b;
+
+.progress-hero_pill {
+  display: inline-block;
+  background: #f0f4ff;
+  border: 1px solid #dbeafe;
+  color: #1e3a8a;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 20px;
+}
+.progress-hero_img {
+  width: 160px;
+  justify-self: end;
+}
+.storage-hint {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #6b7280;
+  /* font-style: italic; */
 }
 
 /* Panel & tabs */
@@ -222,20 +351,50 @@ function fmtDate(isoDate: string) {
 }
 .skill-row {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 250px 1fr; /* left tag ficed, right tag auto */
   align-items: center;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 10px 12px;
+  gap: 12px;
+  padding: 8px 0;
 }
 .skill-tag {
-  background: #f3f4f6;
+  color: #007070;
+  background: #eaf7f7;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
-  padding: 2px 8px;
+  padding: 4px 10px;
+  font-weight: 600;
+  text-align: center;
+}
+.skill-bar {
+  position: relative;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  height: 28px; 
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  overflow: hidden;
+}
+.skill-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(52, 211, 153, 0.7),
+    rgba(5, 150, 105, 0.8)
+  );
+  border-radius: 999px;
+  z-index: 0;
 }
 .skill-count {
+  position: relative;
+  z-index: 1;
   font-weight: 700;
+  color: #111827;
+  margin-left: auto;
 }
 
 /* History tab (cards) */
@@ -275,20 +434,73 @@ function fmtDate(isoDate: string) {
 
 /* Individual tip card */
 .tip-card {
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 12px 14px;
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
-  transition: box-shadow 120ms ease, transform 120ms ease;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  cursor: pointer;
 }
 .tip-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(16, 24, 40, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+}
+/* image */
+.fav-media {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  background: #f7f7f7;
+}
+
+.fav-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* content */
+.fav-content {
+  padding: 12px 16px 16px;
+}
+
+.tip-title {
+  font-size: 18px;
+  margin: 8px 0 6px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tip-activity {
+  font-size: 14px;
+  color: #475569;
+  margin: 0 0 8px;
+}
+
+.history-skills {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.history-skill {
+  font-size: 12px;
+  background: #d1fae5;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid #e5e7eb;
+  font-weight: 600;
 }
 
 /* Card header */
-.tip-card__head {
+/* .tip-card__head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -311,7 +523,7 @@ function fmtDate(isoDate: string) {
 }
 
 /* Skill chips row */
-.tip-card__skills {
+/* .tip-card__skills {
   list-style: none;
   padding: 0;
   margin: 10px 0 0;
@@ -319,15 +531,13 @@ function fmtDate(isoDate: string) {
   flex-wrap: wrap;
   gap: 6px;
 }
-
-
 .chip {
   font-size: 12px;
   background: #f3f4f6;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   padding: 2px 8px;
-}
+} */
 
 /* Empty state */
 .empty {
@@ -335,5 +545,4 @@ function fmtDate(isoDate: string) {
   padding: 18px 8px;
   text-align: center;
 }
-
 </style>

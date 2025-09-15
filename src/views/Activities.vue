@@ -290,11 +290,11 @@ function changeAge(newAge: AgeGroup) {
   margin: 20px;
 }
 .hero h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
 }
 .hero p {
   margin-bottom: 1.5rem;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 500;
 }
 .act-hero {
@@ -331,7 +331,7 @@ function changeAge(newAge: AgeGroup) {
   font-weight: 700;
 }
 .act-hero_img {
-  width: 160px;
+  width: 240px;
   justify-self: end;
 }
 
