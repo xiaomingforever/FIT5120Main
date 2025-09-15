@@ -32,7 +32,7 @@
 
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
-              <font-awesome-icon icon="book" style="color: brown;" /> Why Brain Builder ▾
+              <font-awesome-icon icon="book" style="color: brown;" /> Try Brain Builder ▾
             </a>
             <ul v-if="showDropdown" class="dropdown-menu">
               <li>
