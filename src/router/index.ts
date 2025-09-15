@@ -9,6 +9,7 @@ const Progress = () => import('@/views/Progress.vue')
 const EditRoutine = () => import('@/views/EditRoutine.vue')
 const TipsDisplay = () => import('@/views/TipsDisplay.vue')
 const TipsCongrats = () => import('@/views/TipsCongrats.vue')
+const Stories = () => import('@/views/Stories.vue')
 
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -20,13 +21,14 @@ export default createRouter({
       component: AppLayout, // shared header and sidebar for these pages
       children: [
         { path: 'today', name: 'Today', component: Today },
+        { path: 'Stories', name: 'Stories', component: Stories},
         { path: 'activities', name: 'Activities', component: Activities },
         {
           path: 'activities/:activityId',
           name: 'TipsDisplay',
           component: TipsDisplay,
           props: true,
-          meta: { parent: 'Activities' } 
+          meta: { parent: 'Activities' }
         },
         {
           path: 'activities/:activityId/congrats',
