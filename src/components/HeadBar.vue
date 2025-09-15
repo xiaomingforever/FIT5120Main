@@ -26,7 +26,7 @@
 
           <li>
             <router-link to="/Stories">
-              <font-awesome-icon icon="clipboard-list" style="color: yellowgreen;" /> Stories
+              <font-awesome-icon icon="coffee" style="color: burlywood;" /> Stories
             </router-link>
           </li>
 
