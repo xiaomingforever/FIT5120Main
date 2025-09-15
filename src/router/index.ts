@@ -10,6 +10,7 @@ const EditRoutine = () => import('@/views/EditRoutine.vue')
 const TipsDisplay = () => import('@/views/TipsDisplay.vue')
 const TipsCongrats = () => import('@/views/TipsCongrats.vue')
 const Stories = () => import('@/views/Stories.vue')
+const Story1 = () => import('@/views/Story1.vue')
 
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,7 @@ export default createRouter({
       children: [
         { path: 'today', name: 'Today', component: Today },
         { path: 'Stories', name: 'Stories', component: Stories},
+        { path: 'Story1', name: 'Story1', component: Story1},
         { path: 'activities', name: 'Activities', component: Activities },
         {
           path: 'activities/:activityId',
