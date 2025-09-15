@@ -13,7 +13,14 @@ const emit = defineEmits<{ (e: 'close'): void }>()
 const router = useRouter()
 
 function goActivities() {
-  router.push({ name: 'Activities' })
+   router.push({
+    path: `/activities/${props.activityId}`,
+    query: {
+      name: props.activityName,
+      age: localStorage.getItem("age_code") || "1-3y",
+      gender: localStorage.getItem("gender") || "girl",
+    },
+  })
   emit('close')
 }
 function goProgress() {
@@ -41,13 +48,14 @@ function onBackdrop(e: MouseEvent) {
           </p>
 
           <div class="hero-actions">
-            <button class="btn btn-primary" @click="goActivities">Back to Activities</button>
+            <button class="btn btn-primary" @click="goActivities">View More Tips</button>
             <button class="btn" @click="goProgress">View Progress</button>
           </div>
         </header>
       </div>
     </div>
   </teleport>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <style scoped>
@@ -57,6 +65,7 @@ function onBackdrop(e: MouseEvent) {
   background: rgba(0,0,0,.45);
   display: grid; place-items: center;
   z-index: 1000;
+  font-family: 'Nunito', sans-serif;
 }
 .congrats-modal {
   width: min(680px, 92vw);
@@ -84,14 +93,16 @@ function onBackdrop(e: MouseEvent) {
 }
 .hero-title {
   margin: 0 0 6px;
-  font-size: 28px; font-weight: 800;
+  font-size: 38px; font-weight: 800;
   color: #1f2937;
 }
 .hero-sub {
   margin: 0 auto;
   max-width: 46ch;
   color: #374151;
-  line-height: 1.5; }
+  line-height: 1.5; 
+  font-size: 20px;
+}
 .chip {
   display: inline-block;
   background: #d1fae5;
@@ -116,6 +127,7 @@ function onBackdrop(e: MouseEvent) {
   border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 18px;
 }
 .btn-primary {
   background: #22c55e;
