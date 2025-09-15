@@ -7,6 +7,8 @@ import { useFavoritesStore } from '@/stores/favorites'
 import heartEmpty from '@/assets/Font icons/favorite_empty.png'
 import heartRed from '@/assets/Font icons/favorite_red.png'
 import type { AgeGroup } from '@/stores/Exercise'
+import confetti from "canvas-confetti"
+import TipsCongrats from "@/views/TipsCongrats.vue"
 
 const router = useRouter()
 const fav = useFavoritesStore()
@@ -25,6 +27,8 @@ const erexerciseCardRef = ref<HTMLElement | null>(null)
 
 const showBackBtn = ref(false) 
 const showTooltip = ref(false)
+
+const showCongrats = ref(false)
 
 onMounted(() => {
   const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
@@ -127,13 +131,14 @@ const extractHttpsLink = (text: string): string | null => {
 // --- favorites
 const isFavorited = computed(() => {
   const act = routineData.value?.routine?.[0]?.activity
-  return act ? fav.isFavorite(act.id) : false
+  return act ? fav.isFavorite(act.tip_id) : false
 })
+
 const toggleFavorite = () => {
   const act = routineData.value?.routine?.[0]?.activity
   if (!act) return
   fav.toggle({
-    tip_id: act.id,
+    tip_id: act.tip_id,
     tip: act.tip,
     tip_des: act.tip_des,
     skills: act.skills,
@@ -175,15 +180,17 @@ function handleDone(activity: any) {
     skills: act.skills ?? [],
     source: act.source || '',
   })
-  router.push({
-    name: 'TipsCongrats',
-    params: { activityId: act.id },
-    query: {
-      name: act.name,
-      age: routineData.value.age_code,
-      gender: routineData.value.gender,
-    },
+
+  // fireworks animation
+  confetti({
+    particleCount: 120,
+    spread: 90,
+    origin: { y: 0.6 }, // position
   })
+
+  setTimeout(() => {
+    showCongrats.value = true
+  }, 800)
 }
 
 // --- image glob
@@ -424,6 +431,13 @@ function prevCard() {
   
     <!-- Activity Grid -->
     <CategoryCloudCard />
+
+    <TipsCongrats
+      :open="showCongrats"
+      :activity-name="routineData?.routine?.[0]?.activity.name || ''"
+      :activity-id="routineData?.routine?.[0]?.activity.id || ''"
+      @close="showCongrats = false"
+    />
   </main>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
