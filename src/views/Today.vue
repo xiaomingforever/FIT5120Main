@@ -190,7 +190,7 @@ function handleDone(activity: any) {
 
   setTimeout(() => {
     showCongrats.value = true
-  }, 800)
+  }, 500)
 }
 
 // --- image glob
@@ -433,6 +433,7 @@ function prevCard() {
     <CategoryCloudCard />
 
     <TipsCongrats
+      v-if="showCongrats"
       :open="showCongrats"
       :activity-name="routineData?.routine?.[0]?.activity.name || ''"
       :activity-id="routineData?.routine?.[0]?.activity.id || ''"
@@ -684,7 +685,7 @@ function prevCard() {
 }
 .carousel-controls {
   position: absolute;
-  top: 55%;
+  top: 51%;
   left: 0;
   right: 0;
   transform: translateY(-50%);
