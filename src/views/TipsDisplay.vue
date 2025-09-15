@@ -15,7 +15,8 @@ function toggleFavorite(t: TipFull) {
     tip: t.tip,
     tip_des: t.tip_des,
     skills: t.skills,
-    source: t.source_url,
+    source_url: t.source_url,
+    brainy_background: t.brainy_background,
     activityName: activityName.value || '',
     activityId: activityId.value,
     age_code: t.age_code,
@@ -425,7 +426,7 @@ const headerImage = computed(() => {
   color: #2f2f2f;
   max-width: 48ch;
   white-space: pre-line;
-  font-size: 20px;
+  font-size: 22px;
 }
 
 .hero-media {
@@ -444,6 +445,7 @@ const headerImage = computed(() => {
   padding: 6px 12px;
   border-radius: 9999px;
   font-weight: 600;
+  font-size: 20px;
   line-height: 1;
   border: 1px solid #efe8b5;
   background: #f7f4d6;
@@ -549,7 +551,7 @@ const headerImage = computed(() => {
   padding: 2px 10px;
 } */
 .tip-title {
-  font-size: 18px;
+  font-size: 22px;
   margin: 8px 0 6px;
 }
 
@@ -557,12 +559,12 @@ const headerImage = computed(() => {
 .tip-descr {
   margin: 0 0 10px;
   color: #4b5563;
+  font-size: 18px;
   line-height: 1.45;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
+  -webkit-line-clamp: 3;
   overflow: hidden;
-
   max-height: calc(1.45em * 4);
   white-space: normal;
   word-break: break-word;
@@ -579,8 +581,10 @@ const headerImage = computed(() => {
 }
 
 .skill {
-  font-size: 12px;
-  background: #b7d4d6;
+  font-size: 14px;
+  font-weight: 600;
+  color: #007070;
+  background: #eaf7f7;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;

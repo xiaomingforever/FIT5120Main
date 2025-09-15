@@ -17,8 +17,23 @@ const gender = String(localStorage.getItem('gender') || 'girl')
 const age = String(localStorage.getItem('age_code') || '1-3y')
 const period = 'Any'
 
-const openTip = (t: FavoriteTip) => {
-  selectedTip.value = t
+const normalizeFavorite = (f: any) => ({
+  tip_id: f.tip_id,
+  tip: f.tip,
+  tip_des: f.tip_des || '',
+  brainy_background: f.brainy_background || '',
+  source_url: f.source_url || f.source || '',
+  skills: f.skills || [],
+  age_code: f.age_code || '',
+  act_name: f.activityName || '',
+  act_desc: f.activityDesc || '',
+  // additional
+  activityName: f.activityName || '',
+  activityId: f.activityId ?? ''
+})
+
+const openFromFavorite = (f: any) => {
+  selectedTip.value = normalizeFavorite(f)
   showTip.value = true
 }
 const closeTip = () => {
@@ -72,6 +87,9 @@ const favImage = (actName?: string): string => {
           <h1 class="fav-hero_title">Your Favorites</h1>
           <p class="fav-hero_sub">Doing the same thing over and over again...</p>
           <span class="fav-hero_pill">{{ countLabel }}</span>
+          <p class="storage-hint">
+            💡 Your favorites are stored locally in your browser (localStorage).
+          </p>
         </div>
         <img class="fav-hero_img" src="/src/assets/favorite page/favorite page.png" alt="" />
       </div>
@@ -85,9 +103,9 @@ const favImage = (actName?: string): string => {
         class="tip-card"
         role="button"
         tabindex="0"
-        @click="openTip(t)"
-        @keydown.enter="openTip(t)"
-        @keydown.space.prevent="openTip(t)"
+        @click="openFromFavorite(t)"
+        @keydown.enter="openFromFavorite(t)"
+        @keydown.space.prevent="openFromFavorite(t)"
       >
       <div class="fav-media" v-if="favImage(t.activityName || (t as any).act_name)">
         <img
@@ -161,11 +179,11 @@ const favImage = (actName?: string): string => {
   margin: 20px;
 }
 .hero h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
 }
 .hero p {
   margin-bottom: 1.5rem;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 500;
 }
 .page-wrap {
@@ -205,6 +223,12 @@ const favImage = (actName?: string): string => {
   border-radius: 999px;
   padding: 6px 12px;
   font-weight: 700;
+}
+.storage-hint {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #6b7280; 
+  /* font-style: italic; */
 }
 .fav-hero_img {
   width: 160px;

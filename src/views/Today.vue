@@ -142,7 +142,7 @@ const toggleFavorite = () => {
     tip: act.tip,
     tip_des: act.tip_des,
     skills: act.skills,
-    source: act.source,
+    source_url: act.source,
     activityName: act.name,
     activityId: act.id,
     age_code: routineData.value.age_code,
@@ -178,7 +178,7 @@ function handleDone(activity: any) {
     activityId: act.id,
     age_code: routineData.value.age_code,
     skills: act.skills ?? [],
-    source: act.source || '',
+    source_url: act.source || '',
   })
 
   // fireworks animation
@@ -487,12 +487,12 @@ function prevCard() {
 }
 
 .hero h1 {
-  font-size: 3rem;
+  font-size: 3.5rem;
 }
 
 .hero p {
   margin-bottom: 1.5rem;
-  font-size: 24px;
+  font-size: 26px;
   font-weight: 500;
 }
 
