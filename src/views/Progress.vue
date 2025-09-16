@@ -59,7 +59,7 @@ const allTips = computed(() => Object.values(groupedHistory.value).flat())
 
 function fmtDate(isoDate: string) {
   const [y, m, d] = isoDate.split('-').map((x) => parseInt(x, 10))
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+  return new Date(y, m -1, d).toLocaleDateString('en-US', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',
@@ -173,7 +173,7 @@ const progressImage = (actName?: string): string => {
               @keydown.enter="openFromCompletion(c)"
               @keydown.space.prevent="openFromCompletion(c)"
             >
-    
+
               <div class="fav-media" v-if="progressImage(c.activityName)">
                 <img
                   :src="progressImage(c.activityName)"
@@ -370,7 +370,7 @@ const progressImage = (actName?: string): string => {
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 999px;
-  height: 28px; 
+  height: 28px;
   display: flex;
   align-items: center;
   padding: 0 10px;
