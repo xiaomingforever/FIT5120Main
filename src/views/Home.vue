@@ -19,25 +19,25 @@
     <!-- What BrainBuilder does -->
     <section class="features">
       <h2 class="section-title">What BrainBuilder does</h2>
-      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
+      <p style="font-size: 24px;">Turn science into simple daily actions.</p>
       <div class="feature-cards">
         <div class="card">
           <img src="/public/today-pick.png" alt="today-pick">
-          <h3>Today's Picks</h3>
+          <h3>Today's Tips</h3>
           <p>Discover fun activities to boost child's brain development.</p>
           <!-- <button>Explore</button> -->
           <router-link to="/today" class="card-btn">Explore</router-link>
         </div>
         <div class="card">
           <img src="/public/browse-activity.png" alt="browse-activity">
-          <h3>Browse Activities</h3>
-          <p>Search 100+ tips. Filter by age, place, and time.</p>
+          <h3>All Activities</h3>
+          <p>Search 80+ tips. Filter by age, place, and time.</p>
           <!-- <button>Open library</button> -->
           <router-link to="/activities" class="card-btn">Open library</router-link>
         </div>
         <div class="card">
           <img src="/public/process.png" alt="browse-activity">
-          <h3>Progress Tracking</h3>
+          <h3>Tips Progress</h3>
           <p>Monitor your child's progress and celebrate achievements.</p>
           <!-- <button>View Progress</button> -->
           <router-link to="/progress" class="card-btn">View Progress</router-link>
@@ -277,7 +277,7 @@ const goSelector = () => {
 }
 
 .two-col a {
-  display: inline-block;    
+  display: inline-block;
   margin-top: 1rem;
   background: #14b8a6;
   border: none;
@@ -414,7 +414,7 @@ const goSelector = () => {
 }
 
 .research-link {
-  display: inline-block;    
+  display: inline-block;
   margin-top: 1rem;
   background: #14b8a6;
   border: none;
