@@ -115,7 +115,7 @@ const progressImage = (actName?: string): string => {
             💡 Your progress is stored locally in your browser (localStorage).
           </p>
         </div>
-        <img class="progress-hero_img" src="/public/process.png" alt="" />
+        <img class="progress-hero_img" src="/public/progress.png" alt="" />
       </div>
     </section>
 
