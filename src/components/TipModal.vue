@@ -403,8 +403,9 @@ const nextTip = computed(() => {
 .close {
   position: fixed;
   margin-bottom: 10px;
-  top: 37px;         
-  right: 27%; 
+  top: 50px;         
+  right: 300px; 
+  z-index: 200;
   border: 0;
   background: #dfdfe0;
   width: 32px;
@@ -487,33 +488,6 @@ const nextTip = computed(() => {
   text-decoration: underline;
   color: #065f46;
 }
-
-/* related tips */
-/* .related {
-  margin-top: 16px;
-}
-.related-title {
-  font-size: 16px;
-  margin: 0 0 8px;
-}
-.related-list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.related-link {
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 999px;
-  padding: 6px 10px;
-  cursor: pointer;
-  font-size: 14px;
-}
-.related-link:hover {
-  background: #f3f4f6;
-} */
 
 .related {
   margin-top: 20px;
@@ -625,7 +599,7 @@ const nextTip = computed(() => {
 
 .fav-btn {
   position: absolute;
-  top: 48%;
+  top: 305px;
   right: 60px;
   border: 0;
   background: transparent;

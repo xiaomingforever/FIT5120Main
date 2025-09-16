@@ -1,6 +1,6 @@
 <template>
   <div class="home-page">
-      <HeadBar />
+    <HeadBar />
 
     <!-- Hero Section -->
     <section class="hero">
@@ -12,7 +12,36 @@
           and teachers with knowledge and tools that nurture children's development.
         </p>
         <!-- <button>Learn More</button> -->
-        <router-link to="/today" class="btn">Learn More About Brain Builder</router-link>
+        <router-link to="/today" class="btn">Start Brain Builder</router-link>
+      </div>
+    </section>
+
+    <!-- What BrainBuilder does -->
+    <section class="features">
+      <h2 class="section-title">What BrainBuilder does</h2>
+      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
+      <div class="feature-cards">
+        <div class="card">
+          <img src="/public/today-pick.png" alt="today-pick">
+          <h3>Today's Picks</h3>
+          <p>Discover fun activities to boost child's brain development.</p>
+          <!-- <button>Explore</button> -->
+          <router-link to="/today" class="card-btn">Explore</router-link>
+        </div>
+        <div class="card">
+          <img src="/public/browse-activity.png" alt="browse-activity">
+          <h3>Browse Activities</h3>
+          <p>Search 100+ tips. Filter by age, place, and time.</p>
+          <!-- <button>Open library</button> -->
+          <router-link to="/activities" class="card-btn">Open library</router-link>
+        </div>
+        <div class="card">
+          <img src="/public/process.png" alt="browse-activity">
+          <h3>Progress Tracking</h3>
+          <p>Monitor your child's progress and celebrate achievements.</p>
+          <!-- <button>View Progress</button> -->
+          <router-link to="/progress" class="card-btn">View Progress</router-link>
+        </div>
       </div>
     </section>
 
@@ -83,35 +112,6 @@
       </div>
     </section>
 
-    <!-- What BrainBuilder does -->
-    <section class="features">
-      <h2 class="section-title">What BrainBuilder does</h2>
-      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
-      <div class="feature-cards">
-        <div class="card">
-          <img src="/public/today-pick.png" alt="today-pick">
-          <h3>Today's Picks</h3>
-          <p>Discover fun activities to boost child's brain development.</p>
-          <!-- <button>Explore</button> -->
-          <router-link to="/today" class="card-btn">Explore</router-link>
-        </div>
-        <div class="card">
-          <img src="/public/browse-activity.png" alt="browse-activity">
-          <h3>Browse Activities</h3>
-          <p>Search 100+ tips. Filter by age, place, and time.</p>
-          <!-- <button>Open library</button> -->
-          <router-link to="/activities" class="card-btn">Open library</router-link>
-        </div>
-        <div class="card">
-          <img src="/public/process.png" alt="browse-activity">
-          <h3>Progress Tracking</h3>
-          <p>Monitor your child's progress and celebrate achievements.</p>
-          <!-- <button>View Progress</button> -->
-          <router-link to="/progress" class="card-btn">View Progress</router-link>
-        </div>
-      </div>
-    </section>
-
     <!-- FAQ -->
     <div class="faq-div">
       <section class="faq">
@@ -134,7 +134,8 @@
         </details>
         <details>
           <summary>What data do you store?</summary>
-          <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No account needed.</p>
+          <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No
+            account needed.</p>
         </details>
       </section>
     </div>
@@ -151,13 +152,13 @@
 
     <!-- Footer -->
     <footer class="footer">
-      <nav>
+      <!-- <nav>
         <a href="#">Behind the Research</a>
         <a href="#">Terms of Use</a>
         <a href="#">Privacy Policy</a>
         <a href="#">About</a>
         <a href="#">Contact</a>
-      </nav>
+      </nav> -->
       <p>
         BrainBuilder is a social good, non-profit project. It is free for education,
         with no ads, no sales, and no tracking beyond what is needed to run the site.
@@ -169,32 +170,32 @@
 </template>
 
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
-  // import ConfirmModal from '@/components/ConfirmModal.vue'
-  import HeadBar from '@/components/HeadBar.vue';
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+// import ConfirmModal from '@/components/ConfirmModal.vue'
+import HeadBar from '@/components/HeadBar.vue';
 
-  const router = useRouter()
-  const showConfirm = ref(false)
-  const showDropdown = ref(false)
+const router = useRouter()
+const showConfirm = ref(false)
+const showDropdown = ref(false)
 
-  const isOpen = ref(false)
-  const toggleMenu = () => {
-    isOpen.value = !isOpen.value
-  }
+const isOpen = ref(false)
+const toggleMenu = () => {
+  isOpen.value = !isOpen.value
+}
 
-  const handleGetStarted = () => {
-    showConfirm.value = true
-  }
+const handleGetStarted = () => {
+  showConfirm.value = true
+}
 
-  const goToday = () => {
-    showConfirm.value = false
-    router.push('/today')
-  }
+const goToday = () => {
+  showConfirm.value = false
+  router.push('/today')
+}
 
-  const goSelector = () => {
-    showConfirm.value = false
-    router.push('/selector')
+const goSelector = () => {
+  showConfirm.value = false
+  router.push('/selector')
 }
 </script>
 
@@ -216,26 +217,31 @@
   justify-content: center;
   text-align: center;
 }
+
 .hero .overlay {
   position: absolute;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
 }
+
 .hero-content {
   position: relative;
   color: white;
   max-width: 700px;
   padding: 20px;
 }
+
 .hero h1 {
   font-size: 3rem;
   margin-bottom: 1rem;
 }
+
 .hero p {
   margin-bottom: 1.5rem;
   font-size: 24px;
   font-weight: 500;
 }
+
 .hero .btn {
   background: #14b8a6;
   border: none;
@@ -247,6 +253,7 @@
   text-decoration: none;
   font-size: 20px;
 }
+
 .hero .btn:hover {
   background: #0d9488;
 }
@@ -264,18 +271,30 @@
   gap: 2rem;
   max-width: 100%;
   margin: 0 auto;
-  padding: 100px 200px;
+  padding: 30px 200px;
   font-size: 24px;
   background-color: #fbf6ef;
 }
+
 .two-col a {
-  color:#0f766e;
+  display: inline-block;    
+  margin-top: 1rem;
+  background: #14b8a6;
+  border: none;
+  padding: 8px 16px;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 20px;
   font-weight: 600;
   text-decoration: none;
+  transition: background 0.25s ease;
 }
+
 .two-col a:hover {
-  color:#14b8a6;
+  background: #0d9488;
 }
+
 .two-col img {
   max-width: 100%;
   border-radius: 8px;
@@ -298,13 +317,14 @@
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
+
 .image-grid img {
   border-radius: 8px;
   width: 100%;
 }
 
 .why {
-  background: #fbf6ef; 
+  background: #fbf6ef;
   position: relative;
   padding: 72px 20px;
   overflow: visible;
@@ -317,7 +337,7 @@
 }
 
 .why-title {
-  color: #f97316; 
+  color: #f97316;
   font-size: 40px;
   line-height: 1.05;
   margin: 0 0 8px 0;
@@ -354,8 +374,9 @@
   text-align: left;
   justify-self: start;
 }
+
 .why-text.right {
-  text-align: left; 
+  text-align: left;
   justify-self: end;
 }
 
@@ -391,14 +412,24 @@
   text-align: center;
   margin-top: 32px;
 }
+
 .research-link {
-  color: #0f766e;
-  text-decoration: none;
+  display: inline-block;    
+  margin-top: 1rem;
+  background: #14b8a6;
+  border: none;
+  padding: 8px 16px;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 20px;
   font-weight: 600;
-  font-size: 24px;
+  text-decoration: none;
+  transition: background 0.25s ease;
 }
+
 .research-link:hover {
-  color: #14b8a6;
+  background: #0d9488;
 }
 
 /* decorate shape */
@@ -415,7 +446,8 @@
   height: 0;
   border-left: 16px solid transparent;
   border-right: 16px solid transparent;
-  border-bottom: 22px solid #facc15; /* yellow */
+  border-bottom: 22px solid #facc15;
+  /* yellow */
   transform: rotate(0deg);
 }
 
@@ -426,7 +458,7 @@
   height: 22px;
   background: #ef4444;
   border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(239,68,68,0.08);
+  box-shadow: 0 4px 10px rgba(239, 68, 68, 0.08);
 }
 
 .shape-green {
@@ -467,10 +499,27 @@
     gap: 18px;
   }
 
-  .why-text.left { order: 1; text-align: left; justify-self: stretch; }
-  .why-image.top-right { order: 2; justify-self: center; }
-  .why-image.bottom-left { order: 3; justify-self: center; }
-  .why-text.right { order: 4; text-align: left; justify-self: stretch; }
+  .why-text.left {
+    order: 1;
+    text-align: left;
+    justify-self: stretch;
+  }
+
+  .why-image.top-right {
+    order: 2;
+    justify-self: center;
+  }
+
+  .why-image.bottom-left {
+    order: 3;
+    justify-self: center;
+  }
+
+  .why-text.right {
+    order: 4;
+    text-align: left;
+    justify-self: stretch;
+  }
 
   .why-image .circle-img,
   .why-image.small .circle-img {
@@ -479,20 +528,25 @@
   }
 
   /* hide decorate shape */
-  .shape-yellow, .shape-red, .shape-green, .shape-diamond {
+  .shape-yellow,
+  .shape-red,
+  .shape-green,
+  .shape-diamond {
     display: none;
   }
 }
 
 /* Features */
 .features {
-  padding: 3rem 20px;
+  padding: 1rem 20px;
   text-align: center;
   background-color: #fbf6ef;
 }
+
 .features img {
   width: 120px;
 }
+
 .feature-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -500,6 +554,7 @@
   max-width: 1000px;
   margin: 2rem auto;
 }
+
 .card {
   border-radius: 12px;
   padding: 20px;
@@ -507,6 +562,7 @@
   background-color: white;
   font-size: 20px;
 }
+
 .card .card-btn {
   margin-top: 1rem;
   background: #14b8a6;
@@ -518,6 +574,7 @@
   font-size: 16px;
   text-decoration: none;
 }
+
 .card .card-btn:hover {
   background: #0d9488;
 }
@@ -528,6 +585,7 @@
   margin: 1rem auto;
   padding: 0 20px;
 }
+
 .faq details {
   margin-bottom: 1rem;
   border: 1px solid #ddd;
@@ -536,6 +594,7 @@
   background-color: white;
   font-size: 20px;
 }
+
 .faq summary {
   font-weight: bold;
   cursor: pointer;
@@ -549,13 +608,16 @@
   /* margin-top: 30px; */
   background-color: #fbf6ef;
 }
+
 .cta h2 {
   font-size: 40px;
 }
+
 .cta p {
   padding-bottom: 20px;
   font-size: 18px;
 }
+
 .cta .start-btn {
   background: #f97316;
   border: none;
@@ -567,9 +629,11 @@
   text-decoration: none;
   font-size: 24px;
 }
+
 .cta .start-btn:hover {
   background: #ea580c;
 }
+
 hr {
   width: 700px;
   margin-top: 50px;
@@ -583,20 +647,24 @@ hr {
   font-size: 0.9rem;
   color: #666;
 }
+
 .footer nav {
   margin-bottom: 1rem;
 }
+
 .footer nav a {
   margin: 0 10px;
   color: #666;
   text-decoration: none;
 }
+
 .footer nav a:hover {
   text-decoration: underline;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+
   .two-col,
   .feature-cards {
     grid-template-columns: 1fr;
