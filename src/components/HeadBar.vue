@@ -1,5 +1,8 @@
 <template>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
   <div class="home-page">
     <!-- Navbar -->
     <header class="navbar">
@@ -17,47 +20,50 @@
 
       <!-- Nav menu -->
       <div class="nav-container">
-        <ul :class="['nav-links', { 'active': isOpen }]">
-          <li>
+        <ul :class="['nav-links', { active: isOpen }]">
+          <!-- <li>
             <router-link to="/">
-              <font-awesome-icon icon="house" style="color: yellowgreen;" /> Home
+              <font-awesome-icon icon="house" style="color: yellowgreen" /> Home //no need for this right now
             </router-link>
-          </li>
+          </li> -->
 
           <li>
             <router-link to="/Stories">
-              <font-awesome-icon icon="coffee" style="color: burlywood;" /> Stories
+              <font-awesome-icon icon="coffee" style="color: burlywood" /> Stories
             </router-link>
           </li>
 
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
-              <font-awesome-icon icon="book" style="color: brown;" /> Try Brain Builder ▾
+              <font-awesome-icon icon="book" style="color: brown" /> Try Brain Builder ▾
             </a>
             <ul v-if="showDropdown" class="dropdown-menu">
               <li>
-            <router-link to="/today">
-              <font-awesome-icon icon="lightbulb" style="color: orange;" /> Today's Tips
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/activities" :class="{ active: $route.path.startsWith('/activities') }">
-              <font-awesome-icon icon="clipboard-list" style="color: green;" /> All Activities
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/favorites">
-              <font-awesome-icon icon="star" style="color: palevioletred;" /> Favorite Tips
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/progress">
-              <font-awesome-icon icon="chart-line" style="color: skyblue;" /> Activity Progress
-            </router-link>
-          </li>
+                <router-link
+                  to="/activities"
+                  :class="{ active: $route.path.startsWith('/activities') }"
+                >
+                  <font-awesome-icon icon="clipboard-list" style="color: green" /> All Activities
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/today">
+                  <font-awesome-icon icon="lightbulb" style="color: orange" /> Today's Tips
+                </router-link>
+              </li>
+
+              <li>
+                <router-link to="/favorites">
+                  <font-awesome-icon icon="star" style="color: palevioletred" /> Favorite Tips
+                </router-link>
+              </li>
+              <li>
+                <router-link to="/progress">
+                  <font-awesome-icon icon="chart-line" style="color: skyblue" /> Tips Progress
+                </router-link>
+              </li>
             </ul>
           </li>
-
         </ul>
       </div>
     </header>
