@@ -29,7 +29,7 @@
 
           <li>
             <router-link to="/Stories">
-              <font-awesome-icon icon="coffee" style="color: burlywood" /> Stories
+              <font-awesome-icon icon="coffee" style="color: burlywood"/> Stories
             </router-link>
           </li>
 
@@ -43,7 +43,7 @@
                   to="/activities"
                   :class="{ active: $route.path.startsWith('/activities') }"
                 >
-                  <font-awesome-icon icon="clipboard-list" style="color: green" /> All Activities
+                  <font-awesome-icon icon="clipboard-list" style="color: green" /> Explore Activities
                 </router-link>
               </li>
               <li>
@@ -124,7 +124,7 @@ const toggleMenu = () => {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 22px;
+  gap: 10px;
   align-items: center;
 }
 
@@ -140,7 +140,9 @@ const toggleMenu = () => {
 }
 
 .nav-links a:hover {
+  background-color: #f2f2f2;
   color: #14b8a6;
+  padding: 10px 16px;
 }
 
 .dropdown {
@@ -227,10 +229,11 @@ const toggleMenu = () => {
 }
 
 .router-link-active {
-  background-color: transparent;
+  background-color: #f2f2f2;
+  color: #14b8a6 !important;
   border-radius: 6px;
   padding: 10px 16px;
-  color: inherit !important;
+  /* color: inherit !important; */
   font-weight: bold;
 }
 </style>
