@@ -1,164 +1,226 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, onUnmounted, Transition } from 'vue'
+import { useRouter } from 'vue-router'
+import type { AgeGroup } from '@/stores/Exercise'
 
-  const router = useRouter()
+const routineData = ref<any>(null)
+const loading = ref(false)
 
-  const age = ref<string | null>(null)
-  const gender = ref<string | null>(null)
+// age and gender
+const AGE_TABS: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
+const selectedAge = ref<AgeGroup>('1-3y')
+const selectedGender = ref<'girl' | 'boy'>('girl')
 
-  const selectAge = (a: string) => (age.value = a)
-  const selectGender = (g: string) => (gender.value = g)
+const selectorTop = ref<HTMLElement | null>(null)
+const erexerciseCardRef = ref<HTMLElement | null>(null)
 
-  // generate routine
-  const enter = async () => {
-    if (!age.value || ! gender.value) {
-      alert('Please select both age and gender.')
-      return
-    }
+const showBackBtn = ref(false)
 
-    try {
-      const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ age_code: age.value, gender: gender.value })
-      })
-      const data = await res.json()
-      // save to localStorage
-      localStorage.setItem('routine', JSON.stringify(data))
-      localStorage.setItem('age_code', age.value)
-      localStorage.setItem('gender', gender.value)
-      // jump to display routine
-      router.push('/today')
-    } catch (err) {
-      console.error(err)
-      alert('Failed to generate routine.')
-    }
+onMounted(() => {
+  const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
+  const genderSaved = localStorage.getItem('gender') as 'girl' | 'boy' | null
+  // const routineSaved = localStorage.getItem('routine')
+
+  if (ageSaved && AGE_TABS.includes(ageSaved)) {
+    selectedAge.value = ageSaved
   }
+  if (genderSaved) {
+    selectedGender.value = genderSaved
+  }
+  generateRoutine()
+})
+
+async function generateRoutine() {
+  loading.value = true
+  try {
+    const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        age_code: selectedAge.value,
+        gender: selectedGender.value
+      })
+    })
+    const data = await res.json()
+    if (data.routine && data.routine.length > 0) {
+      routineData.value = data
+      localStorage.setItem('routine', JSON.stringify(data))
+      localStorage.setItem('age_code', selectedAge.value)
+      localStorage.setItem('gender', selectedGender.value)
+    } else {
+      routineData.value = null
+    }
+  } catch (err) {
+    console.error('Failed to generate routine:', err)
+    routineData.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+function scrollToExerciseCard() {
+  if (erexerciseCardRef.value) {
+    erexerciseCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+function handleScroll() {
+  if (!selectorTop.value) return
+  const rect = selectorTop.value.getBoundingClientRect()
+  // if age selector scroll to top, display button
+  showBackBtn.value = rect.top < 0
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+function changeAge(age: AgeGroup) {
+  selectedAge.value = age
+  localStorage.setItem('age_code', age)
+  generateRoutine()
+  scrollToExerciseCard()
+}
+
+function changeGender(g: 'girl' | 'boy') {
+  selectedGender.value = g
+  localStorage.setItem('gender', g)
+  generateRoutine()
+}
 </script>
 
 <template>
-  <div class="selector-page">
-    <div class="card">
-      <button class="close" aria-label="Close" @click="router.push('/')">✕</button>
+  <!-- Selector -->
+    <section class="selector-hero">
+      <div class="selector-hero-content">
+        <h2 class="section-title">Personalize Your Tips</h2>
+        <p class="selector-sub">
+          Choose gender and age group to tailor activities for your child.
+        </p>
 
-      <div class="header">
-        <img src="/selector-page/baby-1.png" alt="Baby" class="icon" />
-        <h2>Select your child's<br />age and gender</h2>
-      </div>
+        <!-- Gender + Age grouped together -->
+        <div class="selectors-wrapper">
+          <!-- Gender -->
+          <div class="selector-group">
+            <h3 class="group-title">Select Gender</h3>
+            <div class="selector">
+              <div :class="['selector-card', { active: selectedGender === 'girl' }]" @click="changeGender('girl')">
+                <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" />
+                Girl
+              </div>
+              <div :class="['selector-card', { active: selectedGender === 'boy' }]" @click="changeGender('boy')">
+                <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" />
+                Boy
+              </div>
+            </div>
+          </div>
 
-      <div class="section">
-        <label class="label">Age:</label>
-        <div class="options">
-          <button :class="['opt', { active: age === '0-1y' }]" @click="selectAge('0-1y')">0-1</button>
-          <button :class="['opt', { active: age === '1-3y' }]" @click="selectAge('1-3y')">1-3</button>
-          <button :class="['opt', { active: age === '3-5y' }]" @click="selectAge('3-5y')">3-5</button>
+          <!-- Age -->
+          <div class="selector-group">
+            <h3 class="group-title">Choose Age Group</h3>
+            <div class="selector">
+              <div v-for="age in AGE_TABS" :key="age" :class="['selector-card', { active: selectedAge === age }]"
+                @click="changeAge(age)">
+                {{ age.replace('y', '') }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div class="section">
-        <label class="label">Gender:</label>
-        <div class="options">
-          <button :class="['opt', { active: gender === 'girl' }]" @click="selectGender('girl')">
-            <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" /> Girl
-          </button>
-          <button :class="['opt', { active: gender === 'boy' }]" @click="selectGender('boy')">
-            <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" /> Boy
-          </button>
-        </div>
-      </div>
-
-      <div class="footer">
-        <button class="enter-btn" @click="enter">Enter</button>
-      </div>
-    </div>
-  </div>
+    </section>
 </template>
 
-<style scoped>
+<style>
+.selector-hero {
+  position: relative;
+  width: 100%;
+  padding: 0 20px;
+  /* background: url("../assets/selector-hero.jpg") center/cover no-repeat; */
+  text-align: center;
+  margin: 0;
+  font-size: 22px;
+}
+
+/* .selector-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(36, 36, 36, 0.55);
+  z-index: 0;
+  border-radius: 20px;
+} */
+.selectors-wrapper {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.selector-group {
+  display: flex;
+  align-items: center;   
+  gap: 1.5rem;             
+  justify-content: center; 
+  flex-wrap: wrap; 
+}
+
+.group-title {
+  font-size: 1.5rem;
+  color: #f97316;
+  white-space: nowrap;
+  margin: 0;
+}
+.selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap; 
+}
+.selector-card {
+  background: white;
+  border-radius: 16px;
+  padding: 10px 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 180px;
+  margin: 0 auto;
+}
+
+.selector-card:hover {
+  transform: translateY(-5px);
+}
+
+.selector-card.active {
+  background: #14b8a6;
+  color: white;
+}
+
+.selector-block {
+  text-align: center;
+  margin: 20px auto;
+}
+
+.section-title {
+  color: #f97316;
+  font-size: 2rem;
+  margin-bottom: -10px;
+}
+
+.selector-sub {
+  color: #555;
+  font-size: 22px;
+  margin-bottom: -10px;
+}
 .icon {
   width: 24px;
   height: 24px;
   object-fit: contain;
-}
-.selector-page {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: #f6f3dc;
-}
-.card {
-  position: relative;
-  background: #fff;
-  border-radius: 20px;
-  padding: 32px;
-  width: 360px;
-  max-width: 90%;
-  box-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.02),
-    0 10px 24px rgba(0, 0, 0, 0.08);
-  text-align: center;
-}
-.close {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  border: none;
-  background: none;
-  font-size: 20px;
-  cursor: pointer;
-}
-.header {
-  margin-bottom: 22px;
-}
-.baby-icon {
-  width: 54px;
-  margin-bottom: 10px;
-}
-h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  line-height: 1.4;
-}
-.section {
-  margin: 18px 0;
-  text-align: left;
-}
-.label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-.options {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.opt {
-  padding: 8px 16px;
-  border-radius: 12px;
-  border: 1px solid #ddd;
-  background: #fdfbe6;
-  cursor: pointer;
-}
-.opt.active {
-  background: #a9cbd0;
-  color: #fff;
-  border-color: #a9cbd0;
-}
-.footer {
-  margin-top: 22px;
-}
-.enter-btn {
-  padding: 10px 24px;
-  border-radius: 12px;
-  border: none;
-  background: #fdfbe6;
-  font-weight: 600;
-  cursor: pointer;
-}
-.enter-btn:hover {
-  background: #eee7b8;
 }
 </style>

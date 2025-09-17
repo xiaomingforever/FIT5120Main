@@ -30,7 +30,7 @@
         </div>
         <div class="card">
           <img src="/public/browse-activity.png" alt="browse-activity">
-          <h3>All Activities</h3>
+          <h3>Explore Activities</h3>
           <p>Search 80+ tips. Filter by age, place, and time.</p>
           <!-- <button>Open library</button> -->
           <router-link to="/activities" class="card-btn">Open library</router-link>

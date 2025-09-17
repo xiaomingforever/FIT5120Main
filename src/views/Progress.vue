@@ -186,13 +186,13 @@ const progressImage = (actName?: string): string => {
     <section class="panel">
       <div class="tabs">
         <button :class="['tab', { active: activeTab === 'skills' }]" @click="activeTab = 'skills'">
-          Skills
+          Skill Progress
         </button>
         <button
           :class="['tab', { active: activeTab === 'history' }]"
           @click="activeTab = 'history'"
         >
-          History
+          Tip History
         </button>
       </div>
 

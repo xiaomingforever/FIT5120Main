@@ -74,7 +74,7 @@ const goToActivity = (c: Cat) => {
   padding: 22px;
   /* box-shadow: var(--card-shadow); */
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  width: min(1060px, 88vw);
+  width: min(900px, 88vw);
   margin: 0 auto;
   margin-bottom: 20px;
   /* margin-top: -50px; */

@@ -401,22 +401,22 @@ const nextTip = computed(() => {
   font-family: 'Nunito', sans-serif;
 }
 .close {
-  position: fixed;
+  position: absolute;
   margin-bottom: 10px;
-  top: 50px;         
-  right: 300px; 
+  top: 25px;         
+  right: 25px; 
   z-index: 200;
   border: 0;
   background: #dfdfe0;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 600;
 }
 .hero {
-  width: 55%;
+  width: 40%;
   height: 250px;
   object-fit: fill;
   border-radius: 12px;
@@ -599,8 +599,8 @@ const nextTip = computed(() => {
 
 .fav-btn {
   position: absolute;
-  top: 305px;
-  right: 60px;
+  top: 22px;
+  right: 90px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -612,8 +612,8 @@ const nextTip = computed(() => {
   outline-offset: 2px;
 }
 .fav-btn img {
-  width: 26px;
-  height: 26px;
+  width: 40px;
+  height: 40px;
   display: block;
 }
 .completed-info {

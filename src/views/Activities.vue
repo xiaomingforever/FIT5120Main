@@ -1,25 +1,114 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import ExerciseCard from '@/components/ExerciseCard.vue'
 import type { Exercise, AgeGroup, Tip } from '@/stores/Exercise'
 
 const router = useRouter()
 const exercises = ref<Exercise[]>([]) // API data from back-end
-const selectedAge = ref<AgeGroup>('0-1y')
-const loading = ref(true)
+// const selectedAge = ref<AgeGroup>('0-1y')
+// const loading = ref(true)
 
 const currentAge = computed(() => selectedAge.value)
 const gender = computed(() => localStorage.getItem('gender') || 'girl')
 
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
-const AGE_TABS: Array<{ label: string; value: '0-1y' | AgeGroup }> = [
-  // { label: 'All Ages', value: 'all' },
-  { label: '0-1', value: '0-1y' },
-  { label: '1-3', value: '1-3y' },
-  { label: '3-5', value: '3-5y' },
-]
+// const AGE_TABS: Array<{ label: string; value: '0-1y' | AgeGroup }> = [
+//   // { label: 'All Ages', value: 'all' },
+//   { label: '0-1', value: '0-1y' },
+//   { label: '1-3', value: '1-3y' },
+//   { label: '3-5', value: '3-5y' },
+// ]
+
+const routineData = ref<any>(null)
+const loading = ref(false)
+
+// age and gender
+const AGE_TABS: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
+const selectedAge = ref<AgeGroup>('1-3y')
+const selectedGender = ref<'girl' | 'boy'>('girl')
+
+const selectorTop = ref<HTMLElement | null>(null)
+const erexerciseCardRef = ref<HTMLElement | null>(null)
+
+const showBackBtn = ref(false)
+
+onMounted(() => {
+  const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
+  const genderSaved = localStorage.getItem('gender') as 'girl' | 'boy' | null
+  // const routineSaved = localStorage.getItem('routine')
+
+  if (ageSaved && AGE_TABS.includes(ageSaved)) {
+    selectedAge.value = ageSaved
+  }
+  if (genderSaved) {
+    selectedGender.value = genderSaved
+  }
+  generateRoutine()
+})
+
+async function generateRoutine() {
+  loading.value = true
+  try {
+    const res = await fetch('https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        age_code: selectedAge.value,
+        gender: selectedGender.value
+      })
+    })
+    const data = await res.json()
+    if (data.routine && data.routine.length > 0) {
+      routineData.value = data
+      localStorage.setItem('routine', JSON.stringify(data))
+      localStorage.setItem('age_code', selectedAge.value)
+      localStorage.setItem('gender', selectedGender.value)
+    } else {
+      routineData.value = null
+    }
+  } catch (err) {
+    console.error('Failed to generate routine:', err)
+    routineData.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+function scrollToExerciseCard() {
+  if (erexerciseCardRef.value) {
+    erexerciseCardRef.value.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}
+
+function handleScroll() {
+  if (!selectorTop.value) return
+  const rect = selectorTop.value.getBoundingClientRect()
+  // if age selector scroll to top, display button
+  showBackBtn.value = rect.top < 0
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll)
+})
+
+function changeAge(age: AgeGroup) {
+  selectedAge.value = age
+  localStorage.setItem('age_code', age)
+  generateRoutine()
+  scrollToExerciseCard()
+}
+
+function changeGender(g: 'girl' | 'boy') {
+  selectedGender.value = g
+  localStorage.setItem('gender', g)
+  generateRoutine()
+}
 
 // request to backend when loading
 onMounted(async () => {
@@ -134,15 +223,6 @@ const grouped = computed(() => {
 // })
 
 const visible = computed<Exercise[]>(() => {
-  // if (selectedAge.value === 'all') {
-  //   // for 'all' show every activity and practiceCount is unique tip count across all ages
-  //   return exercises.value.map((ex) => ({
-  //     ...ex,
-  //     practiceCount: new Set((ex.tips || []).map((t: any) => String(t.tip_id))).size,
-  //     currentAgeGroup: 'all',
-  //   }))
-  // }
-  // display current age group
   const group = grouped.value.find((g) => g.label === selectedAge.value)
   if (!group) return []
 
@@ -154,12 +234,6 @@ const visible = computed<Exercise[]>(() => {
     currentAgeGroup: selectedAge.value,
   }))
 })
-
-// function openExercise(ex: Exercise) {
-//   // route to detail  or open a modal
-//   // router.push({ name: 'ExerciseDetail', params: { id: ex.id } })
-//   console.log('open', ex)
-// }
 
 const goToTips = (ex: Exercise) => {
   const normalizedAge = selectedAge.value
@@ -175,25 +249,19 @@ const goToTips = (ex: Exercise) => {
     },
   })
 }
-// const grouped = computed(() =>
-//   AGE_ORDER.map((label) => ({
-//     label,
-//     items: exercises.value.filter((e) => e.ageGroup === label),
-//   })).filter((g) => g.items.length),
-// )
 
 const prevAgeIndex = ref(0)
 const direction = ref<'left' | 'right'>('right')
 
-function changeAge(newAge: AgeGroup) {
-  const newIndex = AGE_ORDER.indexOf(newAge as AgeGroup)
+// function changeAge(newAge: AgeGroup) {
+//   const newIndex = AGE_ORDER.indexOf(newAge as AgeGroup)
 
-  direction.value = newIndex > prevAgeIndex.value ? 'right' : 'left'
-  prevAgeIndex.value = newIndex
+//   direction.value = newIndex > prevAgeIndex.value ? 'right' : 'left'
+//   prevAgeIndex.value = newIndex
 
-  selectedAge.value = newAge
-  localStorage.setItem('age_code', newAge)
-}
+//   selectedAge.value = newAge
+//   localStorage.setItem('age_code', newAge)
+// }
 </script>
 
 <template>
@@ -208,8 +276,47 @@ function changeAge(newAge: AgeGroup) {
     </div>
   </section>
 
+  <!-- Selector -->
+    <section class="selector-hero">
+      <div class="selector-hero-content">
+        <h2 class="section-title">Personalize Your Tips</h2>
+        <p class="selector-sub">
+          Choose gender and age group to tailor activities for your child.
+        </p>
+
+        <!-- Gender + Age grouped together -->
+        <div class="selectors-wrapper">
+          <!-- Gender -->
+          <div class="selector-group">
+            <h3 class="group-title">Select Gender</h3>
+            <div class="selector">
+              <div :class="['selector-card', { active: selectedGender === 'girl' }]" @click="changeGender('girl')">
+                <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" />
+                Girl
+              </div>
+              <div :class="['selector-card', { active: selectedGender === 'boy' }]" @click="changeGender('boy')">
+                <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" />
+                Boy
+              </div>
+            </div>
+          </div>
+
+          <!-- Age -->
+          <div class="selector-group">
+            <h3 class="group-title">Choose Age Group</h3>
+            <div class="selector">
+              <div v-for="age in AGE_TABS" :key="age" :class="['selector-card', { active: selectedAge === age }]"
+                @click="changeAge(age)">
+                {{ age.replace('y', '') }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
   <!-- HERO CARD -->
-  <section class="act-hero">
+  <section class="act-hero" ref="erexerciseCardRef">
     <div class="act-hero_inner">
       <div class="act-hero_copy">
         <h1 class="act-hero_title">Explore Activities</h1>
@@ -227,7 +334,7 @@ function changeAge(newAge: AgeGroup) {
 
   <div class="activities">
     <!-- Age selector bar -->
-    <nav class="agebar" role="tablist" aria-label="Filter by age group">
+    <!-- <nav class="agebar" role="tablist" aria-label="Filter by age group">
       <button
         v-for="t in AGE_TABS"
         :key="t.value"
@@ -239,7 +346,7 @@ function changeAge(newAge: AgeGroup) {
       >
         {{ t.label }}
       </button>
-    </nav>
+    </nav> -->
 
     <h1 class="page-title">Tips Collection</h1>
 
@@ -298,7 +405,7 @@ function changeAge(newAge: AgeGroup) {
   font-weight: 500;
 }
 .act-hero {
-  margin: 20px auto;
+  margin: 60px auto;
   width: 900px;
 }
 .act-hero_inner {
@@ -334,9 +441,87 @@ function changeAge(newAge: AgeGroup) {
   width: 240px;
   justify-self: end;
 }
+.selector-hero {
+  position: relative;
+  width: 100%;
+  padding: 0 20px;
+  /* background: url("../assets/selector-hero.jpg") center/cover no-repeat; */
+  text-align: center;
+  margin: 0 auto;
+  font-size: 22px;
+}
+.selectors-wrapper {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
 
+.selector-group {
+  display: flex;
+  align-items: center;   
+  gap: 1.5rem;             
+  justify-content: center; 
+  flex-wrap: wrap; 
+}
+
+.group-title {
+  font-size: 1.5rem;
+  color: #f97316;
+  white-space: nowrap;
+  margin: 0;
+}
+.selector {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap; 
+}
+.selector-card {
+  background: white;
+  border-radius: 16px;
+  padding: 10px 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 180px;
+  margin: 0 auto;
+}
+
+.selector-card:hover {
+  transform: translateY(-5px);
+}
+
+.selector-card.active {
+  background: #14b8a6;
+  color: white;
+}
+
+.selector-block {
+  text-align: center;
+  margin: 20px auto;
+}
+
+.section-title {
+  color: #f97316;
+  font-size: 2rem;
+  margin-bottom: -10px;
+}
+
+.selector-sub {
+  color: #555;
+  font-size: 22px;
+  margin-bottom: -10px;
+}
+.icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
 .activities {
-  padding: 1rem;
+  /* padding: 1rem; */
   width: 900px;
   margin: 0 auto;
 }

@@ -19,13 +19,13 @@ const loading = ref(false)
 
 // age and gender
 const AGE_TABS: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
-const selectedAge = ref<AgeGroup>('1-3y') 
-const selectedGender = ref<'girl' | 'boy'>('girl') 
+const selectedAge = ref<AgeGroup>('1-3y')
+const selectedGender = ref<'girl' | 'boy'>('girl')
 
 const selectorTop = ref<HTMLElement | null>(null)
 const erexerciseCardRef = ref<HTMLElement | null>(null)
 
-const showBackBtn = ref(false) 
+const showBackBtn = ref(false)
 const showTooltip = ref(false)
 
 const showCongrats = ref(false)
@@ -229,7 +229,7 @@ function toFileBase(name: string) {
 function getImageUrl(actName: string) {
   const base = toFileBase(actName)
   const candidates = [
-     `../assets/Tips/${base}.png`,
+    `../assets/Tips/${base}.png`,
     `../assets/Activities/ActivityCard/${base}.png`,
   ]
   for (const k of candidates) {
@@ -266,54 +266,44 @@ function prevCard() {
       </div>
     </section>
 
-    <!-- gender selector -->
-    <div class="selector-block" ref="selectorTop">
-      <h2 class="section-title">Select Gender</h2>
-      <p class="selector-sub">
-        Personalize tips to better match your child's experience.
-      </p>
-      <div class="selector">
-        <div
-          :class="['selector-card', { active: selectedGender === 'girl' }]"
-          @click="changeGender('girl')"
-        >
-          <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" />Girl
-        </div>
-        <div
-          :class="['selector-card', { active: selectedGender === 'boy' }]"
-          @click="changeGender('boy')"
-        >
-          <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" />Boy
-        </div>
-      </div>
-      <!-- shapes decoration -->
-      <span class="shape shape-blue"></span>
-      <span class="shape shape-orange"></span>
-      <span class="shape shape-purple"></span>
-    </div>
+    <!-- Selector -->
+    <section class="selector-hero">
+      <div class="selector-hero-content">
+        <h2 class="section-title">Personalize Your Tips</h2>
+        <p class="selector-sub">
+          Choose gender and age group to tailor activities for your child.
+        </p>
 
-    <!-- age selector -->
-    <div class="selector-block">
-      <h2 class="section-title">Choose an Age Group</h2>
-      <p class="selector-sub">
-        Activities are tailored to your child's developmental stage.
-      </p>
-      <div class="selector">
-        <div
-          v-for="age in AGE_TABS"
-          :key="age"
-          :class="['selector-card', { active: selectedAge === age }]"
-          @click="changeAge(age)"
-        >
-          {{ age.replace('y', '') }}
+        <!-- Gender + Age grouped together -->
+        <div class="selectors-wrapper">
+          <!-- Gender -->
+          <div class="selector-group">
+            <h3 class="group-title">Select Gender</h3>
+            <div class="selector">
+              <div :class="['selector-card', { active: selectedGender === 'girl' }]" @click="changeGender('girl')">
+                <img src="/src/assets/selector page/girl.png" alt="Girl" class="icon" />
+                Girl
+              </div>
+              <div :class="['selector-card', { active: selectedGender === 'boy' }]" @click="changeGender('boy')">
+                <img src="/src/assets/selector page/boy.png" alt="Boy" class="icon" />
+                Boy
+              </div>
+            </div>
+          </div>
+
+          <!-- Age -->
+          <div class="selector-group">
+            <h3 class="group-title">Choose Age Group</h3>
+            <div class="selector">
+              <div v-for="age in AGE_TABS" :key="age" :class="['selector-card', { active: selectedAge === age }]"
+                @click="changeAge(age)">
+                {{ age.replace('y', '') }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <!-- decorate shape -->
-      <span class="shape shape-yellow"></span>
-      <span class="shape shape-red"></span>
-      <span class="shape shape-green"></span>
-      <span class="shape shape-diamond"></span>
-    </div>
+    </section>
 
     <!-- Exercise Section Intro -->
     <div class="exercise-intro" ref="erexerciseCardRef">
@@ -354,11 +344,7 @@ function prevCard() {
             <p class="desc" v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
             <!-- Image -->
             <!-- <img class="illustration" src="/src/assets/Activities/ActivityCard/LearningTime1.png" alt="image" /> -->
-             <img
-              class="illustration"
-              :src="getImageUrl(item.activity.name)"
-              :alt="item.activity.name"
-            />
+            <img class="illustration" :src="getImageUrl(item.activity.name)" :alt="item.activity.name" />
             <!-- Why this matters -->
             <div class="why" v-if="item.activity.brainyBackground">
               <h3>Why this matters</h3>
@@ -395,10 +381,8 @@ function prevCard() {
         <p v-if="routineData" class="complete-count">
           Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
         </p>
-        <div class="info-wrapper"
-              @mouseenter="showTooltip = true" 
-              @mouseleave="showTooltip = false" 
-              @click="showTooltip = !showTooltip">
+        <div class="info-wrapper" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
+          @click="showTooltip = !showTooltip">
           <!-- info icon -->
           <span class="info-icon">ℹ️</span>
 
@@ -425,20 +409,16 @@ function prevCard() {
     <div class="exercise-intro">
       <h2 class="section-title">Browse Tips by Activity type</h2>
       <p class="exercise-sub">
-        Browse tips by different activity types to discover ideas that match your child's needs. 
+        Browse tips by different activity types to discover ideas that match your child's needs.
       </p>
     </div>
-  
+
     <!-- Activity Grid -->
     <CategoryCloudCard />
 
-    <TipsCongrats
-      v-if="showCongrats"
-      :open="showCongrats"
+    <TipsCongrats v-if="showCongrats" :open="showCongrats"
       :activity-name="routineData?.routine?.[0]?.activity.name || ''"
-      :activity-id="routineData?.routine?.[0]?.activity.id || ''"
-      @close="showCongrats = false"
-    />
+      :activity-id="routineData?.routine?.[0]?.activity.id || ''" @close="showCongrats = false" />
   </main>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
@@ -496,29 +476,73 @@ function prevCard() {
   font-weight: 500;
 }
 
+.selector-hero {
+  position: relative;
+  width: 100%;
+  padding: 0 20px;
+  /* background: url("../assets/selector-hero.jpg") center/cover no-repeat; */
+  text-align: center;
+  margin: 0;
+  font-size: 22px;
+}
+
+/* .selector-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(36, 36, 36, 0.55);
+  z-index: 0;
+  border-radius: 20px;
+} */
+.selectors-wrapper {
+  display: flex;
+  justify-content: space-around;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 30px;
+}
+
+.selector-group {
+  display: flex;
+  align-items: center;   
+  gap: 1.5rem;             
+  justify-content: center; 
+  flex-wrap: wrap; 
+}
+
+.group-title {
+  font-size: 1.5rem;
+  color: #f97316;
+  white-space: nowrap;
+  margin: 0;
+}
 .selector {
   display: flex;
-  justify-content: center;
-  gap: 2rem;
-  margin: 40px 0;
+  gap: 1rem;
+  flex-wrap: wrap; 
 }
 .selector-card {
   background: white;
   border-radius: 16px;
-  padding: 20px 30px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 10px 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: center;
   font-size: 22px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  width: 180px;
+  margin: 0 auto;
 }
+
 .selector-card:hover {
   transform: translateY(-5px);
 }
+
 .selector-card.active {
   background: #14b8a6;
   color: white;
 }
+
 .selector-block {
   text-align: center;
   margin: 20px auto;
@@ -527,112 +551,30 @@ function prevCard() {
 .section-title {
   color: #f97316;
   font-size: 2rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: -10px;
 }
 
 .selector-sub {
   color: #555;
   font-size: 22px;
-  margin-bottom: 1.5rem;
+  margin-bottom: -10px;
 }
 .icon {
   width: 24px;
   height: 24px;
   object-fit: contain;
 }
-/* decorate shape */
-.shape {
-  position: absolute;
-  pointer-events: none;
-  opacity: 0.9;
-  z-index: 0;
-}
-
-.selector-block {
-  position: relative;
-  /* padding: 60px 20px; */
-}
-
-.shape-yellow {
-  left: -100px;
-  top: 80px;
-  width: 0;
-  height: 0;
-  border-left: 16px solid transparent;
-  border-right: 16px solid transparent;
-  border-bottom: 22px solid #facc15; /* yellow */
-  transform: rotate(0deg);
-}
-
-.shape-red {
-  right: -140px;
-  top: 70px;
-  width: 22px;
-  height: 22px;
-  background: #ef4444;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(239,68,68,0.08);
-}
-
-.shape-green {
-  right: -50px;
-  top: 70%;
-  transform: translate(-50%, -50%);
-  width: 14px;
-  height: 14px;
-  background: #10b981;
-  border-radius: 3px;
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.shape-diamond {
-  left: 42%;
-  bottom: -20px;
-  width: 18px;
-  height: 18px;
-  background: #f59e0b;
-  transform: rotate(45deg);
-  border-radius: 2px;
-}
-.shape-blue {
-  left: -250px;
-  top: 30px;
-  width: 24px;
-  height: 24px;
-  background: #3b82f6;
-  border-radius: 50%;
-  box-shadow: 0 4px 10px rgba(59,130,246,0.2);
-}
-
-.shape-orange {
-  right: -260px;
-  top: 80px;
-  width: 0;
-  height: 0;
-  border-left: 18px solid transparent;
-  border-right: 18px solid transparent;
-  border-bottom: 26px solid #fb923c; 
-}
-
-.shape-purple {
-  left: 0;
-  bottom: 60px;
-  width: 22px;
-  height: 22px;
-  background: #a855f7;
-  transform: rotate(45deg);
-  border-radius: 3px;
-}
 
 .exercise-card {
   background: #fff;
   border-radius: 20px;
-  margin: 20px auto;
+  margin: 10px auto;
   padding: 40px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   max-width: 1200px;
-  width: 1050px;
+  width: 900px;
 }
+
 .exercise-intro {
   text-align: center;
   margin-bottom: 24px;
@@ -664,6 +606,7 @@ function prevCard() {
   width: 300px;
   text-align: center;
 }
+
 .carousel {
   position: relative;
   overflow: hidden;
@@ -683,6 +626,7 @@ function prevCard() {
   padding: 20px;
   padding-top: 0;
 }
+
 .carousel-controls {
   position: absolute;
   top: 51%;
@@ -694,6 +638,7 @@ function prevCard() {
   padding: 0 10px;
   pointer-events: none;
 }
+
 .carousel-controls button {
   pointer-events: all;
   background: #007070;
@@ -705,10 +650,12 @@ function prevCard() {
   font-size: 20px;
   cursor: pointer;
 }
+
 .carousel-controls button:disabled {
   background: #ccc;
   cursor: not-allowed;
 }
+
 .carousel-controls button:hover {
   background: #0d9488;
 }
@@ -817,6 +764,7 @@ function prevCard() {
   /* gap: 6px; */
   /* position: relative; */
 }
+
 .complete-count {
   font-size: 18px;
   font-weight: 700;
@@ -830,23 +778,26 @@ function prevCard() {
   margin: 0 auto;
   margin-top: 10px;
 }
+
 .info-wrapper {
   position: relative;
   display: inline-block;
-  right: 38%;
+  right: 36%;
   margin-top: 7px;
 }
+
 .info-icon {
   cursor: pointer;
   font-size: 20px;
 }
+
 .tooltip {
   position: absolute;
   top: -320%;
   left: -20%;
-  /* transform: translateX(-50%); */  
-  white-space: normal; 
-  text-align: center; 
+  /* transform: translateX(-50%); */
+  white-space: normal;
+  text-align: center;
   background: #fff;
   color: #333;
   padding: 0 10px;
@@ -854,21 +805,24 @@ function prevCard() {
   font-size: 16px;
   white-space: nowrap;
   z-index: 10;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
 }
+
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
 }
+
 /* Sidebar container */
 .sidebar {
   position: fixed;
   top: 50%;
-  right: 20px;   
+  right: 20px;
   /* transform: translateY(-50%); */
   display: flex;
   flex-direction: column;
@@ -886,7 +840,7 @@ function prevCard() {
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
   transition: background 0.2s;
 }
 
@@ -903,7 +857,7 @@ function prevCard() {
 .fade-slide-enter-from,
 .fade-slide-leave-to {
   opacity: 0;
-  transform: translateY(20px); 
+  transform: translateY(20px);
 }
 
 .fade-slide-enter-to,
