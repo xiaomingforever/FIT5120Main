@@ -121,7 +121,7 @@ const favImage = (actName?: string): string => {
           <h3 class="tip-title">{{ t.tip }}</h3>
           <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
           <ul v-if="t.skills && t.skills.length" class="skills">
-            <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
+            <li class="skill">{{ t.skills[0].code }}</li>
           </ul>
         </div>
       </article>

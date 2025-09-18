@@ -252,7 +252,7 @@ const progressImage = (actName?: string): string => {
                 <p class="tip-activity">{{ c.activityName }}</p>
                 <p></p>
                 <ul v-if="c.skills?.length" class="history-skills">
-                  <li v-for="s in c.skills" :key="s.code" class="history-skill">{{ s.code }}</li>
+                  <li class="history-skill">{{ c.skills[0].code }}</li>
                 </ul>
               </div>
             </article>

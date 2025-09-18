@@ -74,7 +74,33 @@ const getCompletedCount = (id: string | number) => {
   return completedCounts.value[id] || 0
 }
 
+const todayKey = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
+
 function done() {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+
+  const entry = records[model.value.tip_id] || { date: todayKey, count: 0 }
+
+  // reset when a new day
+  if (entry.date !== todayKey) {
+    entry.date = todayKey
+    entry.count = 0
+  }
+
+  if (entry.count >= 2) {
+    alert("Each tip can be completed a maximum of twice a day.")
+    return
+  }
+
+  if (entry.count === 1) {
+    const confirmAgain = confirm("You've already completed this tip today. Do you want to complete it again?")
+    if (!confirmAgain) return
+  }
+
+  entry.count++
+  records[model.value.tip_id] = entry
+  localStorage.setItem('tipDailyCounts', JSON.stringify(records))
+
   // Save the finished tip with skill tags and timestamp
   completedCounts.value[props.activityId] = (completedCounts.value[props.activityId] || 0) + 1
   localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
@@ -100,7 +126,14 @@ function done() {
 
   setTimeout(() => {
     showCongrats.value = true
-  }, 500)
+  }, 300)
+}
+
+const getTipCount = (id: string | number) => {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+  const todayKey = new Date().toISOString().split('T')[0]
+  const entry = records[id]
+  return entry && entry.date === todayKey ? entry.count : 0
 }
 
 const extractHttpsLink = (text?: string): string | null => {
@@ -240,30 +273,6 @@ const onKey = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-// const done = () => {
-//   router.push({
-//     name: 'TipsCongrats',
-//     params: { activityId: String(props.activityId) },
-//     query: {
-//       name: props.activityName,
-//       age: props.age,
-//       gender: props.gender,
-//       period: props.period,
-//       completedTipId: String(model.value.tip_id),
-//     },
-//   })
-// }
-
-// const related = computed(() => {
-//   const all = props.tips || []
-//   const others = all.filter((t) => String(t.tip_id) !== String(model.value.tip_id))
-//   // stable: pick first 2 by id
-//   return others
-//     .slice()
-//     .sort((a: any, b: any) => Number(a.tip_id) - Number(b.tip_id))
-//     .slice(0, 2)
-// })
-
 const previousTip = computed(() => {
   const all = (props.tips || []).sort((a, b) => Number(a.tip_id) - Number(b.tip_id))
   const idx = all.findIndex(t => String(t.tip_id) === String(model.value.tip_id))
@@ -308,7 +317,7 @@ const nextTip = computed(() => {
           <li v-for="s in model.skills" :key="s.code" class="chip">{{ s.code }}</li>
         </ul>
         <div class="completed-info">
-          <span class="count">Completed: {{ getCompletedCount(props.activityId) }} times</span>
+          <span class="count">Total Completed: {{ getCompletedCount(props.activityId) }} times</span>
           <p class="explain">
             Each time you complete this activity, it helps track your child's progress and growth journey.
           </p>
@@ -329,17 +338,6 @@ const nextTip = computed(() => {
             <strong>View Related Research</strong>
           </a>
         </p>
-
-        <!-- <section v-if="related.length" class="related">
-          <h3 class="related-title">Related tips</h3>
-          <ul class="related-list">
-            <li v-for="r in related" :key="r.tip_id">
-              <button class="related-link" @click="emit('open-related', r.tip_id)">
-                {{ r.tip }}
-              </button>
-            </li>
-          </ul>
-        </section> -->
 
         <section v-if="previousTip || nextTip" class="related">
           <h3 class="related-title">✨Related tips</h3>
@@ -365,7 +363,15 @@ const nextTip = computed(() => {
         </section>
 
         <div class="footer">
-          <button class="start-btn" @click="done">Done</button>
+          <button
+            class="start-btn"
+            :disabled="getTipCount(model.tip_id) >= 2"
+            @click="done"
+          >
+            <span v-if="getTipCount(model.tip_id) === 0">Done</span>
+            <span v-else-if="getTipCount(model.tip_id) === 1">Completed (Do it again)</span>
+            <span v-else>Completed (Today's upper limit)</span>
+          </button>
         </div>
       </div>
     </div>
@@ -595,6 +601,10 @@ const nextTip = computed(() => {
 .start-btn:focus {
   outline: 2px solid #a7f3d0;
   outline-offset: 2px;
+}
+.start-btn:disabled{
+  background: #ccc;
+  cursor: not-allowed;
 }
 
 .fav-btn {
