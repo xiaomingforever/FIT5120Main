@@ -70,8 +70,9 @@ onMounted(() => {
   }
 })
 
-const getCompletedCount = (id: string | number) => {
-  return completedCounts.value[id] || 0
+function getCompletedCount(id: string | number) {
+  const savedCounts = JSON.parse(localStorage.getItem('completedCounts') || '{}')
+  return savedCounts[id] || 0
 }
 
 const todayKey = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
@@ -142,7 +143,7 @@ const extractHttpsLink = (text?: string): string | null => {
   return match ? match[0] : null
 }
 
-const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
   eager: true,
   import: 'default',
   query: '?url',
@@ -284,6 +285,31 @@ const nextTip = computed(() => {
   const idx = all.findIndex(t => String(t.tip_id) === String(model.value.tip_id))
   return idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null
 })
+
+function handleCongratsClose() {
+  showCongrats.value = false
+  emit('close')  
+}
+
+// Tip Images
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’,]/g, '')        
+    .replace(/[^a-z0-9]+/g, '-') 
+    .replace(/^-+|-+$/g, '')    
+}
+
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+    const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path.split('/').pop()?.toLowerCase().replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return '' 
+}
 </script>
 
 <template>
@@ -303,7 +329,11 @@ const nextTip = computed(() => {
         >
           <img :src="isFavorited ? heartRed : heartEmpty" alt="" />
         </button>
-        <img v-if="imageUrl" class="hero" :src="imageUrl" :alt="activityName" />
+        <!-- <img v-if="imageUrl" class="hero" :src="imageUrl" :alt="activityName" /> -->
+         <div class="hero">
+          <img class="hero-img" :src="getTipImage(model.tip)" :alt="model.tip" />
+           <!-- <p style="font-size:12px;color:#999">DEBUG: {{ getTipImage(model.tip) }}</p> -->
+        </div>
 
         <div class="meta">
           <span class="activity">{{ activityName }}</span>
@@ -381,7 +411,7 @@ const nextTip = computed(() => {
       :open="showCongrats"
       :activity-name="activityName || ''"
       :activity-id="activityId || ''"
-      @close="showCongrats = false"
+      @close="handleCongratsClose"
   />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
@@ -422,13 +452,15 @@ const nextTip = computed(() => {
   font-weight: 600;
 }
 .hero {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.hero-img {
   width: 40%;
   height: 250px;
-  object-fit: fill;
+  object-fit: cover;
   border-radius: 12px;
-  display: block;
-  margin: 0 auto;
-  margin-bottom: 10px;
+  display: inline-block;
 }
 .meta {
   display: flex;

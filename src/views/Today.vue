@@ -150,15 +150,47 @@ onMounted(() => {
 })
 
 const getCompletedCount = (id: string) => {
-  return completedCounts.value[id] || 0
+  const savedCounts = JSON.parse(localStorage.getItem('completedCounts') || '{}')
+  return savedCounts[id] || 0
+}
+
+const todayKey = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
+
+function getTipCount(id: string | number) {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+  const todayKey = new Date().toISOString().split('T')[0]
+  const entry = records[id]
+  return entry && entry.date === todayKey ? entry.count : 0
 }
 
 function handleDone(activity: any) {
   const act = routineData.value.routine[0].activity
   const id = act.id
 
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+  let entry = records[id] || { date: todayKey, count: 0 }
+
   completedCounts.value[id] = (completedCounts.value[id] || 0) + 1
   localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
+
+  if (entry.date !== todayKey) {
+    entry = { date: todayKey, count: 0 }
+  }
+
+  if (entry.count >= 2) {
+    alert("Each tip can only be completed twice per day. You cannot complete it again today.")
+    return
+  }
+
+  if (entry.count === 1) {
+    const confirmAgain = confirm("You have already completed this tip once today. Do you want to complete it again?")
+    if (!confirmAgain) return
+  }
+
+  // update count
+  entry.count++
+  records[id] = entry
+  localStorage.setItem('tipDailyCounts', JSON.stringify(records))
 
   progress.record({
     id: act.id,
@@ -348,14 +380,21 @@ function prevCard() {
         </div>
       </div>
 
-      <button class="done-btn" @click="handleDone">
-        Done
+      <button
+        class="done-btn"
+        v-if="routineData && routineData.routine.length"
+        :disabled="getTipCount(routineData.routine[currentIndex].activity.id) >= 2"
+        @click="handleDone(routineData.routine[currentIndex].activity)"
+      >
+        <span v-if="getTipCount(routineData.routine[currentIndex].activity.id) === 0">Done</span>
+        <span v-else-if="getTipCount(routineData.routine[currentIndex].activity.id) === 1">Completed (once more)</span>
+        <span v-else>Completed (daily limit reached)</span>
       </button>
 
       <!-- Completed times -->
       <div class="completed-times">
         <p v-if="routineData" class="complete-count">
-          Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
+          Total Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
         </p>
         <div class="info-wrapper" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
           @click="showTooltip = !showTooltip">
@@ -706,7 +745,7 @@ function prevCard() {
 }
 
 .exercise-card .done-btn {
-  width: 150px;
+  width: 300px;
   height: 40px;
   display: block;
   margin: 20px auto 0;
@@ -716,14 +755,18 @@ function prevCard() {
   border-radius: 8px;
   border: none;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 18px;
   cursor: pointer;
 }
 
 .exercise-card .done-btn:hover {
   background: #0d9488
 }
-
+.exercise-card .done-btn:disabled
+{
+  background: #ccc;
+  cursor: not-allowed;
+}
 .completed-times {
   display: flex;
   align-items: center;
