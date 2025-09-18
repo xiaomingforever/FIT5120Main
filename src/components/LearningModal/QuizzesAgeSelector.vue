@@ -23,8 +23,12 @@ const emit = defineEmits<{
 
 // selection
 const selected = ref<'0-1' | '1-2' | '3-5' | null>(null)
-const pick = (age: '0-1' | '1-2' | '3-5') => { selected.value = age }
-const start = () => { if (selected.value) emit('start', selected.value) }
+const pick = (age: '0-1' | '1-2' | '3-5') => {
+  selected.value = age
+}
+const start = () => {
+  if (selected.value) emit('start', selected.value)
+}
 
 function bgImageStyle(url?: string) {
   return url ? { backgroundImage: `url(${url})` } : {}
@@ -34,21 +38,10 @@ function onOverlay() {
 }
 </script>
 
-
 <template>
   <teleport to="body">
-    <div
-      v-if="open"
-      class="overlay"
-      @click="onOverlay"
-    >
-      <div
-        class="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="qas-title"
-        @click.stop
-      >
+    <div v-if="open" class="overlay" @click="onOverlay">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="qas-title" @click.stop>
         <!-- Close button -->
         <button class="close" aria-label="Close" @click="$emit('close')">×</button>
 
@@ -56,13 +49,13 @@ function onOverlay() {
 
         <div class="grid">
           <!-- Infant -->
-          <button class="age-card" type="button" :class="{ selected: selected === '0-1' }"
-  @click="pick('0-1')">
-            <div
-              class="thumb"
-              :style="bgImageStyle(infantImg)"
-              aria-hidden="true"
-            />
+          <button
+            class="age-card"
+            type="button"
+            :class="{ selected: selected === '0-1' }"
+            @click="pick('0-1')"
+          >
+            <div class="thumb" :style="bgImageStyle(infantImg)" aria-hidden="true" />
             <div class="label">
               <strong>Infant</strong>
               <span>(0-1)</span>
@@ -70,13 +63,13 @@ function onOverlay() {
           </button>
 
           <!-- Toddler -->
-          <button class="age-card" type="button" :class="{ selected: selected === '1-2' }"
-  @click="pick('1-2')">
-            <div
-              class="thumb"
-              :style="bgImageStyle(toddlerImg)"
-              aria-hidden="true"
-            />
+          <button
+            class="age-card"
+            type="button"
+            :class="{ selected: selected === '1-2' }"
+            @click="pick('1-2')"
+          >
+            <div class="thumb" :style="bgImageStyle(toddlerImg)" aria-hidden="true" />
             <div class="label">
               <strong>Toddler</strong>
               <span>(1-2)</span>
@@ -84,13 +77,13 @@ function onOverlay() {
           </button>
 
           <!-- Preschooler -->
-          <button class="age-card" type="button" :class="{ selected: selected === '3-5' }"
-  @click="pick('3-5')">
-            <div
-              class="thumb"
-              :style="bgImageStyle(preschoolerImg)"
-              aria-hidden="true"
-            />
+          <button
+            class="age-card"
+            type="button"
+            :class="{ selected: selected === '3-5' }"
+            @click="pick('3-5')"
+          >
+            <div class="thumb" :style="bgImageStyle(preschoolerImg)" aria-hidden="true" />
             <div class="label">
               <strong>Preschooler</strong>
               <span>(3-5)</span>
@@ -105,8 +98,6 @@ function onOverlay() {
     </div>
   </teleport>
 </template>
-
-
 
 <style scoped>
 /* Overlay */
@@ -129,6 +120,7 @@ function onOverlay() {
   box-shadow: 0 24px 60px #00000040;
   padding: 28px 28px 24px;
   border: 1px solid #0000000d;
+  font-family: 'Nunito', sans-serif;
 }
 
 .close {
@@ -146,7 +138,9 @@ function onOverlay() {
   font-size: 22px;
   font-weight: 600;
 }
-.close:hover { background: #eaeaea; }
+.close:hover {
+  background: #eaeaea;
+}
 
 .title {
   margin: 8px 0 22px;
@@ -164,7 +158,9 @@ function onOverlay() {
   grid-template-columns: 1fr;
 }
 @media (min-width: 820px) {
-  .grid { grid-template-columns: repeat(3, 1fr); }
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Age card */
@@ -173,18 +169,33 @@ function onOverlay() {
   background: #fff;
   border: 0;
   border-radius: 16px;
-  box-shadow: 0 2px 0 #00000005, 0 10px 22px #0000001a;
+  box-shadow:
+    0 2px 0 #00000005,
+    0 10px 22px #0000001a;
   cursor: pointer;
-  transition: transform .15s ease, box-shadow .2s ease;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.2s ease;
   text-align: center;
   padding: 0;
   overflow: hidden;
 }
-.age-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px #00000029; }
-.age-card:focus-visible { outline: 3px solid #f59e0b73; outline-offset: 2px; }
-.age-card.selected { box-shadow: inset 0 0 0 2px #f59e0b; }
-.cta:disabled { opacity: .5; cursor: not-allowed; }
-
+.age-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px #00000029;
+}
+.age-card:focus-visible {
+  outline: 3px solid #f59e0b73;
+  outline-offset: 2px;
+}
+.age-card.selected {
+  box-shadow: 0 0 0 3px #f59e0b;
+  border-radius: 16px;
+}
+.cta:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 
 /* Image area */
 .thumb {
@@ -203,8 +214,12 @@ function onOverlay() {
   display: grid;
   gap: 2px;
 }
-.label strong { font-weight: 700; }
-.label span { opacity: .85; }
+.label strong {
+  font-weight: 700;
+}
+.label span {
+  opacity: 0.85;
+}
 
 /* Footer actions */
 .actions {
@@ -223,6 +238,11 @@ function onOverlay() {
   box-shadow: 0 6px 14px #f59e0b4d;
   cursor: pointer;
 }
-.cta:hover { filter: brightness(1.02); transform: translateY(-1px); }
-.cta:active { transform: translateY(0); }
+.cta:hover {
+  filter: brightness(1.02);
+  transform: translateY(-1px);
+}
+.cta:active {
+  transform: translateY(0);
+}
 </style>

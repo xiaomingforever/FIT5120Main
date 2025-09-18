@@ -57,7 +57,7 @@ function prettyMs(ms: number) {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: #00000080;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,7 +68,7 @@ function prettyMs(ms: number) {
   width: min(680px, 96vw);
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px #00000033;
   display: flex;
   flex-direction: column;
 }

@@ -10,6 +10,10 @@
 
         <!-- Body -->
         <section v-if="loaded && !showSummary" class="body">
+          <!-- Hero image-->
+          <div v-if="ageImage" class="age-hero">
+            <img :src="ageImage" :alt="`Quiz for ${labelForAgeGroup(props.ageGroup)}`" />
+          </div>
           <!-- Progress -->
           <div class="progress-wrap">
             <div class="progress">
@@ -74,7 +78,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import QuizSummaryModal from './QuizSummaryModal.vue'
-import { loadQuizForAge, type RuntimeQuestion, labelForAgeGroup } from '@/services/quizCsvService'
+import {
+  loadQuizForAge,
+  type RuntimeQuestion,
+  labelForAgeGroup,
+  QUIZ_AGE_IMAGES,
+} from '@/services/quizCsvService'
 
 const props = defineProps<{
   open: boolean
@@ -83,6 +92,7 @@ const props = defineProps<{
 const emit = defineEmits<{ (e: 'close'): void }>()
 
 // state
+const ageImage = computed(() => QUIZ_AGE_IMAGES[props.ageGroup] || '')
 const loaded = ref(false)
 const loadError = ref<string | null>(null)
 const questions = ref<RuntimeQuestion[]>([])
@@ -180,7 +190,7 @@ onMounted(() => {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: #00000080;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,10 +201,18 @@ onMounted(() => {
   width: min(880px, 96vw);
   background: #fff;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px #00000033;
   display: flex;
   flex-direction: column;
   max-height: 92vh;
+  font-family: 'Nunito', sans-serif;
+}
+.age-hero img {
+  width: 33%;
+  height: 90%;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 16px;
 }
 .header {
   display: flex;
