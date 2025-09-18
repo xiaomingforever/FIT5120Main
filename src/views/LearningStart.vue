@@ -119,7 +119,7 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(36, 36, 36, 0.4);
+  background: #24242466;
   z-index: 0;
 }
 .hero > * {
