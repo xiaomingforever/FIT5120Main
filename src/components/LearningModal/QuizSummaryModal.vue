@@ -71,6 +71,7 @@ function prettyMs(ms: number) {
   box-shadow: 0 20px 60px #00000033;
   display: flex;
   flex-direction: column;
+  font-family: 'Nunito', sans-serif;
 }
 .header {
   display: flex;
