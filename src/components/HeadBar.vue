@@ -32,6 +32,11 @@
               <font-awesome-icon icon="coffee" style="color: burlywood"/> Stories
             </router-link>
           </li>
+          <li>
+            <router-link to="/learning-start">
+              <font-awesome-icon icon="coffee" style="color: burlywood"/> Learning
+            </router-link>
+          </li>
 
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
