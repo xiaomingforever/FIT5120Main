@@ -103,7 +103,7 @@ function done() {
   localStorage.setItem('tipDailyCounts', JSON.stringify(records))
 
   // Save the finished tip with skill tags and timestamp
-  completedCounts.value[props.activityId] = (completedCounts.value[props.activityId] || 0) + 1
+  completedCounts.value[model.value.tip_id] = (completedCounts.value[model.value.tip_id] || 0) + 1
   localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
 
   progress.record({
@@ -347,7 +347,7 @@ function getTipImage(tipName: string): string {
           <li v-for="s in model.skills" :key="s.code" class="chip">{{ s.code }}</li>
         </ul>
         <div class="completed-info">
-          <span class="count">Total Completed: {{ getCompletedCount(props.activityId) }} times</span>
+          <span class="count">Total Completed: {{ getCompletedCount(model.tip_id) }} times</span>
           <p class="explain">
             Each time you complete this activity, it helps track your child's progress and growth journey.
           </p>
@@ -399,8 +399,8 @@ function getTipImage(tipName: string): string {
             @click="done"
           >
             <span v-if="getTipCount(model.tip_id) === 0">Done</span>
-            <span v-else-if="getTipCount(model.tip_id) === 1">Completed (Do it again)</span>
-            <span v-else>Completed (Today's upper limit)</span>
+            <span v-else-if="getTipCount(model.tip_id) === 1">Completed (Once More)</span>
+            <span v-else>Completed (Daily Limit Reached)</span>
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useProgressStore } from '@/stores/progress'
-// import TipModal from '@/components/TipModal.vue'
+import TipModal from '@/components/TipModal.vue'
 
 const showTip = ref(false)
 const selectedTip = ref<any | null>(null)
@@ -80,7 +80,7 @@ const skillsList = computed(() => {
 //   // sort descending by date key
 //   return Object.fromEntries(Object.entries(byDate).sort((a, b) => b[0].localeCompare(a[0])))
 // })
-// 按天 + tip 去重后的 history
+
 const groupedHistory = computed(() => {
   const byDate: Record<string, any[]> = {}
 
@@ -90,11 +90,9 @@ const groupedHistory = computed(() => {
 
     if (!byDate[k]) byDate[k] = []
 
-    // 找当天是否已有这个 tip
     const existing = byDate[k].find((item) => item.id === tipKey)
     if (existing) {
       existing.count = (existing.count || 1) + 1
-      // 保留最新完成时间
       if (c.completedAt > existing.completedAt) {
         existing.completedAt = c.completedAt
       }
@@ -103,10 +101,8 @@ const groupedHistory = computed(() => {
     }
   }
 
-  // 日期降序
   const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a))
 
-  // 每天的卡片再按最新完成时间排序
   const sorted = Object.fromEntries(
     sortedDates.map((date) => [
       date,
@@ -295,6 +291,17 @@ const progressImage = (actName?: string): string => {
         </div>
       </div>
     </section>
+    <TipModal
+      v-if="showTip"
+      :open="showTip"
+      :tip="selectedTip"
+      :activityName="selectedTip?.activityName || ''"
+      :activityId="selectedTip?.activityId || ''"
+      :age="selectedTip?.age_code || ''"
+      gender="any"
+      period="any"
+      @close="showTip = false"
+    />
   </div>
   <link
     href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
