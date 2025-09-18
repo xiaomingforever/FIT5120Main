@@ -1,3 +1,32 @@
+<script setup lang="ts">
+import QuizzesAgeSelector from '@/components/LearningModal/QuizzesAgeSelector.vue'
+import QuizModal from '@/components/LearningModal/QuizModal.vue'
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const showAgeSelector = ref(false)
+const showQuiz = ref(false)
+const showAgeModal = ref(false)
+const selectedAge = ref<'0-1' | '1-2' | '3-5' | null>(null)
+const openAgeModal = () => {
+  showAgeModal.value = true
+}
+// const closeAgeModal = () => {
+//   showAgeModal.value = false
+// }
+
+function openQuizzes() {
+  showAgeSelector.value = true
+}
+function startQuiz(age: '0-1' | '1-2' | '3-5') {
+  selectedAge.value = age
+  showAgeSelector.value = false
+  showQuiz.value = true
+}
+</script>
+
 <template>
   <!-- Hero Section -->
   <section class="hero">
@@ -39,9 +68,9 @@
         class="card"
         role="button"
         tabindex="0"
-        @click="openAgeModal"
-        @keydown.enter.prevent="openAgeModal"
-        @keydown.space.prevent="openAgeModal"
+        @click="openQuizzes"
+        @keydown.enter.prevent="openQuizzes"
+        @keydown.space.prevent="openQuizzes"
       >
         <div class="media">
           <img class="media-img" src="/public/Learning/QuizStart.jpg" alt="Quizzes preview" />
@@ -55,30 +84,22 @@
     </div>
 
     <QuizzesAgeSelector
-      :open="showAgeModal"
-      @close="closeAgeModal"
+      :open="showAgeSelector"
+      @close="showAgeSelector = false"
+      @start="startQuiz"
       infant-img="/public/Learning/Infant.jpg"
       toddler-img="/public/Learning/Toddler.jpg"
       preschooler-img="/public/Learning/Preschooler.jpg"
     />
+
+    <QuizModal
+      v-if="selectedAge"
+      :open="showQuiz"
+      :age-group="selectedAge"
+      @close="showQuiz = false"
+    />
   </section>
 </template>
-
-<script setup lang="ts">
-import QuizzesAgeSelector from '@/components/LearningModal/QuizzesAgeSelector.vue'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-
-const router = useRouter()
-
-const showAgeModal = ref(false)
-const openAgeModal = () => {
-  showAgeModal.value = true
-}
-const closeAgeModal = () => {
-  showAgeModal.value = false
-}
-</script>
 
 <style scoped>
 /* HERO CARD */

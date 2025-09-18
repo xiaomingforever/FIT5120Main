@@ -1,3 +1,40 @@
+<script setup lang="ts">
+import { ref, withDefaults, defineProps, defineEmits } from 'vue'
+
+type Props = {
+  open: boolean
+  closeOnOverlay?: boolean
+  infantImg?: string
+  toddlerImg?: string
+  preschoolerImg?: string
+}
+const props = withDefaults(defineProps<Props>(), {
+  closeOnOverlay: false,
+  infantImg: '',
+  toddlerImg: '',
+  preschoolerImg: '',
+})
+
+// emit event
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'start', age: '0-1' | '1-2' | '3-5'): void
+}>()
+
+// selection
+const selected = ref<'0-1' | '1-2' | '3-5' | null>(null)
+const pick = (age: '0-1' | '1-2' | '3-5') => { selected.value = age }
+const start = () => { if (selected.value) emit('start', selected.value) }
+
+function bgImageStyle(url?: string) {
+  return url ? { backgroundImage: `url(${url})` } : {}
+}
+function onOverlay() {
+  if (props.closeOnOverlay) emit('close')
+}
+</script>
+
+
 <template>
   <teleport to="body">
     <div
@@ -19,7 +56,8 @@
 
         <div class="grid">
           <!-- Infant -->
-          <button class="age-card" type="button">
+          <button class="age-card" type="button" :class="{ selected: selected === '0-1' }"
+  @click="pick('0-1')">
             <div
               class="thumb"
               :style="bgImageStyle(infantImg)"
@@ -27,12 +65,13 @@
             />
             <div class="label">
               <strong>Infant</strong>
-              <span>(0–1)</span>
+              <span>(0-1)</span>
             </div>
           </button>
 
           <!-- Toddler -->
-          <button class="age-card" type="button">
+          <button class="age-card" type="button" :class="{ selected: selected === '1-2' }"
+  @click="pick('1-2')">
             <div
               class="thumb"
               :style="bgImageStyle(toddlerImg)"
@@ -40,12 +79,13 @@
             />
             <div class="label">
               <strong>Toddler</strong>
-              <span>(1–2)</span>
+              <span>(1-2)</span>
             </div>
           </button>
 
           <!-- Preschooler -->
-          <button class="age-card" type="button">
+          <button class="age-card" type="button" :class="{ selected: selected === '3-5' }"
+  @click="pick('3-5')">
             <div
               class="thumb"
               :style="bgImageStyle(preschoolerImg)"
@@ -53,52 +93,20 @@
             />
             <div class="label">
               <strong>Preschooler</strong>
-              <span>(3–5)</span>
+              <span>(3-5)</span>
             </div>
           </button>
         </div>
 
         <div class="actions">
-          <button class="cta" type="button">Start Quiz</button>
+          <button class="cta" type="button" :disabled="!selected" @click="start">Start Quiz</button>
         </div>
       </div>
     </div>
   </teleport>
 </template>
 
-<script setup lang="ts">
 
-type Props = {
-  open: boolean
-  closeOnOverlay?: boolean
-  infantImg?: string
-  toddlerImg?: string
-  preschoolerImg?: string
-}
-const props = withDefaults(defineProps<Props>(), {
-  closeOnOverlay: false,
-  infantImg: '',
-  toddlerImg: '',
-  preschoolerImg: '',
-})
-
-defineEmits<{
-  (e: 'close'): void
-}>()
-
-function bgImageStyle(url?: string) {
-  return url
-    ? { backgroundImage: `url(${url})` }
-    : {} // fall backs
-}
-
-function onOverlay() {
-  if (props.closeOnOverlay) {
-
-    emit('close')
-  }
-}
-</script>
 
 <style scoped>
 /* Overlay */
@@ -174,6 +182,9 @@ function onOverlay() {
 }
 .age-card:hover { transform: translateY(-2px); box-shadow: 0 14px 28px #00000029; }
 .age-card:focus-visible { outline: 3px solid #f59e0b73; outline-offset: 2px; }
+.age-card.selected { box-shadow: inset 0 0 0 2px #f59e0b; }
+.cta:disabled { opacity: .5; cursor: not-allowed; }
+
 
 /* Image area */
 .thumb {
