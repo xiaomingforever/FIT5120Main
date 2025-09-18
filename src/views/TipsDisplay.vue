@@ -140,6 +140,39 @@ const tipImage = (actName: string): string => {
   return hit ? CARD_IMAGES[hit] : ''
 }
 
+// Tip Images
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+
+const Header_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’]/g, '')        
+    .replace(/[^a-z0-9]+/g, '-') 
+    .replace(/^-+|-+$/g, '')    
+}
+
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+    const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path.split('/').pop()?.toLowerCase().replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return '' 
+}
+
+
 onMounted(async () => {
   try {
     const enriched = await fetchTipsForActivity(activityId.value)
@@ -175,11 +208,11 @@ const openRelated = (tipId: string | number) => {
 }
 
 // HEADER IMAGE LOGIC
-const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
-  eager: true,
-  import: 'default',
-  query: '?url',
-}) as Record<string, string>
+// const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+//   eager: true,
+//   import: 'default',
+//   query: '?url',
+// }) as Record<string, string>
 
 // normalize activity names to file bases
 const FILENAME_ALIASES: Record<string, string> = {
@@ -207,7 +240,7 @@ const headerImage = computed(() => {
     `../assets/Tips/${base}.svg`,
   ]
   for (const k of candidates) {
-    if (TIP_IMAGES[k]) return TIP_IMAGES[k]
+    if (Header_IMAGES[k]) return Header_IMAGES[k]
   }
   // last resort: any image that contains the base
   // const hit = Object.keys(TIP_IMAGES).find(k => k.toLowerCase().includes(`/${base}.`))
@@ -272,8 +305,8 @@ const getTipCount = (id: string | number) => {
             <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
           </button>
 
-          <div class="tip-media" v-if="tipImage(t.act_name)">
-            <img :src="tipImage(t.act_name)" :alt="`${t.act_name} illustration`" loading="lazy" />
+          <div class="tip-media" v-if="getTipImage(t.tip)">
+            <img :src="getTipImage(t.tip)" :alt="`${t.tip} illustration`" loading="lazy" />
           </div>
 
           <div class="tip-content">

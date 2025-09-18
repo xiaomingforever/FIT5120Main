@@ -71,17 +71,51 @@ const skillsList = computed(() => {
 })
 
 // History tab data sorted by date desc in the getter
+// const groupedHistory = computed(() => {
+//   const byDate: Record<string, typeof filteredCompletions.value> = {}
+//   for (const c of filteredCompletions.value) {
+//     const k = dayKeyFromISO(c.completedAt)
+//     ;(byDate[k] ||= []).push(c)
+//   }
+//   // sort descending by date key
+//   return Object.fromEntries(Object.entries(byDate).sort((a, b) => b[0].localeCompare(a[0])))
+// })
+// 按天 + tip 去重后的 history
 const groupedHistory = computed(() => {
-  const byDate: Record<string, typeof filteredCompletions.value> = {}
+  const byDate: Record<string, any[]> = {}
+
   for (const c of filteredCompletions.value) {
     const k = dayKeyFromISO(c.completedAt)
-    ;(byDate[k] ||= []).push(c)
+    const tipKey = c.id
+
+    if (!byDate[k]) byDate[k] = []
+
+    // 找当天是否已有这个 tip
+    const existing = byDate[k].find((item) => item.id === tipKey)
+    if (existing) {
+      existing.count = (existing.count || 1) + 1
+      // 保留最新完成时间
+      if (c.completedAt > existing.completedAt) {
+        existing.completedAt = c.completedAt
+      }
+    } else {
+      byDate[k].push({ ...c, count: 1 })
+    }
   }
-  // sort descending by date key
-  return Object.fromEntries(Object.entries(byDate).sort((a, b) => b[0].localeCompare(a[0])))
+
+  // 日期降序
+  const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a))
+
+  // 每天的卡片再按最新完成时间排序
+  const sorted = Object.fromEntries(
+    sortedDates.map((date) => [
+      date,
+      byDate[date].sort((a, b) => b.completedAt.localeCompare(a.completedAt)),
+    ]),
+  )
+
+  return sorted
 })
-
-
 
 const fmtDate = (input: string | Date | number | null | undefined) => {
   if (input == null) return ''
@@ -250,10 +284,11 @@ const progressImage = (actName?: string): string => {
               <div class="fav-content">
                 <h3 class="tip-title">{{ c.tip }}</h3>
                 <p class="tip-activity">{{ c.activityName }}</p>
-                <p></p>
                 <ul v-if="c.skills?.length" class="history-skills">
                   <li class="history-skill">{{ c.skills[0].code }}</li>
                 </ul>
+                <p></p>
+                <p class="tip-count">Completed {{ c.count }} time<span v-if="c.count > 1">s</span></p>
               </div>
             </article>
           </div>
@@ -450,14 +485,31 @@ const progressImage = (actName?: string): string => {
   margin-top: 18px;
 }
 .day-header {
-  margin: 0 0 10px;
-  color: #334155;
-  font-weight: 800;
-  font-size: 14px;
-  letter-spacing: 0.02em;
+  display: inline-block;
+  background: #eef3ff;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 16px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 2px solid #c7d2fe;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  margin: 0 0 14px;
+  cursor: default;
+  transition: background 0.2s ease;
   text-transform: uppercase;
 }
-
+.tip-count {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 600;
+  background: #eaf7f7;
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: #007070;
+  margin: 0;
+}
 /* Card grid */
 .tip-grid {
   display: grid;
