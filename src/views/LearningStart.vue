@@ -1,11 +1,9 @@
 <template>
-   <!-- Hero Section -->
+  <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
       <h1>Learning</h1>
-      <p>
-        Learn key tips with flashcards. Take short quizzes to check memory and understanding.
-      </p>
+      <p>Learn key tips with flashcards. Take short quizzes to check memory and understanding.</p>
     </div>
   </section>
 
@@ -18,21 +16,21 @@
         class="card"
         role="button"
         tabindex="0"
-        @click="goFlashcards"
-        @keydown.enter.prevent="goFlashcards"
-        @keydown.space.prevent="goFlashcards"
+        @click="openAgeModal"
+        @keydown.enter.prevent="openAgeModal"
+        @keydown.space.prevent="openAgeModal"
       >
         <div class="media">
-  <img
-    class="media-img"
-    src="/public/Learning/Flashcardstart.jpg"
-    alt="Flashcards preview"
-  />
-</div>
+          <img
+            class="media-img"
+            src="/public/Learning/Flashcardstart.jpg"
+            alt="Flashcards preview"
+          />
+        </div>
         <div class="body">
           <h2>Flashcards</h2>
           <p>Flip cards to learn the essentials for each age group.</p>
-          <button class="cta" @click.stop="goFlashcards">Start</button>
+          <button class="cta" @click.stop="openAgeModal">Start</button>
         </div>
       </div>
 
@@ -41,39 +39,44 @@
         class="card"
         role="button"
         tabindex="0"
-        @click="goQuizzes"
-        @keydown.enter.prevent="goQuizzes"
-        @keydown.space.prevent="goQuizzes"
+        @click="openAgeModal"
+        @keydown.enter.prevent="openAgeModal"
+        @keydown.space.prevent="openAgeModal"
       >
         <div class="media">
-  <img
-    class="media-img"
-    src="/public/Learning/QuizStart.jpg"
-    alt="Quizzes preview"
-  />
-</div>
+          <img class="media-img" src="/public/Learning/QuizStart.jpg" alt="Quizzes preview" />
+        </div>
         <div class="body">
           <h2>Quizzes</h2>
-          <p>10 questions • 4 choices • 5–7 min.</p>
-          <button class="cta" @click.stop="goQuizzes">Start</button>
+          <p>10 questions • 4 choices • 5-7 min.</p>
+          <button class="cta">Start</button>
         </div>
       </div>
     </div>
+
+    <QuizzesAgeSelector
+      :open="showAgeModal"
+      @close="closeAgeModal"
+      infant-img="/public/Learning/Infant.jpg"
+      toddler-img="/public/Learning/Toddler.jpg"
+      preschooler-img="/public/Learning/Preschooler.jpg"
+    />
   </section>
 </template>
 
 <script setup lang="ts">
+import QuizzesAgeSelector from '@/components/LearningModal/QuizzesAgeSelector.vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-function goFlashcards() {
-
-  router.push('/flashcards').catch(() => console.warn('No route is found'))
+const showAgeModal = ref(false)
+const openAgeModal = () => {
+  showAgeModal.value = true
 }
-function goQuizzes() {
-
-  router.push('/quizzes').catch(() => console.warn('No route is found'))
+const closeAgeModal = () => {
+  showAgeModal.value = false
 }
 </script>
 
@@ -83,7 +86,7 @@ function goQuizzes() {
   position: relative;
   width: 100%;
   height: 300px;
-  background: url("../assets/learningstart-hero.jpg") center/cover no-repeat;
+  background: url('../assets/learningstart-hero.jpg') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -92,7 +95,7 @@ function goQuizzes() {
   color: #333;
 }
 .hero::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: rgba(36, 36, 36, 0.4);
@@ -148,7 +151,7 @@ function goQuizzes() {
 .card {
   background: var(--surface, #fff);
   border-radius: 16px;
-  box-shadow: var(--card-shadow, 0 2px 0 #00000005, 0 10px 24px rgba(0, 0,#0000000f));
+  box-shadow: var(--card-shadow, 0 2px 0 #00000005, 0 10px 24px rgba(0, 0, #0000000f));
   border: 1px solid var(--border, #e5e7eb);
   overflow: hidden;
   cursor: pointer;
@@ -170,11 +173,21 @@ function goQuizzes() {
 }
 
 /* Top media areas */
-.media { overflow: hidden; background: transparent; }
-.media-img { display: block; width: 100%; height: 190px; object-fit: cover; }
-@media (min-width: 900px) { .media-img { height: 210px; } }
-
-
+.media {
+  overflow: hidden;
+  background: transparent;
+}
+.media-img {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+@media (min-width: 900px) {
+  .media-img {
+    height: 210px;
+  }
+}
 
 /* Body */
 .body {
@@ -207,5 +220,4 @@ function goQuizzes() {
     transform 0.1s ease,
     box-shadow 0.1s ease;
 }
-
 </style>
