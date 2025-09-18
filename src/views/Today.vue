@@ -165,7 +165,7 @@ function getTipCount(id: string | number) {
 
 function handleDone(activity: any) {
   const act = routineData.value.routine[0].activity
-  const id = act.id
+  const id = act.tip_id
 
   const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
   let entry = records[id] || { date: todayKey, count: 0 }
@@ -193,13 +193,15 @@ function handleDone(activity: any) {
   localStorage.setItem('tipDailyCounts', JSON.stringify(records))
 
   progress.record({
-    id: act.id,
+    id: act.tip_id,
     tip: act.tip,
+    tip_des: activity.tip_des,
     activityName: act.name,
     activityId: act.id,
     age_code: routineData.value.age_code,
     skills: act.skills ?? [],
     source_url: act.source || '',
+    completedAt: new Date().toISOString(),
   })
 
   // fireworks animation
@@ -383,18 +385,18 @@ function prevCard() {
       <button
         class="done-btn"
         v-if="routineData && routineData.routine.length"
-        :disabled="getTipCount(routineData.routine[currentIndex].activity.id) >= 2"
+        :disabled="getTipCount(routineData.routine[currentIndex].activity.tip_id) >= 2"
         @click="handleDone(routineData.routine[currentIndex].activity)"
       >
-        <span v-if="getTipCount(routineData.routine[currentIndex].activity.id) === 0">Done</span>
-        <span v-else-if="getTipCount(routineData.routine[currentIndex].activity.id) === 1">Completed (once more)</span>
+        <span v-if="getTipCount(routineData.routine[currentIndex].activity.tip_id) === 0">Done</span>
+        <span v-else-if="getTipCount(routineData.routine[currentIndex].activity.tip_id) === 1">Completed (once more)</span>
         <span v-else>Completed (daily limit reached)</span>
       </button>
 
       <!-- Completed times -->
       <div class="completed-times">
         <p v-if="routineData" class="complete-count">
-          Total Completed: {{ getCompletedCount(routineData.routine[0].activity.id) }} times
+          Total Completed: {{ getCompletedCount(routineData.routine[0].activity.tip_id) }} times
         </p>
         <div class="info-wrapper" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
           @click="showTooltip = !showTooltip">
