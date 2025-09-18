@@ -14,12 +14,6 @@ const gender = computed(() => localStorage.getItem('gender') || 'girl')
 
 // tabs for the selector bar
 const AGE_ORDER: AgeGroup[] = ['0-1y', '1-3y', '3-5y']
-// const AGE_TABS: Array<{ label: string; value: '0-1y' | AgeGroup }> = [
-//   // { label: 'All Ages', value: 'all' },
-//   { label: '0-1', value: '0-1y' },
-//   { label: '1-3', value: '1-3y' },
-//   { label: '3-5', value: '3-5y' },
-// ]
 
 const routineData = ref<any>(null)
 const loading = ref(false)
@@ -218,10 +212,6 @@ const grouped = computed(() => {
   })).filter((g) => g.items.length)
 })
 
-// const sourceList = computed<Exercise[]>(() => {
-//   return exercises.value
-// })
-
 const visible = computed<Exercise[]>(() => {
   const group = grouped.value.find((g) => g.label === selectedAge.value)
   if (!group) return []
@@ -252,16 +242,6 @@ const goToTips = (ex: Exercise) => {
 
 const prevAgeIndex = ref(0)
 const direction = ref<'left' | 'right'>('right')
-
-// function changeAge(newAge: AgeGroup) {
-//   const newIndex = AGE_ORDER.indexOf(newAge as AgeGroup)
-
-//   direction.value = newIndex > prevAgeIndex.value ? 'right' : 'left'
-//   prevAgeIndex.value = newIndex
-
-//   selectedAge.value = newAge
-//   localStorage.setItem('age_code', newAge)
-// }
 </script>
 
 <template>
@@ -325,7 +305,7 @@ const direction = ref<'left' | 'right'>('right')
           to boost learning and fun.
         </p>
         <span class="act-hero_pill">
-          {{ gender }} · {{ currentAge }}
+          {{ selectedGender }} · {{ selectedAge }}
         </span>
       </div>
       <img class="act-hero_img" src="/src/assets/Activities/OutdoorPlay/exercise-headline.png" alt="Activities illustration" />
@@ -445,7 +425,6 @@ const direction = ref<'left' | 'right'>('right')
   position: relative;
   width: 100%;
   padding: 0 20px;
-  /* background: url("../assets/selector-hero.jpg") center/cover no-repeat; */
   text-align: center;
   margin: 0 auto;
   font-size: 22px;

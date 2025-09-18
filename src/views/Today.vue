@@ -41,17 +41,6 @@ onMounted(() => {
   if (genderSaved) {
     selectedGender.value = genderSaved
   }
-
-  // if (routineSaved) {
-  //   try {
-  //     routineData.value = JSON.parse(routineSaved)
-  //   } catch (e) {
-  //     console.error("Failed to parse routine from localStorage:", e)
-  //     generateRoutine()
-  //   }
-  // } else {
-  //   generateRoutine()
-  // }
   generateRoutine()
 })
 
@@ -212,19 +201,6 @@ function slug(s: string) {
 function toFileBase(name: string) {
   return slug(name)
 }
-// const imageUrl = computed(() => {
-//   const act = routineData.value?.routine?.[0]?.activity
-//   if (!act) return ''
-//   const base = toFileBase(act.name)
-//   const candidates = [
-//     `../assets/Tips/${base}.png`,
-//     `../assets/Activities/ActivityCard/${base}1.png`,
-//   ]
-//   for (const k of candidates) {
-//     if (IMAGE_MAP[k]) return IMAGE_MAP[k]
-//   } 
-//   return ''
-// })
 
 function getImageUrl(actName: string) {
   const base = toFileBase(actName)
@@ -480,20 +456,10 @@ function prevCard() {
   position: relative;
   width: 100%;
   padding: 0 20px;
-  /* background: url("../assets/selector-hero.jpg") center/cover no-repeat; */
   text-align: center;
   margin: 0;
   font-size: 22px;
 }
-
-/* .selector-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(36, 36, 36, 0.55);
-  z-index: 0;
-  border-radius: 20px;
-} */
 .selectors-wrapper {
   display: flex;
   justify-content: space-around;

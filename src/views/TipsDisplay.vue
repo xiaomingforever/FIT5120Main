@@ -60,12 +60,7 @@ const resolvedDesc = computed(
   () => activityDesc.value || (tips.value.find((t) => t.act_desc)?.act_desc ?? ''),
 )
 
-/**
- * - /option returns activities + (tip_id, tip, age_code) lists
- * - /dev enriches a given activity+tip_id with tip_des & skills
- */
 const OPTION_URL = 'https://zdwzxd4laj.execute-api.ap-southeast-2.amazonaws.com/option'
-// const DEV_URL = 'https://qr7uehfaof.execute-api.ap-southeast-2.amazonaws.com/dev'
 
 // get tips (lite) for a specific activity id;
 // try multiple dayparts because backend may segment options by daypart.
@@ -112,8 +107,8 @@ const fetchTipsForActivity = async (actId: string) => {
         } else {
           // merge skills
           const existing = tipMap.get(id)!
-          if ((!existing.skills || existing.skills.length === 0) && t.skill_code) {
-            existing.skills = [{ code: t.skill_code }]
+          if (t.skill_code && !existing.skills.some((s) => s.code === t.skill_code)) {
+            existing.skills.push({ code: t.skill_code })
           }
         }
       }
@@ -144,45 +139,6 @@ const tipImage = (actName: string): string => {
   const hit = Object.keys(CARD_IMAGES).find((k) => k.toLowerCase().includes('/' + kebab))
   return hit ? CARD_IMAGES[hit] : ''
 }
-// a single tip with description + skills using the /dev endpoint
-// const hydrateTip = async (t: TipLite): Promise<TipFull> => {
-//   try {
-//     // pass back an explicit routine with the chosen activity+tip_id
-//     const payload = {
-//       age_code: selectedAge,
-//       gender,
-//       routine: [
-//         {
-//           period: 'Any',
-//           activity: {
-//             id: Number(activityId.value),
-//             name: activityName.value || '',
-//             tip_id: t.tip_id,
-//           },
-//         },
-//       ],
-//     }
-//     const res = await fetch(DEV_URL, {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify(payload),
-//     })
-//     const data = await res.json()
-//     const act = data?.routine?.[0]?.activity ?? {}
-
-//     return {
-//       ...t,
-//       tip: act.tip || t.tip,
-//       tip_des: act.tip_des || '',
-//       skills: act.skills || [],
-//       source: (act.source ?? '').trim(),
-//       activityName: activityName.value,
-//     }
-//   } catch {
-//     // graceful fallback: still render the lite tip
-//     return { ...t, tip_des: '', skills: [], activityName: activityName.value }
-//   }
-// }
 
 onMounted(async () => {
   try {
@@ -257,6 +213,13 @@ const headerImage = computed(() => {
   // const hit = Object.keys(TIP_IMAGES).find(k => k.toLowerCase().includes(`/${base}.`))
   // return hit ? TIP_IMAGES[hit] : ''
 })
+
+const getTipCount = (id: string | number) => {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+  const todayKey = new Date().toISOString().split('T')[0]
+  const entry = records[id]
+  return entry && entry.date === todayKey ? entry.count : 0
+}
 </script>
 
 <template>
@@ -296,32 +259,48 @@ const headerImage = computed(() => {
         tabindex="0"
         @keydown.enter="openTip(t)"
         @keydown.space.prevent="openTip(t)"
+        :class="{ flipped: getTipCount(t.tip_id) >= 1,  selected: selectedTip === String(t.tip_id)}"
       >
-        <button
-          class="fav-btn"
-          :aria-pressed="isFavorited(t.tip_id)"
-          :title="isFavorited(t.tip_id) ? 'Remove from favorites' : 'Add to favorites'"
-          @click.stop="toggleFavorite(t)"
-        >
-          <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
-        </button>
+      <div class="tip-card-inner">
+        <div class="tip-card-front">
+          <button
+            class="fav-btn"
+            :aria-pressed="isFavorited(t.tip_id)"
+            :title="isFavorited(t.tip_id) ? 'Remove from favorites' : 'Add to favorites'"
+            @click.stop="toggleFavorite(t)"
+          >
+            <img :src="isFavorited(t.tip_id) ? heartRed : heartEmpty" alt="" />
+          </button>
 
-        <div class="tip-media" v-if="tipImage(t.act_name)">
-          <img :src="tipImage(t.act_name)" :alt="`${t.act_name} illustration`" loading="lazy" />
-        </div>
+          <div class="tip-media" v-if="tipImage(t.act_name)">
+            <img :src="tipImage(t.act_name)" :alt="`${t.act_name} illustration`" loading="lazy" />
+          </div>
 
-        <div class="tip-content">
-          <!-- <div class="tip-card-head">
+          <div class="tip-content">
+            <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.act_name }}</span>
         </div> -->
 
-          <h3 class="tip-title">{{ t.tip }}</h3>
-          <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
+            <h3 class="tip-title">{{ t.tip }}</h3>
+            <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
 
-          <ul v-if="t.skills && t.skills.length" class="skills">
-            <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
-          </ul>
+            <ul v-if="t.skills && t.skills.length" class="skills">
+              <li class="skill">{{ t.skills[0].code }}</li>
+            </ul>
+          </div>
         </div>
+
+        <div class="tip-card-back">
+          <template v-if="getTipCount(t.tip_id) === 1">
+            ✅ You have completed this tip once today.
+          </template>
+          <template v-else-if="getTipCount(t.tip_id) === 2">
+            🎉 Great job! You have completed this tip twice today.  
+            <br />
+            <div style="padding-top: 20px;">You've reached today's limit.</div>
+          </template>
+        </div>
+      </div>
       </article>
     </section>
     <!-- tip modal -->
@@ -498,7 +477,10 @@ const headerImage = computed(() => {
 }
 
 .tip-card {
+  perspective: 1000px;
   position: relative;
+  width: 100%;
+  height: 380px;
   background: #fff;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
@@ -512,11 +494,62 @@ const headerImage = computed(() => {
     box-shadow 0.12s ease;
 }
 
-.tip-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+.tip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d; 
+  transition: transform 0.6s ease-in-out;
+  border-radius: 16px;
+  /* overflow: hidden; */
+}
+.tip-card.flipped .tip-card-inner {
+  transform: rotateY(180deg);
+}
+/* flip back on hover */
+.tip-card.flipped:hover .tip-card-inner {
+  transform: rotateY(0deg);
+}
+.tip-card-front,
+.tip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
 }
 
+.tip-card-front {
+  background: #fff;
+}
+
+.tip-card-back {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-align: center;
+  /* padding: 20px; */
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.tip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+}
+.tip-card.selected {
+  border: 2px solid #0d9488;
+  box-shadow: 0 8px 20px rgba(0, 148, 136, 0.4);
+  transform: scale(1.02);
+  transition: all 0.25s ease;
+}
 .tip-card-head {
   display: flex;
   justify-content: flex-end;
