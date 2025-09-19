@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div v-if="open && !showSummary" class="overlay" @click.self="onClose">
+    <div v-if="open" v-show="!showSummary" class="overlay" @click.self="onClose">
       <div class="modal" role="dialog" aria-modal="true" :aria-label="title">
         <!-- Header -->
         <header class="header">
@@ -58,9 +58,8 @@
         <footer v-if="open" class="footer">
           <button class="primary" :disabled="!locked" @click="next">{{ nextLabel }}</button>
         </footer>
-      </div>
-    </div>
-    <!-- Summary Modal -->
+
+        <!-- Summary Modal -->
         <QuizSummaryModal
           v-if="showSummary"
           :open="showSummary"
@@ -71,6 +70,8 @@
           @retry="retry"
           @done="onClose"
         />
+      </div>
+    </div>
   </Teleport>
 </template>
 
