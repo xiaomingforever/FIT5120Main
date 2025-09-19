@@ -59,7 +59,7 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
         <div class="body">
           <h2>Flashcards</h2>
           <p>Flip cards to learn the essentials for each age group.</p>
-          <button class="cta" @click.stop="openAgeModal">Start</button>
+          <button class="cta" @click.stop="openAgeModal" disabled>Comming Soon</button>
         </div>
       </div>
 
@@ -240,5 +240,9 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
   transition:
     transform 0.1s ease,
     box-shadow 0.1s ease;
+}
+.cta:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 </style>
