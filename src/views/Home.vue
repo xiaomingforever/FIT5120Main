@@ -22,18 +22,18 @@
       <p style="font-size: 24px;">Turn science into simple daily actions.</p>
       <div class="feature-cards">
         <div class="card">
-          <img src="/public/today-pick.png" alt="today-pick">
-          <h3>Today's Tips</h3>
-          <p>Discover fun activities to boost child's brain development.</p>
-          <!-- <button>Explore</button> -->
-          <router-link to="/today" class="card-btn">Explore</router-link>
-        </div>
-        <div class="card">
           <img src="/public/browse-activity.png" alt="browse-activity">
           <h3>Explore Activities</h3>
           <p>Search 80+ tips. Filter by age, place, and time.</p>
           <!-- <button>Open library</button> -->
           <router-link to="/activities" class="card-btn">Open library</router-link>
+        </div>
+        <div class="card">
+          <img src="/public/today-pick.png" alt="today-pick">
+          <h3>Today's Tips</h3>
+          <p>Discover fun activities to boost child's brain development.</p>
+          <!-- <button>Explore</button> -->
+          <router-link to="/today" class="card-btn">Explore</router-link>
         </div>
         <div class="card">
           <img src="/public/process.png" alt="browse-activity">

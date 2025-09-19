@@ -34,13 +34,13 @@
           </li>
           <li>
             <router-link to="/learning-start">
-              <font-awesome-icon icon="coffee" style="color: burlywood"/> Learning
+              <font-awesome-icon icon="book" style="color: brown"/> Learning
             </router-link>
           </li>
 
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
-              <font-awesome-icon icon="book" style="color: brown" /> Try Brain Builder ▾
+              <font-awesome-icon icon="brain" style="color: skyblue" /> Try Brain Builder ▾
             </a>
             <ul v-if="showDropdown" class="dropdown-menu">
               <li>
