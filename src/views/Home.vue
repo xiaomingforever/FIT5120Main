@@ -561,6 +561,11 @@ const goSelector = () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
   font-size: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .card .card-btn {
