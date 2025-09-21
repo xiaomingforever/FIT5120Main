@@ -92,7 +92,7 @@ function onOverlay() {
         </div>
 
         <div class="actions">
-          <button class="cta" type="button" :disabled="!selected" @click="start">Start Quiz</button>
+          <button class="cta" type="button" :disabled="!selected" @click="start">Start!</button>
         </div>
       </div>
     </div>
