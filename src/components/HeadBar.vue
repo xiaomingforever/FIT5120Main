@@ -37,6 +37,11 @@
               <font-awesome-icon icon="book" style="color: brown"/> Learning
             </router-link>
           </li>
+          <li>
+            <router-link to="/AITools">
+              <font-awesome-icon icon="brain" style="color: brown"/> AI Tools
+            </router-link>
+          </li>
 
           <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
