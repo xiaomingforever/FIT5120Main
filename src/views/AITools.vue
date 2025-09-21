@@ -2,8 +2,8 @@
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Learning</h1>
-      <p>Learn key tips with flashcards. Take short quizzes to check memory and understanding.</p>
+      <h1>BrainBuilder AI</h1>
+      <p>Ask quick questions, get simple answers for your child’s brain development.</p>
     </div>
   </section>
 <!-- This is a mock up -->
