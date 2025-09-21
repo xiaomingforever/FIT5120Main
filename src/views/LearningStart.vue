@@ -67,7 +67,11 @@ function onFlashcardsCompleted() {
   showFlashcards.value = false
   showSummary.value = true
 }
-
+function onSummaryTakeQuiz() {
+  showSummary.value = false
+  ageTarget.value = 'quiz'
+  showAgeSelector.value = true
+}
 function restartFlashcards() {
   showSummary.value = false
   showFlashcards.value = false
@@ -156,7 +160,8 @@ function restartFlashcards() {
       :age="selectedAge"
       :total="10"
       @review="restartFlashcards"
-      @take-quiz="goToQuizAgeSelector"
+      @take-quiz="onSummaryTakeQuiz"
+
       @done="showSummary = false"
     />
 
