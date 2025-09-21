@@ -1,31 +1,83 @@
 <script setup lang="ts">
 import QuizzesAgeSelector from '@/components/LearningModal/QuizzesAgeSelector.vue'
 import QuizModal from '@/components/LearningModal/QuizModal.vue'
+import FlashCardModal from '@/components/LearningModal/FlashCardModal.vue'
+import FlashCardSummaryModal from '@/components/LearningModal/FlashCardSummaryModal.vue'
 import { ref } from 'vue'
+import { QUIZ_AGE_IMAGES } from '@/services/quizCsvService'
+import type { AgeGroup } from '@/services/quizCsvService'
 import { useRouter } from 'vue-router'
-
-const router = useRouter()
 
 const showAgeSelector = ref(false)
 const showQuiz = ref(false)
-const showAgeModal = ref(false)
-const selectedAge = ref<'0-1' | '1-2' | '3-5' | null>(null)
-const openAgeModal = () => {
-  showAgeModal.value = true
-}
-// const closeAgeModal = () => {
-//   showAgeModal.value = false
-// }
+const showFlashcards = ref(false)
+const showSummary = ref(false)
+const selectedAge = ref<AgeGroup | null>(null)
+const ageSelectorMode = ref<'flashcards' | 'quiz' | null>(null)
 
-function openQuizzes() {
+const ageTarget = ref<'quiz' | 'flashcards' | null>(null)
+
+function showAgeSelectorFor(mode: 'flashcards' | 'quiz') {
+  ageSelectorMode.value = mode
   showAgeSelector.value = true
 }
-function startQuiz(age: '0-1' | '1-2' | '3-5') {
+
+function openFlashcards() {
+  ageTarget.value = 'flashcards'
+  showAgeSelector.value = true
+}
+
+function openQuizzes() {
+  ageTarget.value = 'quiz'
+  showAgeSelector.value = true
+}
+
+function onAgeChosen(age: '0-1' | '1-2' | '3-5') {
   selectedAge.value = age
   showAgeSelector.value = false
-  showQuiz.value = true
+  if (ageTarget.value === 'quiz') {showQuiz.value = true}
+  else if (ageTarget.value === 'flashcards') {showFlashcards.value = true}
 }
+function goToQuizAgeSelector() {
+  showAgeSelectorFor('quiz')
+}
+
+function closeAgeSelector() {
+  showAgeSelector.value = false
+  ageSelectorMode.value = null
+}
+
+// function handleAgeStart(age: AgeGroup) {
+//   selectedAge.value = age
+//   showAgeSelector.value = false
+//   showSummary.value = false
+
+//   if (ageSelectorMode.value === 'flashcards') {
+//     showFlashcards.value = true
+//     showQuiz.value = false
+//   } else if (ageSelectorMode.value === 'quiz') {
+//     showQuiz.value = true
+//     showFlashcards.value = false
+//   }
+
+//   ageSelectorMode.value = null
+// }
+
+function onFlashcardsCompleted() {
+  showFlashcards.value = false
+  showSummary.value = true
+}
+
+function restartFlashcards() {
+  showSummary.value = false
+  showFlashcards.value = false
+  requestAnimationFrame(() => {
+    showFlashcards.value = true
+  })
+}
+
 </script>
+
 
 <template>
   <!-- Hero Section -->
@@ -45,21 +97,21 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
         class="card"
         role="button"
         tabindex="0"
-        @click="openAgeModal"
-        @keydown.enter.prevent="openAgeModal"
-        @keydown.space.prevent="openAgeModal"
+        @click.stop="openFlashcards"
+        @keydown.enter.prevent="openFlashcards"
+        @keydown.space.prevent="openFlashcards"
       >
         <div class="media">
           <img
             class="media-img"
-            src="/public/Learning/Flashcardstart.jpg"
+            src="/Learning/Flashcardstart.jpg"
             alt="Flashcards preview"
           />
         </div>
         <div class="body">
           <h2>Flashcards</h2>
           <p>Flip cards to learn the essentials for each age group.</p>
-          <button class="cta" @click.stop="openAgeModal" disabled>Comming Soon</button>
+          <!-- <button class="cta" >Start</button> -->
         </div>
       </div>
 
@@ -73,23 +125,39 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
         @keydown.space.prevent="openQuizzes"
       >
         <div class="media">
-          <img class="media-img" src="/public/Learning/QuizStart.jpg" alt="Quizzes preview" />
+          <img class="media-img" src="/Learning/QuizStart.jpg" alt="Quizzes preview" />
         </div>
         <div class="body">
           <h2>Quizzes</h2>
           <p>10 questions • 4 choices • 5-7 min.</p>
-          <button class="cta">Start</button>
+          <!-- <button class="cta">Start</button> -->
         </div>
       </div>
     </div>
 
     <QuizzesAgeSelector
+      v-if="showAgeSelector"
       :open="showAgeSelector"
-      @close="showAgeSelector = false"
-      @start="startQuiz"
-      infant-img="/public/Learning/Infant.jpg"
-      toddler-img="/public/Learning/Toddler.jpg"
-      preschooler-img="/public/Learning/Preschooler.jpg"
+      @close="closeAgeSelector"
+      @start="onAgeChosen"
+      :infant-img="QUIZ_AGE_IMAGES['0-1']"
+      :toddler-img="QUIZ_AGE_IMAGES['1-2']"
+      :preschooler-img="QUIZ_AGE_IMAGES['3-5']"
+    />
+    <FlashCardModal
+      v-if="selectedAge && showFlashcards"
+    :age="selectedAge"
+    @close="showFlashcards = false"
+    @completed="onFlashcardsCompleted"
+    />
+
+    <FlashCardSummaryModal
+      v-if="showSummary && selectedAge"
+      :age="selectedAge"
+      :total="10"
+      @review="restartFlashcards"
+      @take-quiz="goToQuizAgeSelector"
+      @done="showSummary = false"
     />
 
     <QuizModal
@@ -240,9 +308,5 @@ function startQuiz(age: '0-1' | '1-2' | '3-5') {
   transition:
     transform 0.1s ease,
     box-shadow 0.1s ease;
-}
-.cta:disabled {
-  background: #ccc;
-  cursor: not-allowed;
 }
 </style>
