@@ -54,7 +54,24 @@ function parseCsv(text: string): Record<string,string>[] {
 }
 
 function toRuntime(q: any): RuntimeQuestion {
-  const options = (q.options as string).split('|').map((s: string) => s.trim())
+  const rawOptions = q.options?.trim()
+  if (!rawOptions) {
+    console.error('[toRuntime] Missing options field in row:', q)
+    return {
+      age_group: q.age_group as AgeGroup,
+      question: q.question ?? '',
+      options: [],
+      correctKey: 'a',
+      feedback: {
+        correct: q.feedback_correct ?? '',
+        a: q.feedback_a ?? '',
+        b: q.feedback_b ?? '',
+        c: q.feedback_c ?? ''
+      }
+    }
+  }
+
+  const options = rawOptions.split(/\s*\|\s*/).map((s: string) => s.trim())
   const optTriplet = options.map((o: string) => ({ key: o[0].toLowerCase() as 'a'|'b'|'c', text: o.replace(/^\w\)\s*/, '') }))
   const correctKey = ((q.correct_answer as string).trim()[0].toLowerCase()) as 'a'|'b'|'c'
   return {
