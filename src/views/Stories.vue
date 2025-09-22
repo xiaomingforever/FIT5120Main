@@ -1,3 +1,64 @@
+<script setup lang="ts">
+import { reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import Footer from '@/components/Footer.vue'
+const router = useRouter()
+
+type Story = {
+  id: number
+  title: string
+  excerpt?: string
+  author: string
+  image?: string
+}
+
+const leadStory: Story = reactive({
+  id: 1,
+  title: "The Most Important Nutrients for Your Baby's Brain, According to Doctors",
+  excerpt:
+    "Your child's nutrition in the first two years is absolutely critical for both brain development and future health. Here's what they need. ",
+  author: "Sally Kuzemchak, M.S., R.D",
+  image: "/Stories/Hero.png",
+})
+
+type RelatedStory = {
+  id: number
+  title: string
+  author: string
+  image?: string
+}
+
+const related: RelatedStory[] = reactive([
+  { id: 2, title: "6 Key Nutrients Kids Need: A Guide by Age", author: "Rachel Meltzer Warren, M.S., R.D. ", image: "/Stories/Related1.png"   },
+  { id: 3, title: "Baby brain food: 7 foods to fuel brain development", author: "uclahealth", image: "/Stories/Related2.png"  },
+  { id: 4, title: "The crucial brain foods all children need", author: "Claire McCarthy, MD.", image: "/Stories/Related3.png" },
+  { id: 5, title: "7 Brain-Boosting Foods for Children", author: "Jenette Yee Mei En", image: "/Stories/Related4.png" },
+])
+
+const trending: Story[] = reactive([
+  { id: 6, title: "Fun Brain Breaks Kids Can Do at Home", author: "Claire Johnson", image: "/Stories/Trending1.png" },
+  { id: 7, title: "Study Finds Video Games May Boost Children's Brain Function", author: "Claire Thompson", image: "/Stories/Trending2.png" },
+  { id: 8, title: "A Morning with Emma: How Simple Routines Shape Connection", author: "Claire Miller", image: "/Stories/Trending3.png" },
+])
+
+function openRelated(r: RelatedStory) {
+  // router.push({ name: 'story', params: { id: r.id } }) //  connect with router later if needed
+   const routeById: Record<number, string> = {
+    2: 'Related1',
+    3: 'Related2',
+    4: 'Related3',
+    5: 'Related4', // if you added this page
+  }
+
+  const name = routeById[r.id]
+  if (name) {
+    router.push({ name })
+  } else {
+    console.warn(`No route mapped for related id ${r.id}`)
+  }
+}
+</script>
+
 <template>
   <div class="stories-page">
 
@@ -75,70 +136,11 @@
     </section>
 
     <!-- footer  -->
-    <footer class="proto-footer" aria-label="Site footer">
-      <nav class="footer-links" aria-label="Footer">
-        <a href="#">Behind the Research</a>
-        <a href="#">Terms of Uses</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-      </nav>
-      <p class="footer-copy">
-        BrainBuilder is a social-good, non-profit project. It is free for education,
-        with no ads, no sales, and no tracking beyond what is needed to run the site.
-      </p>
-      <p class="copyright">© 2025 BrainBuilder. A student-led project for social good.</p>
-    </footer>
+    <Footer />
   </div>
 </template>
 
-<script setup lang="ts">
-import { reactive } from 'vue'
-import { useRouter } from 'vue-router'
-const router = useRouter()
 
-type Story = {
-  id: number
-  title: string
-  excerpt?: string
-  author: string
-  image?: string
-}
-
-const leadStory: Story = reactive({
-  id: 1,
-  title: "The Essential Nutrients for Your Baby’s Brain, Explained by Experts",
-  excerpt:
-    "The food choices you make in the first two years of your child’s life play a vital role in brain growth and lifelong well-being. Here’s what matters most.",
-  author: "Claire Johnson, R.D.",
-  image: "/Stories/Hero.png",
-})
-
-type RelatedStory = {
-  id: number
-  title: string
-  author: string
-  image?: string
-}
-
-const related: RelatedStory[] = reactive([
-  { id: 2, title: "6 Key Nutrients Kids Need: A Guide by Age", author: "Claire Johnson, M.S., R.D.", image: "/Stories/Related1.png" },
-  { id: 3, title: "Brain Food for Babies: 7 Smart Choices to Support Development", author: "Claire Johnson, R.D.", image: "/Stories/Related2.png" },
-  { id: 4, title: "The crucial brain foods all children need", author: "Dr. Emily Carter, Pediatric Nutrition Specialist", image: "/Stories/Related3.png" },
-  { id: 5, title: "7 Smart Foods to Power Children’s Brain Development", author: "Emily Tan, R.D.", image: "/Stories/Related4.png" },
-])
-
-const trending: Story[] = reactive([
-  { id: 6, title: "Fun Brain Breaks Kids Can Do at Home", author: "Claire Johnson", image: "/Stories/Trending1.png" },
-  { id: 7, title: "Study Finds Video Games May Boost Children’s Brain Function", author: "Claire Thompson", image: "/Stories/Trending2.png" },
-  { id: 8, title: "A Morning with Emma: How Simple Routines Shape Connection", author: "Claire Miller", image: "/Stories/Trending3.png" },
-])
-
-function openRelated(r: RelatedStory) {
-  // router.push({ name: 'story', params: { id: r.id } }) //  connect with router later if needed
-  console.log('Open related:', r.id, r.title)
-}
-</script>
 
 <style scoped>
 .stories-page {
@@ -328,24 +330,6 @@ function openRelated(r: RelatedStory) {
 .t-title { margin: 0; font-weight: 700; font-size: 1.05rem; line-height: 1.35; }
 .t-byline { margin: 0; color: var(--muted); font-size: 0.95rem; }
 
-/* footer */
-.proto-footer {
-  text-align: center;
-  border-top: 1px solid var(--hairline);
-  padding: 1.75rem 1rem 2rem;
-  color: var(--muted);
-}
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-.footer-links a { color: var(--muted); text-decoration: none; }
-.footer-links a:hover { text-decoration: underline; }
-.footer-copy { max-width: 70ch; margin: 0.5rem auto 0; }
-.copyright { margin: 0.25rem 0 0; }
 
 /* responsive */
 @media (max-width: 1024px) {
