@@ -209,10 +209,10 @@ import Footer from '@/components/Footer.vue'
 .copy {
   padding: 0.75rem 1.25rem 1.25rem;
   line-height: 1.7;
-  font-size: 1rem;
+  font-size: 1.3rem;
 }
 .copy h3 {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   margin: 1rem 0 0.35rem;
   font-weight: 800;
 }
