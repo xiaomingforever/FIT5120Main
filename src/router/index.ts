@@ -19,6 +19,9 @@ const Related1 = () => import('@/views/Articles/Related1.vue')
 const Related2 = () => import('@/views/Articles/Related2.vue')
 const Related3 = () => import('@/views/Articles/Related3.vue')
 const Related4 = () => import('@/views/Articles/Related4.vue')
+const Trending1 = () => import('@/views/Articles/Trending1.vue')
+const Trending2 = () => import('@/views/Articles/Trending2.vue')
+const Trending3 = () => import('@/views/Articles/Trending3.vue')
 export default createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
 
@@ -55,6 +58,9 @@ export default createRouter({
         { path: 'Related2', name: 'Related2', component: Related2},
         { path: 'Related3', name: 'Related3', component: Related3},
         { path: 'Related5', name: 'Related4', component: Related4},
+        { path: 'Trending1', name: 'Trending1', component: Trending1},
+        { path: 'Trending2', name: 'Trending2', component: Trending2},
+        { path: 'Trending3', name: 'Trending3', component: Trending3},
       ],
     },
     // put pages here if it shouldn't show header/sidebar

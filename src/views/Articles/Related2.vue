@@ -13,7 +13,7 @@
         <p class="byline">
           <span class="author">By uclahealth</span>
           <span class="divider" aria-hidden="true">|</span>
-          <time class="date" datetime="2022-05-11">May 5, 2022 </time>
+          <time class="date" datetime="2022-05-05">May 5, 2022 </time>
         </p>
       </header>
 
@@ -152,8 +152,8 @@ import Footer from '@/components/Footer.vue'
   grid-template-rows: auto auto 1fr auto;
 }
 :root {
-  --content-max: 920px; /* match your article/container width */
-  --page-padding: 24px; /* outer page padding */
+  --content-max: 920px;
+  --page-padding: 24px;
 }
 
 /*  back button*/
