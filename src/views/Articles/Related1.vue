@@ -18,7 +18,7 @@
         <p class="byline">
           <span class="author">By Rachel Meltzer Warren, M.S., R.D. </span>
           <span class="divider" aria-hidden="true">|</span>
-          <time class="date" datetime="2022-05-11">May 1, 2024</time>
+          <time class="date" datetime="2024-05-01">May 1, 2024</time>
         </p>
       </header>
 
@@ -278,8 +278,8 @@ import Footer from '@/components/Footer.vue'
   grid-template-rows: auto auto 1fr auto;
 }
 :root {
-  --content-max: 920px; /* match your article/container width */
-  --page-padding: 24px; /* outer page padding */
+  --content-max: 920px;
+  --page-padding: 24px;
 }
 
 /*  back button*/
