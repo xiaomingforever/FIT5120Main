@@ -1,5 +1,6 @@
-import quizCsvUrl from '@/data/quiz_all_age_groups_per_option_feedback.csv?url'
+
 import csvRaw from '@/data/quiz_all_age_groups_per_option_feedback.csv?raw'
+
 export type AgeGroup = '0-1' | '1-2' | '3-5'
 export type RuntimeQuestion = {
   age_group: AgeGroup
@@ -12,24 +13,20 @@ export type RuntimeQuestion = {
 export function labelForAgeGroup(age: AgeGroup) {
   return age === '0-1' ? 'Infant (0–1)' : age === '1-2' ? 'Toddler (1–2)' : 'Preschooler (3–5)'
 }
+
 export const QUIZ_AGE_IMAGES: Record<AgeGroup, string> = {
   '0-1': '/Learning/Infant.jpg',
   '1-2': '/Learning/Toddler.jpg',
-  '3-5': '/Learning/Preschooler.jpg'
-};
-
+  '3-5': '/Learning/Preschooler.jpg',
+}
 
 function getCsvText(): string {
-  // csvRaw is a string at build-time; guard anyway
   const txt = (csvRaw ?? '').trim()
-  if (!txt) {
-    // optional: log for visibility
-    console.warn('[quizCsvService] CSV is empty or missing.')
-  }
+  if (!txt) console.warn('[quizCsvService] CSV is empty or missing.')
   return txt
 }
 
-function parseCsv(text: string): Record<string,string>[] {
+function parseCsv(text: string): Record<string, string>[] {
   const rows: string[][] = []
   let row: string[] = ['']
   let i = 0, inQuotes = false
@@ -42,8 +39,7 @@ function parseCsv(text: string): Record<string,string>[] {
     if (c === ',' && !inQuotes) { row.push(''); i++; continue }
     if ((c === '\n' || c === '\r') && !inQuotes) {
       if (row.length > 1 || row[0] !== '') rows.push(row)
-      row = [''];
-      if (c === '\r' && text[i+1] === '\n') i++
+      row = ['']; if (c === '\r' && text[i+1] === '\n') i++
       i++; continue
     }
     row[row.length-1] += c; i++
@@ -53,6 +49,7 @@ function parseCsv(text: string): Record<string,string>[] {
   return rows.map(r => Object.fromEntries(headers.map((h, idx) => [h.trim(), (r[idx] ?? '').trim()])))
 }
 
+<<<<<<< HEAD
 function toRuntime(q: any): RuntimeQuestion {
   const rawOptions = q.options?.trim()
   if (!rawOptions) {
@@ -74,34 +71,56 @@ function toRuntime(q: any): RuntimeQuestion {
   const options = rawOptions.split(/\s*\|\s*/).map((s: string) => s.trim())
   const optTriplet = options.map((o: string) => ({ key: o[0].toLowerCase() as 'a'|'b'|'c', text: o.replace(/^\w\)\s*/, '') }))
   const correctKey = ((q.correct_answer as string).trim()[0].toLowerCase()) as 'a'|'b'|'c'
+=======
+function toRuntimeSafe(q: Record<string, any>): RuntimeQuestion {
+
+  const rawOptions = (q.options ?? '').toString().trim()
+  let parts = rawOptions
+    ? rawOptions.split('|').map(s => s.trim())
+    : [
+        (q.option_a ?? q.a ?? '').toString().trim(),
+        (q.option_b ?? q.b ?? '').toString().trim(),
+        (q.option_c ?? q.c ?? '').toString().trim(),
+      ].filter(Boolean)
+
+
+  const keys = ['a', 'b', 'c'] as const
+  const optTriplet = keys.map((k, i) => {
+    const text = (parts[i] ?? '').replace(/^\w\)\s*/, '').trim()
+    return { key: k, text }
+  })
+
+
+  const corrRaw = (q.correct_answer ?? q.correct ?? '').toString().trim()
+  const correctKey = (corrRaw[0]?.toLowerCase() ?? 'a') as 'a' | 'b' | 'c'
+
+>>>>>>> b20f3dd5d30ffec11f073a4f6054ca5f3a45298e
   return {
-    age_group: q.age_group as AgeGroup,
-    question: q.question,
+    age_group: (q.age_group as AgeGroup) ?? '0-1',
+    question: (q.question ?? '').toString(),
     options: optTriplet,
     correctKey,
     feedback: {
-      correct: q.feedback_correct,
-      a: q.feedback_a,
-      b: q.feedback_b,
-      c: q.feedback_c,
-    }
+      correct: (q.feedback_correct ?? '').toString(),
+      a: (q.feedback_a ?? '').toString(),
+      b: (q.feedback_b ?? '').toString(),
+      c: (q.feedback_c ?? '').toString(),
+    },
   }
 }
 
 export async function loadQuizForAge(age: AgeGroup): Promise<RuntimeQuestion[]> {
-  const res = await fetch(quizCsvUrl)
-  if (!res.ok) throw new Error('Unable to fetch quiz CSV')
   const csvText = getCsvText()
   if (!csvText) return []
-  const lines = csvText.split(/\r?\n/)
-  if (lines.length <= 1) return []
+  const raw = parseCsv(csvText)
 
-  const text = await res.text()
-  const raw = parseCsv(text)
-  const transformed = raw.map(toRuntime).filter((r) => r.age_group === age)
-  // Ensure 10 questions & shuffle deterministically enough
+  // transform + filter
+  const transformed = raw.map(toRuntimeSafe).filter(r => r.age_group === age && r.question && r.options.some(o => o.text))
+
+  // shuffle and trim to 10
   for (let i = transformed.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1)); [transformed[i], transformed[j]] = [transformed[j], transformed[i]]
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[transformed[i], transformed[j]] = [transformed[j], transformed[i]]
   }
   return transformed.slice(0, 10)
 }
