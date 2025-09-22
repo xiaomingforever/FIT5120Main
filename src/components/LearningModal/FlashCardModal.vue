@@ -59,13 +59,24 @@ const currentImage = computed(() => {
   const pool = IMAGE_POOL[props.age] ?? []
   if (!pool.length) return FALLBACK
   const n = pool.length
-  const order = shuffledIdx.value.length ? shuffledIdx.value : Array.from({ length: n }, (_, i) => i)
+  const order = shuffledIdx.value.length
+    ? shuffledIdx.value
+    : Array.from({ length: n }, (_, i) => i)
   const pick = order[currentIndex.value % n]
   return pool[pick] ?? FALLBACK
 })
 
 function flip() {
   isFlipped.value = !isFlipped.value
+}
+
+const swapping = ref(false)
+
+function onSwapStart() {
+  swapping.value = true
+}
+function onSwapDone() {
+  swapping.value = false
 }
 
 function next() {
@@ -98,41 +109,51 @@ function next() {
             <div class="progress-text">{{ currentIndex + 1 }} / {{ total }}</div>
           </div>
 
-          <!-- Image -->
-          <div class="image">
-            <img :src="currentImage" alt="Flashcard visual" />
-          </div>
-
-          <!-- Flip card -->
-          <div class="flip-wrap">
-            <div class="flip" :class="{ flipped: isFlipped }">
-              <div class="face front">
-                <p class="qa">{{ currentQ?.question }}</p>
+          <Transition
+            name="swap"
+            mode="out-in"
+            @before-leave="onSwapStart"
+            @after-enter="onSwapDone"
+            @enter-cancelled="onSwapDone"
+          >
+            <!-- Key this pane by the current card index -->
+            <div class="swap-pane" :key="currentIndex">
+              <!-- Image -->
+              <div class="image">
+                <img :src="currentImage" alt="Flashcard visual" />
               </div>
-              <div class="face back">
-                <p class="qa">{{ answerText }}</p>
+
+              <!-- Flip card -->
+              <div class="flip-wrap">
+                <div class="flip" :class="{ flipped: isFlipped }">
+                  <div class="face front">
+                    <p class="qa">{{ currentQ?.question }}</p>
+                  </div>
+                  <div class="face back">
+                    <p class="qa">{{ answerText }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </Transition>
+
+          <!-- Footer -->
+          <footer class="footer">
+            <button class="secondary" @click="flip">
+              {{ isFlipped ? 'Show Question' : 'Flip' }}
+            </button>
+            <button class="primary" :disabled="loading || total === 0" @click="next">Next</button>
+          </footer>
+
+          <!-- Loading -->
+          <section v-if="loading" class="loading">Loading…</section>
         </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-          <button class="secondary" @click="flip">
-            {{ isFlipped ? 'Show Question' : 'Flip' }}
-          </button>
-          <button class="primary" :disabled="loading || total === 0" @click="next">Next</button>
-        </footer>
-
-        <!-- Loading -->
-        <section v-if="loading" class="loading">Loading…</section>
       </div>
     </div>
   </Teleport>
 </template>
 
 <style scoped>
-
 .overlay {
   position: fixed;
   inset: 0;
@@ -144,7 +165,7 @@ function next() {
   z-index: 1000;
 }
 .modal {
-  width: min(880px, 96vw);
+  width: min(720px, 96vw);
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 10px 40px #00000026;
@@ -208,11 +229,13 @@ function next() {
   border: 1px solid #f0f0f0;
   border-radius: 12px;
   overflow: hidden;
+  max-height: 360px;
 }
 .image img {
   display: block;
   width: 100%;
   height: auto;
+  object-fit: cover;
 }
 
 .flip-wrap {
@@ -221,18 +244,19 @@ function next() {
 .flip {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.5s;
+  transition: transform 0.5s ease;
+  min-height: 110px;
 }
 .flip.flipped {
   transform: rotateY(180deg);
 }
 .face {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
   backface-visibility: hidden;
-  position: relative;
-  padding: 16px;
-  border: 1px solid #eef2f1;
-  border-radius: 12px;
-  min-height: 80px;
+  -webkit-backface-visibility: hidden;
 }
 .face.back {
   transform: rotateY(180deg);
@@ -280,5 +304,34 @@ function next() {
   place-items: center;
   font-weight: 700;
   color: #555;
+}
+
+.swap-enter-from {
+  opacity: 0;
+  transform: translateX(24px) scale(0.98);
+}
+.swap-enter-to {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+.swap-leave-from {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+.swap-leave-to {
+  opacity: 0;
+  transform: translateX(-24px) scale(0.98);
+}
+
+.swap-enter-active,
+.swap-leave-active {
+  transition:
+    transform 0.28s ease,
+    opacity 0.28s ease;
+  will-change: transform, opacity;
+}
+.swap-pane {
+  display: grid;
+  gap: 16px;
 }
 </style>
