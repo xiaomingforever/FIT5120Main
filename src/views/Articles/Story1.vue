@@ -12,7 +12,7 @@
 
       <header class="article-head">
         <h1 id="article-title" class="title">
-          The Most Important Nutrients for Your Baby’s Brain, According to Doctors
+          The Most Important Nutrients for Your Baby's Brain, According to Doctors
         </h1>
 
         <p class="dek">
@@ -67,67 +67,18 @@
       </article>
     </main>
 
-    <!-- related Articles-->
-    <section class="related" aria-labelledby="related-heading">
-      <h2 id="related-heading" class="related-title">Related Articles</h2>
 
-      <div class="related-grid">
 
-        <article class="r-card">
-          <div class="r-media">
-            <img src="/Stories/Related1.png" alt="6 Important Nutrients for Kids: An Age-by-Age Guide" />
-          </div>
-          <div class="r-label">
-            <h3 class="r-h">6 Important Nutrients for Kids: An Age-by-Age Guide</h3>
-            <p class="r-by">By Rachel Melrose Warren, M.S., R.D.</p>
-          </div>
-        </article>
-
-        <article class="r-card">
-          <div class="r-media">
-            <img src="/Stories/Related2.png" alt="Baby brain food: 7 foods to fuel brain development" />
-          </div>
-          <div class="r-label">
-            <h3 class="r-h">Baby brain food: 7 foods to fuel brain development</h3>
-            <p class="r-by">By webhealth</p>
-          </div>
-        </article>
-
-        <article class="r-card">
-          <div class="r-media">
-            <img src="/Stories/Related3.png" alt="The crucial brain foods all children need" />
-          </div>
-          <div class="r-label">
-            <h3 class="r-h">The crucial brain foods all children need</h3>
-            <p class="r-by">By Claire MacArthur, MD</p>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- footer -->
-    <footer class="proto-footer" aria-label="Site footer">
-      <nav class="footer-links" aria-label="Footer">
-        <a href="#">Behind the Research</a>
-        <a href="#">Terms of Uses</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-      </nav>
-      <p class="footer-copy">
-        BrainBuilder is a social-good, non-profit project. It is free for education,
-        with no ads, no sales, and no tracking beyond what is needed to run the site.
-      </p>
-      <p class="copyright">© 2025 BrainBuilder. A student-led project for social good.</p>
-    </footer>
+    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
-
+import Footer from '@/components/Footer.vue';
 </script>
 
 <style scoped>
+.story { position: relative; }
 .story-page {
   --bg: #fff8ef;
   --ink: #3f2f24;
@@ -142,6 +93,10 @@
   min-height: 100dvh;
   display: grid;
   grid-template-rows: auto auto 1fr auto;
+}
+:root {
+  --content-max: 920px;
+  --page-padding: 24px;
 }
 
 /*  back button*/
@@ -164,6 +119,10 @@
   cursor: pointer;
   text-decoration: none;
   font-size: 24px;
+  position: fixed;
+  top: 96px;left: max(var(--page-padding),
+            calc((100vw - var(--content-max))/2 - 8px));
+  z-index: 1000;
 }
 .back-btn:hover { filter: brightness(0.97); }
 .back-btn:active { transform: translateY(1px); box-shadow: 0 1px 0 #0000000f; }
@@ -247,72 +206,6 @@
 }
 .source a { color: inherit; }
 
-/* related articles */
-.related {
-  max-width: 1160px;
-  margin: 1.25rem auto 2.25rem;
-  padding: 0 1rem;
-}
-.related-title {
-  text-align: center;
-  font-size: 1.4rem;
-  font-weight: 800;
-  margin: 0 0 1rem;
-}
-.related-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
-}
-
-.r-card { position: relative; padding-bottom: 5.25rem}
-.r-media {
-  aspect-ratio: 4/3;
-  border-radius: 6px;
-  overflow: hidden;
-  background: #f1f1f1;
-  border: 1px solid #eee;
-}
-.r-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
-
-
-.r-label {
-  position: absolute;
-  left: var(--inset);
-  right: var(--inset);
-  bottom: -18px;
-  margin: 0;
-  min-height: 3.75rem;
-}
-.r-h {
-  margin: 0 0 0.25rem 0;
-  font-size: 1rem;
-  line-height: 1.3;
-  font-weight: 800;
-}
-.r-by {
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-
-.proto-footer {
-  text-align: center;
-  border-top: 1px solid var(--hairline);
-  padding: 1.75rem 1rem 2rem;
-  color: var(--muted);
-}
-.footer-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.25rem;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-.footer-links a { color: var(--muted); text-decoration: none; }
-.footer-links a:hover { text-decoration: underline; }
-.footer-copy { max-width: 70ch; margin: 0.5rem auto 0; }
-.copyright { margin: 0.25rem 0 0; }
 
 /* responsive */
 @media (max-width: 900px) {
