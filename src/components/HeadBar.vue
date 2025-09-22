@@ -39,7 +39,7 @@
           </li>
           <li>
             <router-link to="/AITools">
-              <font-awesome-icon icon="brain" style="color: brown"/> AI Tools
+              <font-awesome-icon icon="robot" style="color: gray"/> AI Tools
             </router-link>
           </li>
 
@@ -134,7 +134,7 @@ const toggleMenu = () => {
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 10px;
+  gap: 24px;
   align-items: center;
 }
 
