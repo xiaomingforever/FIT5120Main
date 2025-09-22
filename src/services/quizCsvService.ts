@@ -13,9 +13,9 @@ export function labelForAgeGroup(age: AgeGroup) {
   return age === '0-1' ? 'Infant (0–1)' : age === '1-2' ? 'Toddler (1–2)' : 'Preschooler (3–5)'
 }
 export const QUIZ_AGE_IMAGES: Record<AgeGroup, string> = {
-  '0-1': '/public/Learning/Infant.jpg',
-  '1-2': '/public/Learning/Toddler.jpg',
-  '3-5': '/public/Learning/Preschooler.jpg'
+  '0-1': '/Learning/Infant.jpg',
+  '1-2': '/Learning/Toddler.jpg',
+  '3-5': '/Learning/Preschooler.jpg'
 };
 
 function parseCsv(text: string): Record<string,string>[] {
