@@ -1,5 +1,5 @@
 import quizCsvUrl from '@/data/quiz_all_age_groups_per_option_feedback.csv?url'
-
+import csvRaw from '@/data/quiz_all_age_groups_per_option_feedback.csv?raw'
 export type AgeGroup = '0-1' | '1-2' | '3-5'
 export type RuntimeQuestion = {
   age_group: AgeGroup
@@ -17,6 +17,17 @@ export const QUIZ_AGE_IMAGES: Record<AgeGroup, string> = {
   '1-2': '/Learning/Toddler.jpg',
   '3-5': '/Learning/Preschooler.jpg'
 };
+
+
+function getCsvText(): string {
+  // csvRaw is a string at build-time; guard anyway
+  const txt = (csvRaw ?? '').trim()
+  if (!txt) {
+    // optional: log for visibility
+    console.warn('[quizCsvService] CSV is empty or missing.')
+  }
+  return txt
+}
 
 function parseCsv(text: string): Record<string,string>[] {
   const rows: string[][] = []
@@ -63,6 +74,11 @@ function toRuntime(q: any): RuntimeQuestion {
 export async function loadQuizForAge(age: AgeGroup): Promise<RuntimeQuestion[]> {
   const res = await fetch(quizCsvUrl)
   if (!res.ok) throw new Error('Unable to fetch quiz CSV')
+  const csvText = getCsvText()
+  if (!csvText) return []
+  const lines = csvText.split(/\r?\n/)
+  if (lines.length <= 1) return []
+
   const text = await res.text()
   const raw = parseCsv(text)
   const transformed = raw.map(toRuntime).filter((r) => r.age_group === age)
