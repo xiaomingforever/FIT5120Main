@@ -525,7 +525,7 @@ async function sendMessage() {
 .copy p {
   color: #374151;
   line-height: 1.8;
-  font-size: 26px;
+  font-size: 20px;
 }
 .media {
   display: grid;
