@@ -3,7 +3,7 @@
   <section class="hero">
     <div class="hero-content">
       <h1>BrainBuilder AI</h1>
-      <p>Ask quick questions, get simple answers for your child’s brain development.</p>
+      <p>Ask quick questions, get simple answers for your child's brain development.</p>
     </div>
   </section>
 <!-- This is a mock up -->
@@ -13,7 +13,8 @@
         <header class="ai-head">
 
           <h2>BrainBuilder AI</h2>
-          <span class="mini-logo" aria-hidden="true">logo</span>
+          <!-- <span class="mini-logo" aria-hidden="true">logo</span> -->
+          <span class="mini-logo"><font-awesome-icon icon="robot" style="color: gray; height: 30px; width: 30px;" /></span>
           <p class="lead">Hi there! How can I support you in your parenting journey today?</p>
           <p class="muted">Empowering parents with AI guidance</p>
         </header>
@@ -44,21 +45,27 @@
         </div>
 
         <div class="conversation">
-          <p class="placeholder">AI chat will appear here. (Placeholder — model not wired yet)</p>
+          <div v-if="messages.length === 0" class="placeholder">
+            <p>AI chat will appear here. Start by asking a question!</p>
+          </div>
+          <div v-for="(msg, index) in messages" :key="index" :class="msg.role" class="message">
+            <strong>{{ msg.role === 'user' ? 'You' : 'AI' }}:</strong>
+            <span>{{ msg.text }}</span>
+          </div>
         </div>
 
-        <form class="composer" @submit.prevent>
+        <form class="composer" @submit.prevent="sendMessage">
           <input
             v-model="draft"
             class="input"
             type="text"
-            placeholder="Ask me anything…"
+            placeholder="Ask me anything..."
             aria-label="Ask BrainBuilder AI"
-            :disabled="true"
+            
           />
-          <button class="send" type="button" :disabled="true" title="Coming soon">Send</button>
+          <button class="send" type="submit" title="Send">Send</button>
         </form>
-        <p class="coming-soon" role="note">Sending is disabled — AI function coming soon.</p>
+        <p class="coming-soon" role="note">AI function is active - try sending a message!</p>
       </div>
     </div>
 
@@ -133,7 +140,7 @@
           <h5>Start Your Journey</h5>
         </div>
         <p class="step-body">
-          Start using BrainBuilder AI with a free trial — no login or ChatGPT Plus subscription
+          Start using BrainBuilder AI with a free trial, no login or ChatGPT Plus subscription
           required.
         </p>
       </li>
@@ -177,11 +184,80 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import axios from 'axios'
 
 const draft = ref('')
+const messages = ref<{ role: string, text: string }[]>([])
+
+const API_URL = 'https://4pzfuisbuj.execute-api.ap-southeast-2.amazonaws.com/generate'
 
 function prefill(text: string) {
   draft.value = text
+}
+
+async function sendMessage() {
+  const prompt = draft.value.trim()
+  if (!prompt) return
+
+  console.log("Sending:", prompt)
+
+  // Add user message
+  messages.value.push({ role: 'user', text: prompt })
+  draft.value = ''
+
+  // Add loading message
+  messages.value.push({ role: 'ai', text: 'Thinking...' })
+
+  try {
+    console.log("API URL:", API_URL)
+    console.log("Request payload:", { prompt })
+    
+    const res = await axios.post(API_URL, JSON.stringify({ prompt }), {
+      headers: { 'Content-Type': 'application/json' },
+      // timeout: 30000 // 30 seconds timeout
+    })
+    
+    console.log("Response:", res.data)
+    
+    // Remove loading message
+    messages.value.pop()
+    
+    const aiReply = res.data.output || res.data.response || res.data.message || 'Sorry, no response received.'
+    messages.value.push({ role: 'ai', text: aiReply })
+  } catch (err) {
+    console.error("Full error:", err)
+    
+    // Remove loading message
+    messages.value.pop()
+    
+    let errorMessage = 'Error connecting to AI.'
+    
+    if (typeof err === 'object' && err !== null && 'response' in err) {
+      const error = err as { response: any }
+      // Server responded with error status
+      console.error("Response data:", error.response.data)
+      console.error("Response status:", error.response.status)
+      console.error("Response headers:", error.response.headers)
+      
+      if (error.response.status === 500) {
+        errorMessage = 'Server error (500). The AI service might be temporarily unavailable.'
+      } else if (error.response.status === 404) {
+        errorMessage = 'API endpoint not found (404). Please check the API URL.'
+      } else if (error.response.status === 403) {
+        errorMessage = 'Access denied (403). Check API permissions.'
+      } else {
+        errorMessage = `Server error (${error.response.status}): ${error.response.data?.message || 'Unknown error'}`
+      }
+    } else if (typeof err === 'object' && err !== null && 'request' in err) {
+      // Request was made but no response received
+      errorMessage = 'Network error: No response from server. Check your internet connection.'
+    } else {
+      // Something else happened
+      errorMessage = `Request error: ${(err as Error).message}`
+    }
+    
+    messages.value.push({ role: 'ai', text: errorMessage })
+  }
 }
 </script>
 
@@ -320,7 +396,7 @@ function prefill(text: string) {
   align-items: center;
   justify-content: center;
   width: 60px;
-  height: 22px;
+  height: 35px;
   background: #eef2ff;
   border-radius: 6px;
   font-size: 10px;
@@ -365,13 +441,33 @@ function prefill(text: string) {
   background: #fcfcfd;
   border: 1px dashed #e5e7eb;
   border-radius: 10px;
-  display: grid;
-  place-items: center;
-  color: #94a3b8;
+  padding: 16px;
+  max-height: 400px;
+  overflow-y: auto;
 }
 .placeholder {
-  margin: 18px;
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: #94a3b8;
   text-align: center;
+}
+.placeholder p {
+  margin: 18px;
+}
+
+.message {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+.message.user {
+  background: #f0f9ff;
+  margin-left: 20px;
+}
+.message.ai {
+  background: #f9fafb;
+  margin-right: 20px;
 }
 
 .composer {
@@ -394,16 +490,20 @@ function prefill(text: string) {
   padding: 0 14px;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
-  background: #f3f4f6;
+  background: var(--amber);
+  color: white;
   font-weight: 600;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  cursor: not-allowed;
+  cursor: pointer;
+}
+.send:hover {
+  background: var(--amber-700);
 }
 .coming-soon {
   margin-top: 6px;
-  color: #9aa3af;
+  color: #16a34a;
   font-size: 12px;
 }
 
