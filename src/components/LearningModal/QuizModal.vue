@@ -36,6 +36,10 @@
               >
                 <span class="key">{{ opt.key.toUpperCase() }})</span>
                 <span class="text">{{ opt.text }}</span>
+                <!-- tick or cross -->
+      <span class="mark" v-if="locked && (showTick(opt.key) || showCross(opt.key))">
+        <img :src="showTick(opt.key) ? marks.tick : marks.cross" alt="" />
+      </span>
               </button>
             </li>
           </ul>
@@ -83,6 +87,7 @@ import {
   type RuntimeQuestion,
   labelForAgeGroup,
   QUIZ_AGE_IMAGES,
+  QUIZ_MARKS,
 } from '@/services/quizCsvService'
 
 const props = defineProps<{
@@ -93,6 +98,7 @@ const emit = defineEmits<{ (e: 'close'): void }>()
 
 // state
 const ageImage = computed(() => QUIZ_AGE_IMAGES[props.ageGroup] || '')
+const marks = QUIZ_MARKS
 const loaded = ref(false)
 const loadError = ref<string | null>(null)
 const questions = ref<RuntimeQuestion[]>([])
@@ -163,6 +169,17 @@ function next() {
   currentIndex.value += 1
   selectedKey.value = null
   locked.value = false
+}
+// when to show tick/cross
+function showTick(key: 'a'|'b'|'c') {
+  const q = currentQ.value
+  return !!(locked.value && q && key === q.correctKey)
+}
+
+function showCross(key: 'a'|'b'|'c') {
+  const q = currentQ.value
+  // show a cross only on the wrong option
+  return !!(locked.value && q && selectedKey.value === key && key !== q.correctKey)
 }
 
 function retry() {
@@ -279,9 +296,10 @@ onMounted(() => {
   background: #fff;
   display: flex;
   gap: 10px;
-  align-items: flex-start;
+  align-items: center;
   cursor: pointer;
 }
+.option .text { flex: 1; }          /* push the mark to the right */
 .option:hover {
   border-color: #d0d0d0;
 }
@@ -297,6 +315,8 @@ onMounted(() => {
   border-color: #ff6b6b;
   background: #fff1f1;
 }
+.option .mark { display: inline-flex; width: 24px; height: 24px; }
+.option .mark img { width: 100%; height: 100%; object-fit: contain; }
 .option.selected {
   box-shadow: inset 0 0 0 2px #0077ff;
 }
