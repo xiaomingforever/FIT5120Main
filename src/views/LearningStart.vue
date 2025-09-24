@@ -38,9 +38,6 @@ function onAgeChosen(age: '0-1' | '1-2' | '3-5') {
   if (ageTarget.value === 'quiz') {showQuiz.value = true}
   else if (ageTarget.value === 'flashcards') {showFlashcards.value = true}
 }
-function goToQuizAgeSelector() {
-  showAgeSelectorFor('quiz')
-}
 
 function closeAgeSelector() {
   showAgeSelector.value = false
@@ -72,9 +69,20 @@ function onSummaryTakeQuiz() {
   ageTarget.value = 'quiz'
   showAgeSelector.value = true
 }
-function goToAgeSelector() {
+function goToQuizAgeSelector() {
   showQuiz.value = false
   selectedAge.value = null
+  showAgeSelector.value = true
+}
+function goToFlashAgeSelector() {
+  // close current summary + flashcards
+  showSummary.value = false
+  showFlashcards.value = false
+
+  // open the age selector in "flashcards" mode
+  // (set both in case your code path checks either)
+  ageTarget.value = 'flashcards'
+  ageSelectorMode.value = 'flashcards'
   showAgeSelector.value = true
 }
 function restartFlashcards() {
@@ -164,7 +172,7 @@ function restartFlashcards() {
       v-if="showSummary && selectedAge"
       :age="selectedAge"
       :total="10"
-      @review="restartFlashcards"
+      @review="goToFlashAgeSelector"
       @take-quiz="onSummaryTakeQuiz"
 
       @done="showSummary = false"
@@ -175,7 +183,7 @@ function restartFlashcards() {
       :open="showQuiz"
       :age-group="selectedAge"
       @close="showQuiz = false"
-      @retry="goToAgeSelector"
+      @retry="goToQuizAgeSelector"
     />
   </section>
 </template>
