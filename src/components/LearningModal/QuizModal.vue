@@ -1,6 +1,6 @@
 <template>
   <Teleport to="body">
-    <div v-if="open" v-show="!showSummary" class="overlay" @click.self="onClose">
+    <div v-if="open" v-show="!showSummary" class="overlay" @click.self="requestClose">
       <div class="modal" role="dialog" aria-modal="true" :aria-label="title">
         <!-- Header -->
         <header class="header">
@@ -98,6 +98,15 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'retry'): void
 }>()
+// If the quiz is still in progress, confirm before closing
+function requestClose() {
+  if (!showSummary.value) {
+    const answered = currentIndex.value + (locked.value ? 1 : 0)
+    const msg = `Exit the quiz? Your current progress (${answered}/${total.value}) will be lost.`
+    if (!window.confirm(msg)) return
+  }
+  emit('close')
+}
 
 // state
 const ageImage = computed(() => QUIZ_AGE_IMAGES[props.ageGroup] || '')
@@ -123,7 +132,7 @@ const feedbackMsg = computed(() => {
   return q.feedback[selectedKey.value]
 })
 const progressPct = computed(() =>
-  Math.round((currentIndex.value / Math.max(total.value, 1)) * 100),
+  total.value === 0 ? 0 : Math.round(((currentIndex.value + 1) / total.value) * 100),
 )
 const nextLabel = computed(() => (currentIndex.value + 1 === total.value ? 'See summary' : 'Next'))
 const elapsedMs = computed(() => (startTs.value ? Date.now() - startTs.value : 0))
