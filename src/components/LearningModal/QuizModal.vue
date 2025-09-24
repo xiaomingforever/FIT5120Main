@@ -71,7 +71,7 @@
           :score="score"
           :total="total"
           :duration-ms="elapsedMs"
-          @retry="retry"
+          @retry="onRetry"
           @done="onClose"
         />
       </div>
@@ -94,7 +94,10 @@ const props = defineProps<{
   open: boolean
   ageGroup: '0-1' | '1-2' | '3-5'
 }>()
-const emit = defineEmits<{ (e: 'close'): void }>()
+const emit = defineEmits<{
+  (e: 'close'): void
+  (e: 'retry'): void
+}>()
 
 // state
 const ageImage = computed(() => QUIZ_AGE_IMAGES[props.ageGroup] || '')
@@ -182,8 +185,8 @@ function showCross(key: 'a'|'b'|'c') {
   return !!(locked.value && q && selectedKey.value === key && key !== q.correctKey)
 }
 
-function retry() {
-  init()
+function onRetry() {
+  emit('retry')
 }
 
 function onClose() {
