@@ -8,6 +8,7 @@ export type RuntimeQuestion = {
   options: { key: 'a'|'b'|'c'; text: string }[]
   correctKey: 'a'|'b'|'c'
   feedback: { correct: string; a: string; b: string; c: string }
+  sourceLink?: string
 }
 
 export function labelForAgeGroup(age: AgeGroup) {
@@ -86,6 +87,7 @@ function toRuntimeSafe(q: Record<string, any>): RuntimeQuestion {
       b: (q.feedback_b ?? '').toString(),
       c: (q.feedback_c ?? '').toString(),
     },
+    sourceLink: q.source_link
   }
 }
 

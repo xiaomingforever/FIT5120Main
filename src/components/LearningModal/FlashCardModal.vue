@@ -87,6 +87,14 @@ function next() {
     emit('completed')
   }
 }
+
+// Build a source link
+const sourceHref = computed(() => {
+  const raw = currentQ.value?.sourceLink || (currentQ.value as any)?.source_link
+  if (!raw) return ''
+  const url = String(raw).trim()
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`
+})
 </script>
 
 <template>
@@ -129,8 +137,17 @@ function next() {
                   <div class="face front">
                     <p class="qa">{{ currentQ?.question }}</p>
                   </div>
-                  <div class="face back">
+                  <div class="face back answer-face">
                     <p class="qa">{{ answerText }}</p>
+                    <a
+                      v-if="isFlipped && sourceHref"
+                      class="source-btn"
+                      :href="sourceHref"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Source
+                    </a>
                   </div>
                 </div>
               </div>
@@ -268,6 +285,24 @@ function next() {
   font-weight: 700;
   line-height: 1.4;
   margin: 0;
+}
+.answer-face { position: absolute; }
+.source-btn {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 800;
+  text-decoration: none;
+  background: #10b981;
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0,0,0,.08);
+}
+.source-btn:focus {
+  outline: 2px solid #a7f3d0;
+  outline-offset: 2px;
 }
 
 .footer {
