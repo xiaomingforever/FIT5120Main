@@ -19,6 +19,10 @@ export const QUIZ_AGE_IMAGES: Record<AgeGroup, string> = {
   '1-2': '/Learning/Toddler.jpg',
   '3-5': '/Learning/Preschooler.jpg',
 }
+export const QUIZ_MARKS = {
+  tick: '/check_green.png',
+  cross: '/cross_red.png'
+};
 
 function getCsvText(): string {
   const txt = (csvRaw ?? '').trim()
