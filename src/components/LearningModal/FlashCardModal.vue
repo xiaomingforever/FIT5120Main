@@ -79,6 +79,13 @@ function onSwapDone() {
   swapping.value = false
 }
 
+function prev() {
+  if (currentIndex.value > 0) {
+    currentIndex.value--
+    isFlipped.value = false
+  }
+}
+
 function next() {
   if (currentIndex.value < total.value - 1) {
     currentIndex.value++
@@ -159,6 +166,7 @@ const sourceHref = computed(() => {
             <button class="secondary" @click="flip">
               {{ isFlipped ? 'Show Question' : 'Flip' }}
             </button>
+            <button class="prev" :disabled="loading || total === 0 || swapping || currentIndex === 0" @click="prev">Previous</button>
             <button class="primary" :disabled="loading || total === 0" @click="next">Next</button>
           </footer>
 
@@ -326,6 +334,16 @@ const sourceHref = computed(() => {
   border: none;
   background: #111827;
   color: #fff;
+  font-weight: 800;
+  border-radius: 10px;
+  padding: 10px 16px;
+  cursor: pointer;
+}
+.prev {
+  appearance: none;
+  border-width: 1px;
+  background: #fff;
+  color: #000000;
   font-weight: 800;
   border-radius: 10px;
   padding: 10px 16px;
