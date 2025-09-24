@@ -72,6 +72,11 @@ function onSummaryTakeQuiz() {
   ageTarget.value = 'quiz'
   showAgeSelector.value = true
 }
+function goToAgeSelector() {
+  showQuiz.value = false
+  selectedAge.value = null
+  showAgeSelector.value = true
+}
 function restartFlashcards() {
   showSummary.value = false
   showFlashcards.value = false
@@ -170,6 +175,7 @@ function restartFlashcards() {
       :open="showQuiz"
       :age-group="selectedAge"
       @close="showQuiz = false"
+      @retry="goToAgeSelector"
     />
   </section>
 </template>
