@@ -65,13 +65,25 @@
           />
           <button class="send" type="submit" title="Send">Send</button>
         </form>
-        <p class="coming-soon" role="note">AI function is active - try sending a message!</p>
+        <p class="coming-soon" role="note">AI function is active, try sending a message!</p>
       </div>
     </div>
 
     <aside class="col-right">
       <div class="card side">
-        <div class="side-ph">RIGHT SIDEBAR placeholder</div>
+        <h3 class="side-title">Your Chats History</h3>
+        <p style="font-size: 12px; color: gray; margin-top: -10px;">( Show only the first user prompt in each session as a summary )</p>
+        <div class="chat-history">
+          <div v-for="(chat, index) in chats" :key="chat.id" class="chat-summary">
+            <button class="summary-btn" @click="openChat(index)">
+              <!-- only display user's first prompt -->
+              {{ chat.messages.find(m => m.role === 'user')?.text || 'Empty chat' }}
+            </button>
+          </div>
+        </div>
+        <div class="new-chat">
+          <button class="btn" @click="startNewChat">+ Start a New Chat</button>
+        </div>
       </div>
     </aside>
   </section>
@@ -99,28 +111,28 @@
   <section class="container section-targets">
     <h3 class="section-title center">Target User Groups for BrainBuilder AI</h3>
     <div class="cards">
-      <article class="card tile">
+      <article class="card tile reveal">
         <h4>First-Time Parents</h4>
         <p>
           Individuals who are new to parenting and seeking guidance on fundamental aspects of brain
           health of child, from basic care to understanding developmental milestones.
         </p>
       </article>
-      <article class="card tile">
+      <article class="card tile reveal">
         <h4>Experienced Parents</h4>
         <p>
           Parents with multiple children who want advanced strategies and guidance for managing
           complex family dynamics and specific behavior challenges.
         </p>
       </article>
-      <article class="card tile">
+      <article class="card tile reveal">
         <h4>Caregivers and Guardians</h4>
         <p>
           Caregivers such as grandparents, aunts, uncles, or foster parents who are raising children
           and need guidance tailored to their unique situations.
         </p>
       </article>
-      <article class="card tile">
+      <article class="card tile reveal">
         <h4>Educators Providers</h4>
         <p>
           Childcare and education professionals looking for guidance on child's brain development
@@ -134,7 +146,7 @@
     <h3 class="section-title center">Using BrainBuilder AI: A Step-by-Step Guide</h3>
 
     <ol class="steps">
-      <li class="step">
+      <li class="step reveal">
         <div class="step-head">
           <span class="bullet">1</span>
           <h5>Start Your Journey</h5>
@@ -144,7 +156,7 @@
           required.
         </p>
       </li>
-      <li class="step">
+      <li class="step reveal">
         <div class="step-head">
           <span class="bullet">2</span>
           <h5>Identify Your Parenting Needs</h5>
@@ -154,7 +166,7 @@
           preschoolers or infants.
         </p>
       </li>
-      <li class="step">
+      <li class="step reveal">
         <div class="step-head">
           <span class="bullet">3</span>
           <h5>Engage with BrainBuilder</h5>
@@ -164,7 +176,7 @@
           questions feature for tailored advice.
         </p>
       </li>
-      <li class="step">
+      <li class="step reveal">
         <div class="step-head">
           <span class="bullet">4</span>
           <h5>Apply Insights</h5>
@@ -183,13 +195,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import axios from 'axios'
 
+interface Message {
+  role: string
+  text: string
+}
+
+interface Chat {
+  id: number
+  messages: Message[]
+}
+
 const draft = ref('')
-const messages = ref<{ role: string, text: string }[]>([])
+const chats = ref<Chat[]>([{ id: Date.now(), messages: [] }])
+const currentChatIndex = ref(0)
+
+const messages = computed(() => chats.value[currentChatIndex.value].messages)
 
 const API_URL = 'https://phs1f0y37g.execute-api.ap-southeast-2.amazonaws.com/generate'
+
+onMounted(() => {
+  const reveals = document.querySelectorAll('.reveal')
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('active')
+      }
+    })
+  }, { threshold: 0.1 })
+
+  reveals.forEach(el => observer.observe(el))
+})
 
 function prefill(text: string) {
   draft.value = text
@@ -261,6 +300,17 @@ async function sendMessage() {
     
     messages.value.push({ role: 'ai', text: errorMessage })
   }
+}
+
+function startNewChat() {
+  const newChat: Chat = { id: Date.now(), messages: [] }
+  chats.value.push(newChat)
+  currentChatIndex.value = chats.value.length - 1
+}
+
+// Switch to a different chat
+function openChat(index: number) {
+  currentChatIndex.value = index
 }
 </script>
 
@@ -458,7 +508,41 @@ async function sendMessage() {
 .placeholder p {
   margin: 18px;
 }
-
+.chat-history {
+  max-height: 400px;
+  overflow-y: auto;
+  margin-bottom: 1rem;
+}
+.summary-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border: none;
+  background: #f5f5f5;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.summary-btn:hover {
+  background: #e0e0e0;
+}
+.new-chat {
+  margin-top: 1rem;
+  text-align: center;
+}
+.btn {
+  background: var(--amber);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+}
+.btn:hover {
+  background: var(--amber-700);
+}
 .message {
   margin-bottom: 12px;
   padding: 8px 12px;
@@ -481,7 +565,7 @@ async function sendMessage() {
   margin-top: 12px;
 }
 .input {
-  width: 100%;
+  width: 96%;
   padding: 12px 14px;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
@@ -544,6 +628,7 @@ async function sendMessage() {
 }
 .card.tile {
   padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .card.tile h4 {
   margin: 0 0 6px;
@@ -570,6 +655,12 @@ async function sendMessage() {
   border-radius: 10px;
   background: #fff;
   padding: 14px 16px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card.tile:hover,
+.step:hover {
+  transform: translateY(-6px) scale(1.03); 
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15); 
 }
 .step-head {
   display: flex;
@@ -596,6 +687,28 @@ async function sendMessage() {
   color: #4b5563;
 }
 
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* add transition-delay */
+.cards .reveal:nth-child(1) { transition-delay: 0.1s; }
+.cards .reveal:nth-child(2) { transition-delay: 0.2s; }
+.cards .reveal:nth-child(3) { transition-delay: 0.3s; }
+.cards .reveal:nth-child(4) { transition-delay: 0.4s; }
+
+.steps .reveal:nth-child(1) { transition-delay: 0.1s; }
+.steps .reveal:nth-child(2) { transition-delay: 0.2s; }
+.steps .reveal:nth-child(3) { transition-delay: 0.3s; }
+.steps .reveal:nth-child(4) { transition-delay: 0.4s; }
+
 .back-wrap {
   margin-top: 22px;
 }
@@ -607,9 +720,11 @@ async function sendMessage() {
   border-radius: 999px;
   font-weight: 700;
   border: none;
+  cursor: pointer;
+  text-decoration: none;
 }
 .btn.back:hover {
-  background: #f59e0bcc;
+  background: var(--amber-700);
 }
 
 @media (max-width: 1024px) {
