@@ -189,7 +189,8 @@ import axios from 'axios'
 const draft = ref('')
 const messages = ref<{ role: string, text: string }[]>([])
 
-const API_URL = 'https://4pzfuisbuj.execute-api.ap-southeast-2.amazonaws.com/generate'
+const API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const API_KEY = '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'
 
 function prefill(text: string) {
   draft.value = text
@@ -209,20 +210,39 @@ async function sendMessage() {
   messages.value.push({ role: 'ai', text: 'Thinking...' })
 
   try {
-    console.log("API URL:", API_URL)
-    console.log("Request payload:", { prompt })
+    // console.log("API URL:", API_URL)
+    // console.log("Request payload:", { prompt })
     
-    const res = await axios.post(API_URL, JSON.stringify({ prompt }), {
-      headers: { 'Content-Type': 'application/json' },
-      // timeout: 30000 // 30 seconds timeout
-    })
+    // const res = await axios.post(API_URL, JSON.stringify({ prompt }), {
+    //   headers: { 'Content-Type': 'application/json' },
+    //   // timeout: 30000 // 30 seconds timeout
+    // })
+     const res = await axios.post(
+      API_URL,
+      {
+        model: "x-ai/grok-4-fast:free",
+        messages: [
+          { role: "system", content: "You are BrainBuilder AI, helping parents with clear advice." },
+          { role: "user", content: prompt }
+        ],
+      },
+      {
+        headers: {
+          "Authorization": `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+     )
     
-    console.log("Response:", res.data)
+    // console.log("Response:", res.data)
     
     // Remove loading message
     messages.value.pop()
     
-    const aiReply = res.data.output || res.data.response || res.data.message || 'Sorry, no response received.'
+    // const aiReply = res.data.output || res.data.response || res.data.message || 'Sorry, no response received.'
+    const aiReply =
+      res.data.choices?.[0]?.message?.content ||
+      'Sorry, no response received.'
     messages.value.push({ role: 'ai', text: aiReply })
   } catch (err) {
     console.error("Full error:", err)
