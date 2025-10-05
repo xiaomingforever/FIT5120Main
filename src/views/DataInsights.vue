@@ -619,23 +619,23 @@ onUnmounted(() => {
             padding: 25px;
             border-radius: 15px;
             margin-top: 20px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #4facfe;
           "
         >
-          <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem">
+          <h3 style="color: #64748B; margin-bottom: 15px; font-size: 1.2rem">
             💡 What This Means for You as a Parent:
           </h3>
-          <p style="color: #64748b; line-height: 1.6; margin-bottom: 10px">
+          <p style="color: #64748B; line-height: 1.6; margin-bottom: 10px">
             <strong>Language difficulties are on the rise</strong> - from 8.9%
             to 7.7%. This trend shows that more children are struggling with
             communication skills when they enter school.
           </p>
-          <p style="color: #64748b; line-height: 1.6; margin-bottom: 10px">
+          <p style="color: #64748B; line-height: 1.6; margin-bottom: 10px">
             <strong>The window of opportunity is closing</strong> - While
             overall vulnerability rates have remained relatively stable, early
             intervention during ages 0-3 can prevent these challenges.
           </p>
-          <p style="color: #667eea; font-weight: 600">
+          <p style="color: #64748B; font-weight: 600">
             ✨ Good news: Simple daily activities like reading, singing, and
             talking with your child can make a huge difference!
           </p>
@@ -650,7 +650,7 @@ onUnmounted(() => {
         </div>
         <div
           style="
-            background: #f0f9ff;
+            background: #f8fafc;
             padding: 25px;
             border-radius: 15px;
             margin-top: 20px;
@@ -669,7 +669,7 @@ onUnmounted(() => {
             "
           >
             <div>
-              <strong style="color: #1e40af"
+              <strong style="color: #43E97B"
                 >Social Skills (10.7% at risk):</strong
               >
               <p style="color: #64748b; margin-top: 5px">
@@ -677,7 +677,7 @@ onUnmounted(() => {
               </p>
             </div>
             <div>
-              <strong style="color: #1e40af"
+              <strong style="color: #43E97B"
                 >Physical Development (10.0% at risk):</strong
               >
               <p style="color: #64748b; margin-top: 5px">
@@ -686,7 +686,7 @@ onUnmounted(() => {
               </p>
             </div>
             <div>
-              <strong style="color: #1e40af"
+              <strong style="color: #43E97B"
                 >Language & Communication (8.8% at risk):</strong
               >
               <p style="color: #64748b; margin-top: 5px">
@@ -763,7 +763,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   height: 320px;
-  background: radial-gradient(circle at 20% 30%, #667eea, #764ba2 80%);
+  background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -953,7 +953,7 @@ circle:hover {
 
 /* Takeaway */
 .takeaway {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: #00C950;
   color: white;
   padding: 1rem 1.25rem;
   border-radius: 12px;
@@ -1083,7 +1083,7 @@ circle:hover {
   .stat-number {
     font-size: 3rem;
     font-weight: 800;
-    color: #667eea;
+    color: #43E97B;
     margin-bottom: 10px;
     display: block;
   }
@@ -1163,7 +1163,7 @@ circle:hover {
   }
 
   .cta-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
     color: white;
     text-align: center;
     padding: 60px 40px;
@@ -1185,7 +1185,7 @@ circle:hover {
 
   .cta-button {
     background: white;
-    color: #667eea;
+    color: #FF9404;
     padding: 15px 40px;
     border: none;
     border-radius: 50px;
@@ -1236,7 +1236,7 @@ circle:hover {
   }
 
   .key-facts {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
     color: white;
     padding: 40px;
     border-radius: 20px;
