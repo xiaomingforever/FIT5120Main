@@ -110,6 +110,14 @@ function openTrending(t: Story) {
   <div class="stories-page">
     <HeadBar />
 
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Stories</h1>
+        <p>Discover expert-backed articles on child brain development, nutrition, and learning all in one place.</p>
+      </div>
+    </section>
+
     <!-- stats bar  -->
     <section class="stats-bar" aria-label="Site statistics">
       <div class="stat">
@@ -196,6 +204,47 @@ function openTrending(t: Story) {
 </template>
 
 <style scoped>
+/* HERO SECTION */
+.hero {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  background: url('/Stories/HeroBanner.png') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  color: #fff;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  max-width: 720px;
+  margin: 0 1rem;
+}
+.hero h1 {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+.hero p {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #f3f3f3;
+}
+
+
 .stories-page {
   --bg: #fff8ef;
   --ink: #3f2f24;
