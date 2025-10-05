@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import Chart from 'chart.js/auto'
+
+let trendChartInst: Chart | null = null;
+let developmentChartInst: Chart | null = null;
 
 const connectionCounter = ref(0)
 let animationFrame: number | null = null
@@ -44,12 +48,12 @@ function animateCounter() {
   const target = 1000000
   const duration = 2000
   const startTime = Date.now()
-  
+
   function update() {
     const elapsed = Date.now() - startTime
     const progress = Math.min(elapsed / duration, 1)
     connectionCounter.value = Math.floor(target * progress)
-    
+
     if (progress < 1) {
       animationFrame = requestAnimationFrame(update)
     } else {
@@ -59,19 +63,272 @@ function animateCounter() {
       }, 2000)
     }
   }
-  
+
   update()
 }
 
 onMounted(() => {
   animateCounter()
+  // await nextTick();
+  initCharts();
+  initAnimations();
+
 })
 
 onUnmounted(() => {
   if (animationFrame) {
     cancelAnimationFrame(animationFrame)
+    trendChartInst?.destroy();
+    developmentChartInst?.destroy();
   }
 })
+
+  function initCharts() {
+    // Data for charts
+    const years = [2009, 2012, 2015, 2018, 2021, 2024];
+    const vulnerableData = [23.6, 22.0, 22.0, 21.7, 22.0, 23.5];
+    const languageData = [8.9, 6.8, 6.5, 6.6, 7.3, 7.7];
+    const communicationData = [9.2, 9.0, 8.5, 8.2, 8.4, 8.9];
+
+
+
+    // Trend Chart
+    const trendCanvas = document.getElementById("trendChart") as HTMLCanvasElement | null;
+
+    if (trendCanvas) {
+      trendChartInst?.destroy();
+      const ctx = trendCanvas.getContext("2d");
+      if (ctx) {
+      trendChartInst = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: years,
+          datasets: [
+            {
+              label: "Children Developmentally Vulnerable (%)",
+              data: vulnerableData,
+              borderColor: "#667eea",
+              backgroundColor: "rgba(102, 126, 234, 0.1)",
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: "#667eea",
+              pointBorderColor: "#fff",
+              pointBorderWidth: 2,
+              pointRadius: 6,
+            },
+            {
+              label: "Language Difficulties (%)",
+              data: languageData,
+              borderColor: "#f093fb",
+              backgroundColor: "rgba(240, 147, 251, 0.1)",
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: "#f093fb",
+              pointBorderColor: "#fff",
+              pointBorderWidth: 2,
+              pointRadius: 6,
+            },
+            {
+              label: "Communication Challenges (%)",
+              data: communicationData,
+              borderColor: "#4facfe",
+              backgroundColor: "rgba(79, 172, 254, 0.1)",
+              borderWidth: 3,
+              fill: true,
+              tension: 0.4,
+              pointBackgroundColor: "#4facfe",
+              pointBorderColor: "#fff",
+              pointBorderWidth: 2,
+              pointRadius: 6,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 12,
+                  weight: "bold",
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 25,
+              grid: {
+                color: "rgba(0,0,0,0.1)",
+              },
+              ticks: {
+                callback: function (value) {
+                  return value + "%";
+                },
+              },
+            },
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+          elements: {
+            point: {
+              hoverRadius: 8,
+            },
+          },
+        },
+      });
+    }
+    }
+
+    // Development Areas Chart
+   const developmentCanvas = document.getElementById("developmentChart") as HTMLCanvasElement | null;
+
+    if (developmentCanvas) {
+  developmentChartInst?.destroy();
+  const devCtx = developmentCanvas.getContext("2d");
+  if (devCtx) {
+    developmentChartInst = new Chart(devCtx, {
+        type: "doughnut",
+        data: {
+          labels: [
+            "Physical Health",
+            "Social Competence",
+            "Emotional Maturity",
+            "Language & Cognition",
+            "Communication & General Knowledge",
+          ],
+          datasets: [
+            {
+              data: [10.0, 10.7, 10.0, 7.7, 8.9],
+              backgroundColor: [
+                "#667eea",
+                "#f093fb",
+                "#4facfe",
+                "#43e97b",
+                "#f5576c",
+              ],
+              borderWidth: 0,
+              hoverOffset: 15,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "right",
+              labels: {
+                usePointStyle: true,
+                padding: 20,
+                font: {
+                  size: 13,
+                  weight: "bold",
+                },
+              },
+            },
+            tooltip: {
+              callbacks: {
+                label: function (context) {
+                  return context.label + ": " + context.parsed + "% vulnerable";
+                },
+              },
+            },
+          },
+          cutout: "60%",
+        },
+      });
+    }
+  }
+  }
+
+  function initAnimations() {
+  const observerOptions = {
+    threshold: 0.3,
+    rootMargin: "0px 0px -50px 0px",
+  };
+
+  const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        // Narrow to HTMLElement
+        const statNumber = entry.target.querySelector(".stat-number, .fact-number");
+
+        if (statNumber instanceof HTMLElement && !statNumber.classList.contains("animated")) {
+          setTimeout(() => {
+            animateNumber(statNumber); // OK: HTMLElement
+          }, Math.random() * 300);
+
+          statNumber.classList.add("animated");
+        }
+      }
+    });
+  }, observerOptions);
+    document.querySelectorAll(".stat-card, .fact-item").forEach((card) => {
+    observer.observe(card);
+  });
+}
+
+  function animateNumber(element: HTMLElement) {
+    const finalValue = (element.textContent || "").trim();
+
+    // Special cases that display as-is
+    const specialCases = ["1M", "700", "7x", "0-2"];
+    if (specialCases.includes(finalValue)) {
+      element.style.transform = "scale(0)";
+      element.style.transition =
+        "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
+      setTimeout(() => {
+        element.style.transform = "scale(1)";
+      }, 200);
+      return;
+    }
+
+    // Extract numeric value
+    const numericValue = parseFloat(finalValue.replace(/[^0-9.]/g, ""));
+    const isPercentage = finalValue.includes("%");
+
+    if (isNaN(numericValue) || numericValue === 0) {
+      return;
+    }
+
+    let currentValue = 0;
+    const increment = numericValue / 60;
+
+    element.textContent = isPercentage ? "0%" : "0";
+
+    const timer = setInterval(() => {
+      currentValue += increment;
+
+      if (currentValue >= numericValue) {
+        element.textContent = finalValue;
+        clearInterval(timer);
+
+        // Bounce effect
+        element.style.transform = "scale(1.1)";
+        element.style.transition = "transform 0.2s ease";
+        setTimeout(() => {
+          element.style.transform = "scale(1)";
+        }, 200);
+      } else {
+        const displayValue = Math.floor(currentValue);
+        element.textContent = isPercentage
+          ? displayValue + "%"
+          : displayValue.toString();
+      }
+    }, 30);
+  }
+
 </script>
 
 <template>
@@ -97,24 +354,24 @@ onUnmounted(() => {
               </linearGradient>
             </defs>
             <!-- Grid lines -->
-            <line 
-              v-for="i in 5" 
-              :key="i" 
-              :x1="50" 
-              :x2="380" 
-              :y1="30 + (i-1)*45" 
-              :y2="30 + (i-1)*45" 
-              stroke="#e5e7eb" 
+            <line
+              v-for="i in 5"
+              :key="i"
+              :x1="50"
+              :x2="380"
+              :y1="30 + (i-1)*45"
+              :y2="30 + (i-1)*45"
+              stroke="#e5e7eb"
               stroke-width="1"
             />
             <!-- Y-axis labels -->
-            <text 
-              v-for="(val, i) in [100, 75, 50, 25, 0]" 
+            <text
+              v-for="(val, i) in [100, 75, 50, 25, 0]"
               :key="'y'+i"
-              x="40" 
-              :y="35 + i*45" 
-              text-anchor="end" 
-              font-size="12" 
+              x="40"
+              :y="35 + i*45"
+              text-anchor="end"
+              font-size="12"
               fill="#666"
             >
               {{ val }}%
@@ -127,27 +384,27 @@ onUnmounted(() => {
               stroke-width="3"
             />
             <!-- Points -->
-            <circle 
-              v-for="(d, i) in brainGrowthData" 
+            <circle
+              v-for="(d, i) in brainGrowthData"
               :key="i"
-              :cx="70 + i*62" 
+              :cx="70 + i*62"
               :cy="210 - d.value*1.8"
-              r="8" 
-              fill="#e74c3c" 
-              stroke="#fff" 
+              r="8"
+              fill="#e74c3c"
+              stroke="#fff"
               stroke-width="2"
               style="cursor: pointer"
               @mouseenter="showTooltip($event, `${d.age}: ${d.value}% of adult brain size`)"
               @mouseleave="hideTooltip"
             />
             <!-- X-axis labels -->
-            <text 
-              v-for="(d, i) in brainGrowthData" 
+            <text
+              v-for="(d, i) in brainGrowthData"
               :key="'x'+i"
-              :x="70 + i*62" 
-              y="235" 
-              text-anchor="middle" 
-              font-size="11" 
+              :x="70 + i*62"
+              y="235"
+              text-anchor="middle"
+              font-size="11"
               fill="#666"
             >
               {{ d.age }}
@@ -174,46 +431,46 @@ onUnmounted(() => {
             <text x="40" y="110" text-anchor="end" font-size="12" fill="#666">400</text>
             <text x="40" y="215" text-anchor="end" font-size="12" fill="#666">0</text>
             <!-- Y-axis title -->
-            <text 
-                x="10" 
-                y="120" 
-                text-anchor="middle" 
-                font-size="12" 
-                fill="#374151" 
-                font-weight="700" 
+            <text
+                x="10"
+                y="120"
+                text-anchor="middle"
+                font-size="12"
+                fill="#374151"
+                font-weight="700"
                 transform="rotate(-90 10 120)"
                 >
                 Vocabulary Size at Age 2
             </text>
-            
+
             <!-- Bars -->
-            <rect 
-              x="80" 
-              y="70" 
-              width="100" 
-              height="140" 
-              fill="#95a5a6" 
+            <rect
+              x="80"
+              y="70"
+              width="100"
+              height="140"
+              fill="#95a5a6"
               rx="8"
               style="cursor: pointer"
               @mouseenter="showTooltip($event, 'Normal Development: 500 words at age 2')"
               @mouseleave="hideTooltip"
             />
-            <rect 
-              x="220" 
-              y="10" 
-              width="100" 
-              height="200" 
-              fill="#27ae60" 
+            <rect
+              x="220"
+              y="10"
+              width="100"
+              height="200"
+              fill="#27ae60"
               rx="8"
               style="cursor: pointer"
               @mouseenter="showTooltip($event, 'Daily Talk: 800 words at age 2 (+300 more!)')"
               @mouseleave="hideTooltip"
             />
-            
+
             <!-- Value labels on bars -->
             <text x="130" y="60" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">500</text>
             <text x="270" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">800</text>
-            
+
             <!-- X-axis labels -->
             <text x="130" y="230" text-anchor="middle" font-size="13" fill="#666">Normal</text>
             <text x="270" y="230" text-anchor="middle" font-size="13" fill="#666">Daily Talk</text>
@@ -274,11 +531,225 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+<!-- Key Facts About Brain Development -->
+      <div class="key-facts">
+        <h2>The Science of Early Development</h2>
+        <div class="facts-grid">
+          <div class="fact-item">
+            <span class="fact-number">90%</span>
+            <div class="fact-text">
+              of brain development occurs in the first 5 years
+            </div>
+          </div>
+          <div class="fact-item">
+            <span class="fact-number">1M</span>
+            <div class="fact-text">
+              neural connections formed per second in early years
+            </div>
+          </div>
+          <div class="fact-item">
+            <span class="fact-number">7x</span>
+            <div class="fact-text">
+              return for every dollar invested in early childhood programs
+            </div>
+          </div>
+          <div class="fact-item">
+            <span class="fact-number">700</span>
+            <div class="fact-text">
+              new neural connections per second at birth
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Key Statistics -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number">23.5%</span>
+          <div class="stat-label">Children Developmentally Vulnerable</div>
+          <div class="stat-description">
+            In Australia 2024, nearly 1 in 4 children are at risk of
+            developmental delays
+          </div>
+          <div class="trend-indicator trend-down">↓ Down from 23.6% (2009)</div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-number">10.7%</span>
+          <div class="stat-label">Language Difficulties</div>
+          <div class="stat-description">
+            Highest challenges: Communication (8.9%) and Language (7.7%)
+          </div>
+          <div class="trend-indicator trend-up">↑ Up from 8.9% (2009)</div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-number">40.8%</span>
+          <div class="stat-label">Highest Vulnerability Rate</div>
+          <div class="stat-description">
+            Northern Territory shows the highest rate of vulnerable children
+          </div>
+          <div class="trend-indicator trend-up">
+            ⚠️ Urgent intervention needed
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <span class="stat-number">0-2</span>
+          <div class="stat-label">Critical Window</div>
+          <div class="stat-description">
+            Most important years for brain architecture formation
+          </div>
+          <div class="trend-indicator trend-down">
+            ⚡ Time-sensitive opportunity
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart Section -->
+      <div class="chart-section">
+        <h2 class="chart-title">Why Your Child's Early Years Matter Most</h2>
+        <div class="chart-container">
+          <canvas id="trendChart"></canvas>
+        </div>
+        <div
+          style="
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+          "
+        >
+          <h3 style="color: #667eea; margin-bottom: 15px; font-size: 1.2rem">
+            💡 What This Means for You as a Parent:
+          </h3>
+          <p style="color: #64748b; line-height: 1.6; margin-bottom: 10px">
+            <strong>Language difficulties are on the rise</strong> - from 8.9%
+            to 7.7%. This trend shows that more children are struggling with
+            communication skills when they enter school.
+          </p>
+          <p style="color: #64748b; line-height: 1.6; margin-bottom: 10px">
+            <strong>The window of opportunity is closing</strong> - While
+            overall vulnerability rates have remained relatively stable, early
+            intervention during ages 0-3 can prevent these challenges.
+          </p>
+          <p style="color: #667eea; font-weight: 600">
+            ✨ Good news: Simple daily activities like reading, singing, and
+            talking with your child can make a huge difference!
+          </p>
+        </div>
+      </div>
+
+      <!-- Development Areas Chart -->
+      <div class="chart-section">
+        <h2 class="chart-title">Where Your Child Needs the Most Support</h2>
+        <div class="chart-container">
+          <canvas id="developmentChart"></canvas>
+        </div>
+        <div
+          style="
+            background: #f0f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #4facfe;
+          "
+        >
+          <h3 style="color: #4facfe; margin-bottom: 15px; font-size: 1.2rem">
+            🎯 Action Plan for Parents:
+          </h3>
+          <div
+            style="
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+              gap: 15px;
+              margin-top: 15px;
+            "
+          >
+            <div>
+              <strong style="color: #1e40af"
+                >Social Skills (10.7% at risk):</strong
+              >
+              <p style="color: #64748b; margin-top: 5px">
+                Arrange playdates, practice sharing, teach emotion words
+              </p>
+            </div>
+            <div>
+              <strong style="color: #1e40af"
+                >Physical Development (10.0% at risk):</strong
+              >
+              <p style="color: #64748b; margin-top: 5px">
+                Encourage active play, fine motor activities like drawing,
+                outdoor exploration
+              </p>
+            </div>
+            <div>
+              <strong style="color: #1e40af"
+                >Language & Communication (8.8% at risk):</strong
+              >
+              <p style="color: #64748b; margin-top: 5px">
+                Read daily, narrate your activities, ask open-ended questions
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Insights -->
+      <div class="insights-grid">
+        <div class="insight-card">
+          <h3 class="insight-title">🏠 Start at Home, Start Today</h3>
+          <p class="insight-text">
+            You don't need expensive programs or special equipment. Simple
+            activities like counting toys, describing colors during walks, or
+            singing nursery rhymes during bath time build crucial neural
+            pathways.
+          </p>
+        </div>
+
+        <div class="insight-card">
+          <h3 class="insight-title">⏰ Every Moment Counts</h3>
+          <p class="insight-text">
+            Your child's brain forms 1 million neural connections per second in
+            early years. Daily routines like mealtime conversations and bedtime
+            stories are actually powerful brain-building opportunities.
+          </p>
+        </div>
+
+        <div class="insight-card">
+          <h3 class="insight-title">📈 Small Steps, Big Impact</h3>
+          <p class="insight-text">
+            Even 15 minutes of focused play daily can significantly improve your
+            child's school readiness. The key is consistency and engagement, not
+            perfection.
+          </p>
+        </div>
+      </div>
+
+      <!-- Call to Action -->
+      <div class="cta-section">
+        <h2 class="cta-title">Ready to Give Your Child the Best Start?</h2>
+        <p class="cta-text">
+          Join thousands of parents who are already using BrainBuilder's simple,
+          science-backed activities. Transform everyday moments into powerful
+          learning opportunities - starting today.
+        </p>
+        <button class="cta-button" onclick="window.open('#', '_blank')">
+          Get Started Free
+        </button>
+        <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8">
+          ✓ Age-appropriate activities ✓ 5-minute daily tips ✓ Track your
+          child's progress
+        </p>
+      </div>
+
   </section>
 
   <!-- Tooltip -->
-  <div 
-    v-if="tooltip.show" 
+  <div
+    v-if="tooltip.show"
     class="tooltip"
     :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
   >
@@ -547,4 +1018,261 @@ circle:hover {
     transform: translate(-50%, -100%) scale(1);
   }
 }
+
+  .hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero p {
+    font-size: 1.3rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(102, 126, 234, 0.1),
+      transparent
+    );
+    transition: left 0.5s;
+  }
+
+  .stat-card:hover::before {
+    left: 100%;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .stat-number {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #667eea;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 5px;
+  }
+
+  .stat-description {
+    font-size: 0.9rem;
+    color: #888;
+    line-height: 1.4;
+  }
+
+  .chart-section {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    margin: 40px 0;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .chart-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 400px;
+    margin: 30px 0;
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin: 40px 0;
+  }
+
+  .insight-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .insight-card:nth-child(2) {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  }
+
+  .insight-card:nth-child(3) {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  }
+
+  .insight-card:hover {
+    transform: scale(1.05);
+  }
+
+  .insight-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+  }
+
+  .insight-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.95;
+  }
+
+  .cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 60px 40px;
+    border-radius: 20px;
+    margin: 40px 0;
+  }
+
+  .cta-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+  }
+
+  .cta-text {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    opacity: 0.9;
+  }
+
+  .cta-button {
+    background: white;
+    color: #667eea;
+    padding: 15px 40px;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .insights-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .trend-indicator {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 10px;
+  }
+
+  .trend-up {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+  }
+
+  .trend-down {
+    background: rgba(34, 197, 94, 0.1);
+    color: #16a34a;
+  }
+
+  .key-facts {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 20px;
+    margin: 40px 0;
+    text-align: center;
+  }
+
+  .key-facts h2 {
+    font-size: 2.2rem;
+    margin-bottom: 30px;
+    font-weight: 800;
+  }
+
+  .facts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+  }
+
+  .fact-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+  }
+
+  .fact-number {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  .fact-text {
+    font-size: 1rem;
+    opacity: 0.9;
+  }
 </style>
