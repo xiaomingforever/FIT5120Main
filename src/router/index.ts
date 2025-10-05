@@ -13,6 +13,7 @@ const TipsCongrats = () => import('@/views/TipsCongrats.vue')
 const LearningStart = () => import('@/views/LearningStart.vue')
 const Stories = () => import('@/views/Stories.vue')
 const AITool = () => import('@/views/AITools.vue')
+const DataInsights = () => import('@/views/DataInsights.vue')
 
 const Story1 = () => import('@/views/Articles/Story1.vue')
 const Related1 = () => import('@/views/Articles/Related1.vue')
@@ -35,6 +36,7 @@ export default createRouter({
         { path: 'learning-start', name: 'LearningStart', component: LearningStart },
         { path: 'AITools', name: 'AITools', component: AITools },
         { path: 'Stories', name: 'Stories', component: Stories},
+        { path: 'DataInsights', name: 'DataInsights', component: DataInsights},
 
         { path: 'activities', name: 'Activities', component: Activities },
         {

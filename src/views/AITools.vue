@@ -215,6 +215,7 @@ const currentChatIndex = ref(0)
 const messages = computed(() => chats.value[currentChatIndex.value].messages)
 
 const API_URL = 'https://phs1f0y37g.execute-api.ap-southeast-2.amazonaws.com/generate'
+// const API_URL = 'https://my-ai-chatbot.onrender.com/generate' 
 
 onMounted(() => {
   const reveals = document.querySelectorAll('.reveal')

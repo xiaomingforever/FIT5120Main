@@ -27,23 +27,7 @@
             </router-link>
           </li> -->
 
-          <li>
-            <router-link to="/Stories">
-              <font-awesome-icon icon="coffee" style="color: burlywood"/> Stories
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/learning-start">
-              <font-awesome-icon icon="book" style="color: brown"/> Learning
-            </router-link>
-          </li>
-          <li>
-            <router-link to="/AITools">
-              <font-awesome-icon icon="robot" style="color: gray"/> AI Tools
-            </router-link>
-          </li>
-
-          <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+                    <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
               <font-awesome-icon icon="brain" style="color: skyblue" /> Try Brain Builder ▾
             </a>
@@ -73,6 +57,28 @@
                 </router-link>
               </li>
             </ul>
+          </li>
+
+          <li>
+            <router-link to="/DataInsights">
+              <font-awesome-icon icon="dashboard" style="color: palevioletred"/> Data Insights
+            </router-link>
+          </li>
+
+          <li>
+            <router-link to="/Stories">
+              <font-awesome-icon icon="coffee" style="color: burlywood"/> Stories
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/learning-start">
+              <font-awesome-icon icon="book" style="color: brown"/> Learning
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/AITools">
+              <font-awesome-icon icon="robot" style="color: gray"/> AI Tools
+            </router-link>
           </li>
         </ul>
       </div>
