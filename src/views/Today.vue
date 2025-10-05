@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed, onUnmounted, Transition } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import CategoryCloudCard from '@/components/CategoryCloudCard.vue'
 import { useProgressStore } from '@/stores/progress'
@@ -9,6 +9,7 @@ import heartRed from '@/assets/Font icons/favorite_red.png'
 import type { AgeGroup } from '@/stores/Exercise'
 import confetti from "canvas-confetti"
 import TipsCongrats from "@/views/TipsCongrats.vue"
+import TipModal from '@/components/TipModal.vue'
 
 const router = useRouter()
 const fav = useFavoritesStore()
@@ -24,16 +25,64 @@ const selectedGender = ref<'girl' | 'boy'>('girl')
 
 const selectorTop = ref<HTMLElement | null>(null)
 const erexerciseCardRef = ref<HTMLElement | null>(null)
-
 const showBackBtn = ref(false)
-const showTooltip = ref(false)
-
 const showCongrats = ref(false)
 
-onMounted(() => {
+// Daily update countdown
+const timeUntilReset = ref('')
+let countdownInterval: number | null = null
+
+// Modal state
+const showTip = ref(false)
+const selectedTip = ref<any | null>(null)
+
+// Calculate time until midnight
+function updateCountdown() {
+  const now = new Date()
+  const midnight = new Date()
+  midnight.setHours(24, 0, 0, 0)
+  
+  const diff = midnight.getTime() - now.getTime()
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+  
+  timeUntilReset.value = `${hours}h ${minutes}m ${seconds}s`
+}
+
+// Check if tips need refresh (new day)
+function shouldRefreshTips(): boolean {
+  const savedDate = localStorage.getItem('tips_date')
+  const today = new Date().toISOString().split('T')[0]
+  return savedDate !== today
+}
+
+// Load tips from cache or API
+async function loadTips() {
+  if (shouldRefreshTips()) {
+    console.log('New day detected, fetching new tips...')
+    await generateRoutine()
+  } else {
+    console.log('Loading cached tips...')
+    const cached = localStorage.getItem('routine')
+    if (cached) {
+      try {
+        routineData.value = JSON.parse(cached)
+        console.log('Loaded cached routine:', routineData.value)
+      } catch (e) {
+        console.error('Failed to parse cached routine:', e)
+        await generateRoutine()
+      }
+    } else {
+      console.log('No cache found, fetching tips...')
+      await generateRoutine()
+    }
+  }
+}
+
+onMounted(async () => {
   const ageSaved = localStorage.getItem('age_code') as AgeGroup | null
   const genderSaved = localStorage.getItem('gender') as 'girl' | 'boy' | null
-  // const routineSaved = localStorage.getItem('routine')
 
   if (ageSaved && AGE_TABS.includes(ageSaved)) {
     selectedAge.value = ageSaved
@@ -41,7 +90,16 @@ onMounted(() => {
   if (genderSaved) {
     selectedGender.value = genderSaved
   }
-  generateRoutine()
+  
+  // Load tips
+  await loadTips()
+  
+  // Start countdown
+  updateCountdown()
+  countdownInterval = window.setInterval(updateCountdown, 1000)
+  
+  // Listen for scroll
+  window.addEventListener('scroll', handleScroll)
 })
 
 async function generateRoutine() {
@@ -61,6 +119,10 @@ async function generateRoutine() {
       localStorage.setItem('routine', JSON.stringify(data))
       localStorage.setItem('age_code', selectedAge.value)
       localStorage.setItem('gender', selectedGender.value)
+      // Save today's date
+      const today = new Date().toISOString().split('T')[0]
+      localStorage.setItem('tips_date', today)
+      console.log('Saved new routine with date:', today)
     } else {
       routineData.value = null
     }
@@ -87,16 +149,14 @@ function scrollToExerciseCard() {
 function handleScroll() {
   if (!selectorTop.value) return
   const rect = selectorTop.value.getBoundingClientRect()
-  // if age selector scroll to top, display button
   showBackBtn.value = rect.top < 0
 }
 
-onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-})
-
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  if (countdownInterval) {
+    clearInterval(countdownInterval)
+  }
 })
 
 function changeAge(age: AgeGroup) {
@@ -117,14 +177,13 @@ const extractHttpsLink = (text: string): string | null => {
   return match ? match[0] : null
 }
 
-// --- favorites
-const isFavorited = computed(() => {
-  const act = routineData.value?.routine?.[0]?.activity
-  return act ? fav.isFavorite(act.tip_id) : false
-})
+// favorites
+const isFavorited = (tipId: string | number) => {
+  return fav.isFavorite(tipId)
+}
 
-const toggleFavorite = () => {
-  const act = routineData.value?.routine?.[0]?.activity
+const toggleFavorite = (item: any) => {
+  const act = item.activity
   if (!act) return
   fav.toggle({
     tip_id: act.tip_id,
@@ -138,7 +197,7 @@ const toggleFavorite = () => {
   })
 }
 
-// --- progress
+// progress
 progress.load()
 const completedCounts = ref<Record<string, number>>({})
 
@@ -154,7 +213,7 @@ const getCompletedCount = (id: string) => {
   return savedCounts[id] || 0
 }
 
-const todayKey = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
+const todayKey = new Date().toISOString().split('T')[0]
 
 function getTipCount(id: string | number) {
   const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
@@ -163,10 +222,9 @@ function getTipCount(id: string | number) {
   return entry && entry.date === todayKey ? entry.count : 0
 }
 
-function handleDone(activity: any) {
-  const act = routineData.value.routine[0].activity
+function handleDone(item: any) {
+  const act = item.activity
   const id = act.tip_id
-
   const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
   let entry = records[id] || { date: todayKey, count: 0 }
 
@@ -187,7 +245,6 @@ function handleDone(activity: any) {
     if (!confirmAgain) return
   }
 
-  // update count
   entry.count++
   records[id] = entry
   localStorage.setItem('tipDailyCounts', JSON.stringify(records))
@@ -195,7 +252,7 @@ function handleDone(activity: any) {
   progress.record({
     id: act.tip_id,
     tip: act.tip,
-    tip_des: activity.tip_des,
+    tip_des: act.tip_des,
     activityName: act.name,
     activityId: act.id,
     age_code: routineData.value.age_code,
@@ -204,63 +261,77 @@ function handleDone(activity: any) {
     completedAt: new Date().toISOString(),
   })
 
-  // fireworks animation
   confetti({
     particleCount: 120,
     spread: 90,
-    origin: { y: 0.6 }, // position
+    origin: { y: 0.6 },
   })
 
   setTimeout(() => {
     showCongrats.value = true
   }, 500)
+  
+  closeTip()
 }
 
-// --- image glob
-const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+// image handling
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
   eager: true,
   import: 'default',
   query: '?url',
 }) as Record<string, string>
-const IMAGES_B = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
-  eager: true,
-  import: 'default',
-  query: '?url',
-}) as Record<string, string>
-const IMAGE_MAP = { ...TIP_IMAGES, ...IMAGES_B }
 
-function slug(s: string) {
-  return s.toLowerCase().replace(/\s+/g, '-')
-}
-function toFileBase(name: string) {
-  return slug(name)
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['']/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
-function getImageUrl(actName: string) {
-  const base = toFileBase(actName)
-  const candidates = [
-    `../assets/Tips/${base}.png`,
-    `../assets/Activities/ActivityCard/${base}.png`,
-  ]
-  for (const k of candidates) {
-    if (IMAGE_MAP[k]) return IMAGE_MAP[k]
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+  const slug = slugTipName(tipName)
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path.split('/').pop()?.toLowerCase().replace(/\.[^.]+$/, '')
+    if (file === slug) return url
   }
   return ''
 }
 
-const currentIndex = ref(0)
-
-function nextCard() {
-  if (routineData.value && currentIndex.value < routineData.value.routine.length - 1) {
-    currentIndex.value++
-  }
+// Modal functions
+const openTip = (item: any) => {
+  selectedTip.value = item
+  showTip.value = true
 }
 
-function prevCard() {
-  if (currentIndex.value > 0) {
-    currentIndex.value--
-  }
+const closeTip = () => {
+  showTip.value = false
+  selectedTip.value = null
 }
+
+const openRelated = (tipId: string | number) => {
+  const found = routineData.value?.routine?.find((item: any) => 
+    String(item.activity.tip_id) === String(tipId)
+  )
+  if (found) selectedTip.value = found
+}
+
+// Compute flattened tips array for modal
+const allTips = computed(() => {
+  if (!routineData.value?.routine) return []
+  return routineData.value.routine.map((item: any) => ({
+    tip_id: item.activity.tip_id,
+    tip: item.activity.tip,
+    tip_des: item.activity.tip_des,
+    brainy_background: item.activity.brainyBackground,
+    source_url: item.activity.source,
+    age_code: routineData.value.age_code,
+    act_name: item.activity.name,
+    act_desc: '',
+    skills: item.activity.skills || []
+  }))
+})
 </script>
 
 <template>
@@ -277,14 +348,13 @@ function prevCard() {
     </section>
 
     <!-- Selector -->
-    <section class="selector-hero">
+    <section class="selector-hero" ref="selectorTop">
       <div class="selector-hero-content">
         <h2 class="section-title">Personalize Your Tips</h2>
         <p class="selector-sub">
           Choose gender and age group to tailor activities for your child.
         </p>
-
-        <!-- Gender + Age grouped together -->
+        
         <div class="selectors-wrapper">
           <!-- Gender -->
           <div class="selector-group">
@@ -300,7 +370,7 @@ function prevCard() {
               </div>
             </div>
           </div>
-
+          
           <!-- Age -->
           <div class="selector-group">
             <h3 class="group-title">Choose Age Group</h3>
@@ -317,102 +387,74 @@ function prevCard() {
 
     <!-- Exercise Section Intro -->
     <div class="exercise-intro" ref="erexerciseCardRef">
-      <h2 class="section-title">Daily Exercise Tips</h2>
+      <h2 class="section-title">Daily Exercise Tips (Daily Update)</h2>
       <p class="exercise-sub">
-        Each card gives you a fun and simple activity designed to nurture your childs brain.
-        Browse through, save favorites, and mark them as done to track progress.
+        Each card gives you a fun and simple activity designed to nurture your child's brain.
+        Click on cards to view details, save favorites, and mark them as done to track progress.
       </p>
+      
+      <!-- Countdown Timer -->
+      <div class="countdown-badge">
+        <span class="countdown-icon">🔄</span>
+        <span class="countdown-text">Update tips in: <strong>{{ timeUntilReset }}</strong></span>
+      </div>
     </div>
 
-    <!-- Exercise Card Carousel -->
-    <div class="exercise-card">
+    <!-- Tips Grid -->
+    <div class="tips-container">
       <div v-if="loading" class="loading">
         Loading activities...
       </div>
-
-      <div v-if="routineData" class="carousel">
-        <div class="carousel-track" :style="{ transform: `translateX(-${currentIndex * 100}%)` }">
-          <div v-for="(item, index) in routineData.routine" :key="item.activity.id" class="carousel-item">
-            <p style="font-size: 18px;">Age Group: {{ routineData.age_code }}, Gender: {{ routineData.gender }}</p>
-            <p class="activity-name">Activity: {{ item.activity.name.toUpperCase() }}</p>
-
-            <div class="card-header">
-              <div class="tags" v-if="item.activity.skills && item.activity.skills.length">
-                <span v-for="skill in item.activity.skills" :key="skill.code" class="tag">
-                  {{ skill.code.toUpperCase() }}
-                </span>
-              </div>
-              <button class="fav-btn" :aria-pressed="isFavorited"
-                :title="isFavorited ? 'Remove from favorites' : 'Add to favorites'" @click.stop="toggleFavorite">
-                <img :src="isFavorited ? heartRed : heartEmpty" alt="" />
+      
+      <section v-else-if="routineData" class="grid">
+        <article
+          v-for="item in routineData.routine"
+          :key="item.activity.id"
+          class="tip-card"
+          @click="openTip(item)"
+          role="button"
+          tabindex="0"
+          @keydown.enter="openTip(item)"
+          @keydown.space.prevent="openTip(item)"
+          :class="{ flipped: getTipCount(item.activity.tip_id) >= 1 }"
+        >
+          <div class="tip-card-inner">
+            <div class="tip-card-front">
+              <button
+                class="fav-btn"
+                :aria-pressed="isFavorited(item.activity.tip_id)"
+                :title="isFavorited(item.activity.tip_id) ? 'Remove from favorites' : 'Add to favorites'"
+                @click.stop="toggleFavorite(item)"
+              >
+                <img :src="isFavorited(item.activity.tip_id) ? heartRed : heartEmpty" alt="" />
               </button>
+              
+              <div class="tip-media" v-if="getTipImage(item.activity.tip)">
+                <img :src="getTipImage(item.activity.tip)" :alt="`${item.activity.tip} illustration`" loading="lazy" />
+              </div>
+              
+              <div class="tip-content">
+                <h3 class="tip-title">{{ item.activity.tip }}</h3>
+                <p v-if="item.activity.tip_des" class="tip-descr">{{ item.activity.tip_des }}</p>
+                <ul v-if="item.activity.skills && item.activity.skills.length" class="skills">
+                  <li class="skill">{{ item.activity.skills[0].code }}</li>
+                </ul>
+              </div>
             </div>
-
-            <!-- title -->
-            <h2 class="title" v-if="item.activity.tip">{{ item.activity.tip }}</h2>
-            <!-- description -->
-            <p class="desc" v-if="item.activity.tip_des">{{ item.activity.tip_des }}</p>
-            <!-- Image -->
-            <!-- <img class="illustration" src="/src/assets/Activities/ActivityCard/LearningTime1.png" alt="image" /> -->
-            <img class="illustration" :src="getImageUrl(item.activity.name)" :alt="item.activity.name" />
-            <!-- Why this matters -->
-            <div class="why" v-if="item.activity.brainyBackground">
-              <h3>Why this matters</h3>
-              <p>{{ item.activity.brainyBackground }}</p>
-            </div>
-            <!-- source -->
-            <div v-if="item.activity.source" class="source">
-              <strong>Source: </strong>
-              <span v-if="extractHttpsLink(item.activity.source)">
-                <a :href="extractHttpsLink(item.activity.source)!" target="_blank" rel="noopener noreferrer">
-                  View related research
-                </a>
-              </span>
-              <span v-else>
-                {{ item.activity.source }}
-              </span>
+            
+            <div class="tip-card-back">
+              <template v-if="getTipCount(item.activity.tip_id) === 1">
+                ✅ You have completed this tip once today.
+              </template>
+              <template v-else-if="getTipCount(item.activity.tip_id) === 2">
+                🎉 Great job! You have completed this tip twice today.
+                <br />
+                <div style="padding-top: 20px;">You've reached today's limit.</div>
+              </template>
             </div>
           </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="carousel-controls">
-          <button @click="prevCard" :disabled="currentIndex === 0">‹</button>
-          <button @click="nextCard" :disabled="currentIndex === routineData.routine.length - 1">›</button>
-        </div>
-      </div>
-
-      <button
-        class="done-btn"
-        v-if="routineData && routineData.routine.length"
-        :disabled="getTipCount(routineData.routine[currentIndex].activity.tip_id) >= 2"
-        @click="handleDone(routineData.routine[currentIndex].activity)"
-      >
-        <span v-if="getTipCount(routineData.routine[currentIndex].activity.tip_id) === 0">Done</span>
-        <span v-else-if="getTipCount(routineData.routine[currentIndex].activity.tip_id) === 1">Completed (once more)</span>
-        <span v-else>Completed (daily limit reached)</span>
-      </button>
-
-      <!-- Completed times -->
-      <div class="completed-times">
-        <p v-if="routineData" class="complete-count">
-          Total Completed: {{ getCompletedCount(routineData.routine[0].activity.tip_id) }} times
-        </p>
-        <div class="info-wrapper" @mouseenter="showTooltip = true" @mouseleave="showTooltip = false"
-          @click="showTooltip = !showTooltip">
-          <!-- info icon -->
-          <span class="info-icon">ℹ️</span>
-
-          <!-- info -->
-          <transition name="fade">
-            <div v-if="showTooltip" class="tooltip">
-              <p>The number of times you have completed the activity, </p>
-              <p>used to track progress.</p>
-              <div class="tooltip-arrow"></div>
-            </div>
-          </transition>
-        </div>
-      </div>
+        </article>
+      </section>
     </div>
 
     <!-- Sidebar with Back button -->
@@ -422,7 +464,7 @@ function prevCard() {
       </div>
     </Transition>
 
-    <!-- Exercise Section Intro -->
+    <!-- Browse by Activity Type -->
     <div class="exercise-intro">
       <h2 class="section-title">Browse Tips by Activity type</h2>
       <p class="exercise-sub">
@@ -430,13 +472,33 @@ function prevCard() {
       </p>
     </div>
 
-    <!-- Activity Grid -->
     <CategoryCloudCard />
 
-    <TipsCongrats v-if="showCongrats" :open="showCongrats"
+    <!-- Tip Modal -->
+    <TipModal
+      v-if="showTip && selectedTip"
+      :open="showTip"
+      :tip="selectedTip.activity"
+      :tips="allTips"
+      :activity-name="selectedTip.activity.name"
+      :activity-id="selectedTip.activity.id"
+      :age="selectedAge"
+      :gender="selectedGender"
+      period="Any"
+      @close="closeTip"
+      @open-related="openRelated"
+      @done="handleDone(selectedTip)"
+    />
+
+    <TipsCongrats 
+      v-if="showCongrats" 
+      :open="showCongrats"
       :activity-name="routineData?.routine?.[0]?.activity.name || ''"
-      :activity-id="routineData?.routine?.[0]?.activity.id || ''" @close="showCongrats = false" />
+      :activity-id="routineData?.routine?.[0]?.activity.id || ''" 
+      @close="showCongrats = false" 
+    />
   </main>
+  
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
@@ -501,6 +563,7 @@ function prevCard() {
   margin: 0;
   font-size: 22px;
 }
+
 .selectors-wrapper {
   display: flex;
   justify-content: space-around;
@@ -511,10 +574,10 @@ function prevCard() {
 
 .selector-group {
   display: flex;
-  align-items: center;   
-  gap: 1.5rem;             
-  justify-content: center; 
-  flex-wrap: wrap; 
+  align-items: center;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .group-title {
@@ -523,11 +586,13 @@ function prevCard() {
   white-space: nowrap;
   margin: 0;
 }
+
 .selector {
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap; 
+  flex-wrap: wrap;
 }
+
 .selector-card {
   background: white;
   border-radius: 16px;
@@ -550,15 +615,10 @@ function prevCard() {
   color: white;
 }
 
-.selector-block {
-  text-align: center;
-  margin: 20px auto;
-}
-
 .section-title {
   color: #f97316;
   font-size: 2rem;
-  margin-bottom: -10px;
+  margin-bottom: 10px;
 }
 
 .selector-sub {
@@ -566,32 +626,17 @@ function prevCard() {
   font-size: 22px;
   margin-bottom: -10px;
 }
+
 .icon {
   width: 24px;
   height: 24px;
   object-fit: contain;
 }
 
-.exercise-card {
-  background: #fff;
-  border-radius: 20px;
-  margin: 10px auto;
-  padding: 40px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  max-width: 1200px;
-  width: 900px;
-}
-
 .exercise-intro {
   text-align: center;
   margin-bottom: 24px;
   margin-top: 40px;
-}
-
-.exercise-intro .section-title {
-  color: #f97316;
-  font-size: 2rem;
-  margin-bottom: 0.5rem;
 }
 
 .exercise-sub {
@@ -602,246 +647,210 @@ function prevCard() {
   line-height: 1.6;
 }
 
-.exercise-card .activity-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #065f46;
-  background: #d1fae5;
-  border: 1px solid #a7f3d0;
-  padding: 3px 0;
-  border-radius: 999px;
-  width: 300px;
-  text-align: center;
-}
-
-.carousel {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-}
-
-.carousel-track {
-  display: flex;
-  transition: transform 0.4s ease-in-out;
-}
-
-.carousel-item {
-  min-width: 100%;
-  box-sizing: border-box;
-  padding: 20px;
-  padding-top: 0;
-}
-
-.carousel-controls {
-  position: absolute;
-  top: 51%;
-  left: 0;
-  right: 0;
-  transform: translateY(-50%);
-  display: flex;
-  justify-content: space-between;
-  padding: 0 10px;
-  pointer-events: none;
-}
-
-.carousel-controls button {
-  pointer-events: all;
-  background: #007070;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  width: 40px;
-  height: 40px;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.carousel-controls button:disabled {
-  background: #ccc;
-  cursor: not-allowed;
-}
-
-.carousel-controls button:hover {
-  background: #0d9488;
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
+.countdown-badge {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 8px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 2px solid #fbbf24;
+  border-radius: 24px;
+  padding: 10px 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 12px rgba(251, 191, 36, 0.2);
 }
 
-.tags {
+.countdown-icon {
+  font-size: 20px;
+}
+
+.countdown-text {
+  font-size: 18px;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.countdown-text strong {
+  font-weight: 700;
+  color: #b45309;
+}
+
+.tips-container {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 20px;
+  color: #666;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+  margin-bottom: 40px;
+}
+
+.tip-card {
+  perspective: 1000px;
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.tip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease-in-out;
+  border-radius: 16px;
+}
+
+.tip-card.flipped .tip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.tip-card.flipped:hover .tip-card-inner {
+  transform: rotateY(0deg);
+}
+
+.tip-card-front,
+.tip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  backface-visibility: hidden;
+  border-radius: 16px;
+}
+
+.tip-card-front {
+  background: #fff;
+}
+
+.tip-card-back {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-align: center;
+  transform: rotateY(180deg);
   display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 4px 8px rgba(0,0,0,0.08);
+  padding: 5px;
+}
+
+.tip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+}
+
+.tip-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #f6f6f6;
+}
+
+.tip-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.tip-content {
+  padding: 0.9rem 1rem 1.1rem;
+}
+
+.tip-title {
+  font-size: 22px;
+  margin: 8px 0 6px;
+}
+
+.tip-descr {
+  margin: 0 0 10px;
+  color: #4b5563;
+  font-size: 18px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  max-height: calc(1.45em * 4);
+  white-space: normal;
+  word-break: break-word;
+}
+
+.skills {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
+  margin-top: auto;
+}
+
+.skill {
+  font-size: 14px;
+  font-weight: 600;
+  color: #007070;
+  background: #eaf7f7;
+  border-radius: 999px;
+  padding: 2px 8px;
+  border: 1px solid #e5e7eb;
 }
 
 .fav-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 10px;
+  z-index: 1;
   border: 0;
   background: transparent;
   cursor: pointer;
   padding: 6px;
   border-radius: 999px;
-  margin-right: 40px;
+}
+
+.fav-btn:focus {
+  outline: 2px solid #a7f3d0;
+  outline-offset: 2px;
 }
 
 .fav-btn img {
-  width: 36px;
-  height: 36px;
-}
-
-.exercise-card .tag {
-  font-size: 16px;
-  font-weight: 600;
-  color: #007070;
-  background: #eaf7f7;
-  padding: 4px 8px;
-  border-radius: 6px;
-}
-
-.exercise-card .title {
-  font-size: 30px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-.exercise-card .desc {
-  margin-bottom: 16px;
-  line-height: 1.4;
-  font-size: 24px;
-}
-
-.exercise-card .illustration {
-  width: 200px;
-  margin: 0 auto 16px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
-.exercise-card .why h3 {
-  color: #007070;
-  margin-bottom: 6px;
-  font-size: 30px;
-}
-
-.exercise-card .why p {
-  font-size: 24px;
-}
-
-.source {
-  margin-top: 12px;
-  font-size: 20px;
-  color: #026060;
-}
-
-.source a {
-  text-decoration: underline;
-  color: #007070;
-  font-size: 20px;
-}
-
-.source a:hover {
-  color: #2e9e55;
-}
-
-.exercise-card .done-btn {
-  width: 300px;
-  height: 40px;
-  display: block;
-  margin: 20px auto 0;
-  background: #007070;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: none;
-  font-weight: 600;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.exercise-card .done-btn:hover {
-  background: #0d9488
-}
-.exercise-card .done-btn:disabled
-{
-  background: #ccc;
-  cursor: not-allowed;
-}
-.completed-times {
-  display: flex;
-  align-items: center;
-  /* gap: 6px; */
-  /* position: relative; */
-}
-
-.complete-count {
-  font-size: 18px;
-  font-weight: 700;
-  color: #065f46;
-  background: #d1fae5;
-  border: 1px solid #a7f3d0;
-  padding: 3px 10px;
-  border-radius: 999px;
-  width: 200px;
-  text-align: center;
-  margin: 0 auto;
-  margin-top: 10px;
-}
-
-.info-wrapper {
-  position: relative;
-  display: inline-block;
-  right: 36%;
-  margin-top: 7px;
-}
-
-.info-icon {
-  cursor: pointer;
-  font-size: 20px;
-}
-
-.tooltip {
-  position: absolute;
-  top: -320%;
-  left: -20%;
-  /* transform: translateX(-50%); */
-  white-space: normal;
-  text-align: center;
-  background: #fff;
-  color: #333;
-  padding: 0 10px;
-  border-radius: 20px;
-  font-size: 16px;
-  white-space: nowrap;
-  z-index: 10;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* Sidebar container */
 .sidebar {
   position: fixed;
   top: 50%;
   right: 20px;
-  /* transform: translateY(-50%); */
   display: flex;
   flex-direction: column;
   gap: 12px;
   z-index: 1000;
 }
 
-/* Back button */
 .back-btn {
   background: #14b8a6;
   color: white;
@@ -859,7 +868,6 @@ function prevCard() {
   background: #0d9488;
 }
 
-/* transition of enter and leave */
 .fade-slide-enter-active,
 .fade-slide-leave-active {
   transition: all 0.4s ease;
