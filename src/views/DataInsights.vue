@@ -762,9 +762,9 @@ function setYear(i: number) {
   </section>
 
   <section class="insights-container">
-    <div class="charts-grid">
+    <!-- <div class="charts-grid"> -->
       <!-- Chart 1: Brain Growth -->
-      <div class="chart-card">
+      <!-- <div class="chart-card">
         <div class="chart-title">Brain Growth Race (0-5 years)</div>
         <div class="chart-visual">
           <svg viewBox="0 0 400 250" class="line-chart">
@@ -773,9 +773,9 @@ function setYear(i: number) {
                 <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:0.3" />
                 <stop offset="100%" style="stop-color:#e74c3c;stop-opacity:0.05" />
               </linearGradient>
-            </defs>
+            </defs> -->
             <!-- Grid lines -->
-            <line
+            <!-- <line
               v-for="i in 5"
               :key="i"
               :x1="50"
@@ -784,9 +784,9 @@ function setYear(i: number) {
               :y2="30 + (i-1)*45"
               stroke="#e5e7eb"
               stroke-width="1"
-            />
+            /> -->
             <!-- Y-axis labels -->
-            <text
+            <!-- <text
               v-for="(val, i) in [100, 75, 50, 25, 0]"
               :key="'y'+i"
               x="40"
@@ -796,16 +796,16 @@ function setYear(i: number) {
               fill="#666"
             >
               {{ val }}%
-            </text>
+            </text> -->
             <!-- Line path -->
-            <polyline
+            <!-- <polyline
               :points="brainGrowthData.map((d, i) => `${70 + i*62},${210 - d.value*1.8}`).join(' ')"
               fill="url(#gradient)"
               stroke="#e74c3c"
               stroke-width="3"
-            />
+            /> -->
             <!-- Points -->
-            <circle
+            <!-- <circle
               v-for="(d, i) in brainGrowthData"
               :key="i"
               :cx="70 + i*62"
@@ -817,9 +817,9 @@ function setYear(i: number) {
               style="cursor: pointer"
               @mouseenter="showTooltip($event, `${d.age}: ${d.value}% of adult brain size`)"
               @mouseleave="hideTooltip"
-            />
+            /> -->
             <!-- X-axis labels -->
-            <text
+            <!-- <text
               v-for="(d, i) in brainGrowthData"
               :key="'x'+i"
               :x="70 + i*62"
@@ -840,19 +840,19 @@ function setYear(i: number) {
             View Source: First Things First
           </a>
         </div>
-      </div>
+      </div> -->
 
       <!-- Chart 2: Word Power -->
-      <div class="chart-card">
+      <!-- <div class="chart-card">
         <div class="chart-title">Daily Talk = Word Power</div>
         <div class="chart-visual">
-          <svg viewBox="0 0 400 250" class="bar-chart">
+          <svg viewBox="0 0 400 250" class="bar-chart"> -->
             <!-- Y-axis labels -->
-            <text x="40" y="20" text-anchor="end" font-size="12" fill="#666">800</text>
+            <!-- <text x="40" y="20" text-anchor="end" font-size="12" fill="#666">800</text>
             <text x="40" y="110" text-anchor="end" font-size="12" fill="#666">400</text>
-            <text x="40" y="215" text-anchor="end" font-size="12" fill="#666">0</text>
+            <text x="40" y="215" text-anchor="end" font-size="12" fill="#666">0</text> -->
             <!-- Y-axis title -->
-            <text
+            <!-- <text
                 x="10"
                 y="120"
                 text-anchor="middle"
@@ -862,10 +862,10 @@ function setYear(i: number) {
                 transform="rotate(-90 10 120)"
                 >
                 Vocabulary Size at Age 2
-            </text>
+            </text> -->
 
             <!-- Bars -->
-            <rect
+            <!-- <rect
               x="80"
               y="70"
               width="100"
@@ -886,14 +886,14 @@ function setYear(i: number) {
               style="cursor: pointer"
               @mouseenter="showTooltip($event, 'Daily Talk: 800 words at age 2 (+300 more!)')"
               @mouseleave="hideTooltip"
-            />
+            /> -->
 
             <!-- Value labels on bars -->
-            <text x="130" y="60" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">500</text>
-            <text x="270" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">800</text>
+            <!-- <text x="130" y="60" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">500</text>
+            <text x="270" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">800</text> -->
 
             <!-- X-axis labels -->
-            <text x="130" y="230" text-anchor="middle" font-size="13" fill="#666">Normal</text>
+            <!-- <text x="130" y="230" text-anchor="middle" font-size="13" fill="#666">Normal</text>
             <text x="270" y="230" text-anchor="middle" font-size="13" fill="#666">Daily Talk</text>
             <text x="200" y="245" text-anchor="middle" font-size="11" fill="#2c3e50" font-weight="bold">Development Type</text>
           </svg>
@@ -906,10 +906,10 @@ function setYear(i: number) {
             View Source: ZERO TO THREE
           </a>
         </div>
-      </div>
+      </div> -->
 
       <!-- Chart 3: Neural Connections -->
-      <div class="chart-card">
+      <!-- <div class="chart-card">
         <div class="chart-title">Neural Connection Speed</div>
         <div class="counter-container">
           <div class="counter">{{ connectionCounter.toLocaleString() }}</div>
@@ -923,10 +923,10 @@ function setYear(i: number) {
             View Source: Harvard Center
           </a>
         </div>
-      </div>
+      </div> -->
 
       <!-- Chart 4: Energy Allocation -->
-      <div class="chart-card">
+      <!-- <div class="chart-card">
         <div class="chart-title">Energy Allocation: Baby vs Adult</div>
         <div class="energy-container">
           <div class="energy-column">
@@ -951,7 +951,10 @@ function setYear(i: number) {
           </a>
         </div>
       </div>
-    </div>
+    </div> -->
+
+    <div class="kicker">Why the First 5 Years Are So Critical</div>
+    <div class="kicker-sub">Decades of neuroscience show early childhood is the most important time for brain development.</div>
 
 <!-- Key Facts About Brain Development -->
       <div class="key-facts">
@@ -970,7 +973,7 @@ function setYear(i: number) {
             </div>
           </div>
           <div class="fact-item">
-            <span class="fact-number">7x</span>
+            <span class="fact-number">7:1</span>
             <div class="fact-text">
               return for every dollar invested in early childhood programs
             </div>
@@ -1112,7 +1115,7 @@ function setYear(i: number) {
 
 
       <!-- Development Areas Chart -->
-      <div class="chart-section">
+      <!-- <div class="chart-section">
         <h2 class="chart-title">Where Your Child Needs the Most Support</h2>
         <div class="chart-container">
           <canvas id="developmentChart"></canvas>
@@ -1164,7 +1167,7 @@ function setYear(i: number) {
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Insights -->
       <div class="insights-grid">
@@ -2087,8 +2090,31 @@ circle:hover {
     color: #16a34a;
   }
 
+  .kicker {
+  color: #333;
+  font-size: 52px;
+  font-weight: 800;
+  text-align: center;
+  margin: 24px auto;
+  animation: slideInLeft 1s ease-out;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  max-width: 1200px;
+  line-height: 1.2;
+}
+
+.kicker-sub {
+  color: #3e3e3e;
+  text-align: center;
+  font-size: 22px;
+  max-width: 980px;
+  margin: 0 auto 32px;
+  animation: slideInRight 1s ease-out;
+  line-height: 1.7;
+}
+
   .key-facts {
-    background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
+    /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
+    background: linear-gradient(90deg, #667eea, #764ba2);
     color: white;
     padding: 40px;
     border-radius: 20px;
@@ -2121,6 +2147,7 @@ circle:hover {
     font-weight: 800;
     margin-bottom: 10px;
     display: block;
+    animation: bounce 2s infinite;
   }
 
   .fact-text {
