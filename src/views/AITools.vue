@@ -48,9 +48,11 @@
           <div v-if="messages.length === 0" class="placeholder">
             <p>AI chat will appear here. Start by asking a question!</p>
           </div>
-          <div v-for="(msg, index) in messages" :key="index" :class="msg.role" class="message">
-            <strong>{{ msg.role === 'user' ? 'You' : 'AI' }}:</strong>
-            <span>{{ msg.text }}</span>
+          <div v-for="(msg, index) in messages" :key="index" class="message" :class="msg.role">
+            <div class="avatar" v-if="msg.role === 'ai'">
+              <font-awesome-icon icon="robot" class="icon-robot" />
+            </div>
+            <div class="bubble" v-html="formatMessage(msg.text)"></div>
           </div>
         </div>
 
@@ -196,6 +198,7 @@
 
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
+import { marked } from 'marked'
 import axios from 'axios'
 
 interface Message {
@@ -312,6 +315,10 @@ function startNewChat() {
 // Switch to a different chat
 function openChat(index: number) {
   currentChatIndex.value = index
+}
+
+function formatMessage(text: string) {
+  return marked.parse(text || '')
 }
 </script>
 
@@ -492,7 +499,7 @@ function openChat(index: number) {
 
 .conversation {
   min-height: 120px;
-  background: #fcfcfd;
+  background: white;
   border: 1px dashed #e5e7eb;
   border-radius: 10px;
   padding: 16px;
@@ -545,17 +552,28 @@ function openChat(index: number) {
   background: var(--amber-700);
 }
 .message {
+  display: flex;
+  align-items: flex-start;
   margin-bottom: 12px;
   padding: 8px 12px;
   border-radius: 8px;
+  animation: fadeIn 0.4s ease-in;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 .message.user {
   background: #f0f9ff;
   margin-left: 20px;
+  width: fit-content;
+  justify-content: flex-end;
+  margin-left: auto;
 }
 .message.ai {
   background: #f9fafb;
   margin-right: 20px;
+  justify-content: flex-start;
 }
 
 .composer {
