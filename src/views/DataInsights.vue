@@ -1,4 +1,3 @@
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Chart from 'chart.js/auto'
@@ -94,7 +93,8 @@ let playTimer: any = null
 const YEARS = [2009, 2012, 2015, 2018, 2021, 2024]
 const API_BASE = 'https://i247jgjan0.execute-api.ap-southeast-2.amazonaws.com'
 const API_URL = API_BASE + '/states'
-const GEOJSON_URL = 'vic_map_all_years_domains.geojson'
+// const GEOJSON_URL = 'vic_map_all_years_domains.geojson'
+const GEOJSON_URL = 'https://child-health-bucket.s3.ap-southeast-2.amazonaws.com/vic_map_all_years_domains.geojson'
 
 const STATE_COLORS: Record<string, string> = {
   'Australia':'#3b82f6',
@@ -749,7 +749,6 @@ function setYear(i: number) {
   currentYearIndex.value = i
   updateMap()
 }
-
 </script>
 
 <template>
@@ -1229,7 +1228,7 @@ function setYear(i: number) {
   </div>
 </template>
 
-<style scoped>
+<style>
 /* Hero Section */
 .hero {
   position: relative;
@@ -1542,6 +1541,7 @@ circle:hover {
   color: #6b7280;
   margin: 0;
 }
+
 /* Pills */
 .pills {
   display: flex;
@@ -1628,7 +1628,7 @@ circle:hover {
 }
 
 .insight::before {
-  content: "💡";
+  content: "\01F4A1";
   position: absolute;
   top: 20px;
   right: 20px;
