@@ -114,19 +114,19 @@ const tooltip = ref({
   content: ''
 })
 
-function showTooltip(event: MouseEvent, content: string) {
-  const rect = (event.target as SVGElement).getBoundingClientRect()
-  tooltip.value = {
-    show: true,
-    x: event.clientX,
-    y: event.clientY - 10,
-    content
-  }
-}
+// function showTooltip(event: MouseEvent, content: string) {
+//   const rect = (event.target as SVGElement).getBoundingClientRect()
+//   tooltip.value = {
+//     show: true,
+//     x: event.clientX,
+//     y: event.clientY - 10,
+//     content
+//   }
+// }
 
-function hideTooltip() {
-  tooltip.value.show = false
-}
+// function hideTooltip() {
+//   tooltip.value.show = false
+// }
 
 function animateCounter() {
   const target = 1000000
@@ -749,6 +749,10 @@ function setYear(i: number) {
   currentYearIndex.value = i
   updateMap()
 }
+
+function goToLink(url: string) {
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
@@ -987,7 +991,7 @@ function setYear(i: number) {
       </div>
 
       <!-- Key Statistics -->
-      <div class="stats-grid">
+      <!-- <div class="stats-grid">
         <div class="stat-card">
           <span class="stat-number">23.5%</span>
           <div class="stat-label">Children Developmentally Vulnerable</div>
@@ -1028,7 +1032,26 @@ function setYear(i: number) {
             &#9889; Time-sensitive opportunity
           </div>
         </div>
-      </div>
+      </div> -->
+<div class="cards3">
+  <div class="note" @click="goToLink('https://developingchild.harvard.edu/resources/inbriefs/inbrief-science-of-ecd/')">
+    <h4>Brain Architecture is Built Early</h4>
+    Strong early experiences create the foundation for learning, behavior and health.
+    <div class="foot">Harvard Center on the Developing Child</div>
+  </div>
+
+  <div class="note" @click="goToLink('https://heckmanequation.org/')">
+    <h4>Early Investment Pays Off</h4>
+    Every dollar invested in quality early programs returns about $7 over a lifetime.
+    <div class="foot">Heckman Equation Research</div>
+  </div>
+
+  <div class="note" @click="goToLink('https://www.zerotothree.org/resource/distillation/22-statistics-you-need-to-know-about-childhood-brain-development/')">
+    <h4>Language Windows Close Quickly</h4>
+    Rich language before age 3 predicts long-term school advantages.
+    <div class="foot">Hart & Risley Language Study</div>
+  </div>
+</div>
 
           <!-- Australian Reality Section -->
     <div class="australian-section">
@@ -1331,6 +1354,71 @@ function setYear(i: number) {
   margin: 0.6rem auto 0;
   background: linear-gradient(90deg, #667eea, #764ba2);
   border-radius: 9999px;
+}
+
+.cards3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+  width: 100%;
+}
+
+.note {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.note::after {
+  content: "→";
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  font-size: 24px;
+  color: #6366f1;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s;
+}
+
+.note:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.18);
+  border-color: #6366f1;
+}
+
+.note:hover::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.note h4 {
+  margin: 0 0 12px;
+  font-size: 22px;
+  color: #111827;
+  transition: color 0.3s;
+  font-weight: 700;
+}
+
+.note:hover h4 {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.foot {
+  margin-top: 16px;
+  color: #9ca3af;
+  font-size: 13px;
+  font-style: italic;
 }
 
 /* Chart Visuals */
