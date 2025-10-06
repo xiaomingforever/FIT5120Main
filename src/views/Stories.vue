@@ -233,7 +233,7 @@ function openTrending(t: Story) {
   margin: 0 1rem;
 }
 .hero h1 {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-size: clamp(2.6rem, 5vw, 3.8rem);
   font-weight: 800;
   margin-bottom: 1rem;
 }

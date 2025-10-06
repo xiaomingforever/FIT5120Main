@@ -116,7 +116,7 @@ const toggleMenu = () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 0;
-  z-index: 50;
+  z-index: 2000;
   height: 80px;
   width: 100%;
   box-sizing: border-box;

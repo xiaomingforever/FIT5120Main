@@ -1,9 +1,31 @@
+
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Chart from 'chart.js/auto'
 
+// Load Leaflet dynamically
+const loadLeaflet = () => {
+  return new Promise((resolve) => {
+    if ((window as any).L) {
+      resolve(true)
+      return
+    }
+
+    const link = document.createElement('link')
+    link.rel = 'stylesheet'
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+    document.head.appendChild(link)
+
+    const script = document.createElement('script')
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+    script.onload = () => resolve(true)
+    document.head.appendChild(script)
+  })
+}
+
 let trendChartInst: Chart | null = null;
 let developmentChartInst: Chart | null = null;
+let stateVulnChartInst: Chart | null = null;
 
 const connectionCounter = ref(0)
 let animationFrame: number | null = null
@@ -21,6 +43,68 @@ const wordPowerData = [
   { type: 'Normal Development', words: 500 },
   { type: 'Daily Talk', words: 800 }
 ]
+
+// Domain data for pills
+const DOMAINS = [
+  { name: 'Physical development', icon:'\u{1F3C3}', key:'Physical health and wellbeing',
+    insight:[
+      'Physical development challenges are increasing from 9.3% to 10.0% nationally, showing declining active play opportunities.',
+      'Screen time impact is evident - Children need more physical activity and motor skill development in early years.',
+      '\u{1F4A1} Good news: Simple outdoor play, dancing and playground time dramatically help physical development.'
+    ]
+  },
+  { name: 'Social competence', icon:'\u{1F465}', key:'Social competence',
+    insight:[
+      'Social competence vulnerabilities are rising from 9.5% to 10.7%, indicating social-emotional challenges.',
+      'Early socialisation is crucial - Children need guided social interactions and emotional regulation support from birth.',
+      '\u{1F91D} Good news: Playgroups, family interactions and emotional coaching can significantly boost social skills.'
+    ]
+  },
+  { name: 'Emotional maturity', icon:'\u{1F60A}', key:'Emotional maturity',
+    insight:[
+      'Emotional maturity challenges are significant from 8.9% to 10.0%, showing increased need for emotional support.',
+      'Emotion skills are learnable - Early coaching in naming feelings & calm responses has lasting impact.',
+      '\u{1F60A} Good news: Simple emotional coaching during daily routines transforms development.'
+    ]
+  },
+  { name: 'Language & cognitive', icon:'\u{1F9E0}', key:'Language and cognitive',
+    insight:[
+      'Language difficulties show mixed trends from 8.8% to 7.7% nationally; some states show increases.',
+      'The window of opportunity is critical - Early language during ages 0-3 has the highest payoff.',
+      '\u{1F4A1} Good news: Daily reading, singing and talking make a huge difference.'
+    ]
+  },
+  { name: 'Communication skills', icon:'\u{1F4AC}', key:'Communication skills',
+    insight:[
+      'Communication skills show concerning patterns - fluctuating from 9.2% to 8.9%, with state variations.',
+      'Early communication is foundational - The first 1,000 days are critical for communication skill development.',
+      '\u{1F4A1} Good news: Talking, singing & responsive conversation builds strong foundations!'
+    ]
+  }
+]
+
+let currentDomain = ref('Communication skills')
+let csvData: any[] = []
+let geoData: any = null
+let map: any = null
+let geoJsonLayer: any = null
+let currentYearIndex = ref(0)
+let playTimer: any = null
+
+const YEARS = [2009, 2012, 2015, 2018, 2021, 2024]
+const API_BASE = 'https://i247jgjan0.execute-api.ap-southeast-2.amazonaws.com'
+const API_URL = API_BASE + '/states'
+const GEOJSON_URL = 'vic_map_all_years_domains.geojson'
+
+const STATE_COLORS: Record<string, string> = {
+  'Australia':'#3b82f6',
+  'New South Wales':'#f59e0b',
+  'Victoria':'#10b981',
+  'Queensland':'#ef4444',
+  'Western Australia':'#8b5cf6',
+  'South Australia':'#ec4899'
+}
+const DISPLAY_STATES = ['Australia','New South Wales','Victoria','Queensland','Western Australia','South Australia']
 
 // Tooltip state
 const tooltip = ref({
@@ -67,38 +151,235 @@ function animateCounter() {
   update()
 }
 
-onMounted(() => {
+onMounted(async () => {
   animateCounter()
-  // await nextTick();
-  initCharts();
-  initAnimations();
-
+  buildDomainPills()
+  await loadLeaflet()
+  await loadData()
+  initCharts()
+  initAnimations()
 })
 
 onUnmounted(() => {
   if (animationFrame) {
     cancelAnimationFrame(animationFrame)
-    trendChartInst?.destroy();
-    developmentChartInst?.destroy();
+  }
+  if (playTimer) {
+    clearInterval(playTimer)
+  }
+  trendChartInst?.destroy()
+  developmentChartInst?.destroy()
+  stateVulnChartInst?.destroy()
+  if (map) {
+    map.remove()
   }
 })
 
-  function initCharts() {
-    // Data for charts
-    const years = [2009, 2012, 2015, 2018, 2021, 2024];
-    const vulnerableData = [23.6, 22.0, 22.0, 21.7, 22.0, 23.5];
-    const languageData = [8.9, 6.8, 6.5, 6.6, 7.3, 7.7];
-    const communicationData = [9.2, 9.0, 8.5, 8.2, 8.4, 8.9];
+async function loadData() {
+  try {
+    const resp = await fetch(API_URL)
+    if (!resp.ok) throw new Error('Failed to fetch API data: ' + resp.status)
+    const apiRows = await resp.json()
 
+    csvData = apiRows.map((d: any) => ({
+      Domain: d.Domain ?? d.domain ?? d.domain_name,
+      State: d.State ?? d.state ?? d.state_name,
+      Year: d.Year != null ? +d.Year : (d.year != null ? +d.year : null),
+      Vulnerable_pct: (d.Vulnerable_pct != null ? +d.Vulnerable_pct : (d.vulnerable_pct != null ? +d.vulnerable_pct : (d.Vulnerable_pct_1dp ? parseFloat(d.Vulnerable_pct_1dp) : null)))
+    }))
 
+    updateStateVulnChart()
 
-    // Trend Chart
-    const trendCanvas = document.getElementById("trendChart") as HTMLCanvasElement | null;
+    try {
+      const geoResp = await fetch(GEOJSON_URL)
+      if (geoResp.ok) {
+        geoData = await geoResp.json()
+        setTimeout(() => initMap(), 100)
+      } else {
+        showMapPlaceholder()
+      }
+    } catch (geoErr) {
+      console.warn('GeoJSON not available:', geoErr)
+      showMapPlaceholder()
+    }
+  } catch (err) {
+    console.error('loadData error', err)
+    alert('Failed to load data. Please check your API connection.')
+  }
+}
 
-    if (trendCanvas) {
-      trendChartInst?.destroy();
-      const ctx = trendCanvas.getContext("2d");
-      if (ctx) {
+function showMapPlaceholder() {
+  const mapEl = document.getElementById('vicMap')
+  if (mapEl) {
+    mapEl.innerHTML = `
+      <div style="
+        height: 100%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+      ">
+        <div>
+          <div style="font-size: 48px; margin-bottom: 20px;">&#x1F5FA;&#xFE0F;</div>
+          <h3 style="color: #374151; margin-bottom: 12px;">Victoria Map Coming Soon</h3>
+          <p style="color: #6b7280;">The interactive map requires the GeoJSON data file.<br/>
+          Please ensure <code>vic_map_all_years_domains.geojson</code> is available.</p>
+        </div>
+      </div>
+    `
+  }
+}
+
+function buildDomainPills() {
+  const wrap = document.getElementById('domainPills')
+  if (!wrap) return
+  
+  wrap.innerHTML = ''
+  DOMAINS.forEach(d => {
+    const btn = document.createElement('button')
+    btn.className = 'pill' + (d.key === currentDomain.value ? ' active' : '')
+    btn.innerHTML = `<span>${d.icon}</span> ${d.name}`
+    btn.onclick = () => {
+      currentDomain.value = d.key
+      updateDomainPills()
+      updateStateVulnChart()
+      updateInsightText()
+      if (map) updateMap()
+    }
+    wrap.appendChild(btn)
+  })
+}
+
+function updateDomainPills() {
+  const btns = document.querySelectorAll('.pill')
+  btns.forEach((el, i) => {
+    if (DOMAINS[i].key === currentDomain.value) {
+      el.classList.add('active')
+    } else {
+      el.classList.remove('active')
+    }
+  })
+}
+
+function updateInsightText() {
+  const domain = DOMAINS.find(d => d.key === currentDomain.value)
+  if (!domain) return
+  
+  const p1 = document.getElementById('insight-1')
+  const p2 = document.getElementById('insight-2')
+  const p3 = document.getElementById('insight-3')
+  
+  if (p1) p1.innerHTML = `<strong>${domain.insight[0]}</strong>`
+  if (p2) p2.innerHTML = `<strong>${domain.insight[1]}</strong>`
+  if (p3) p3.textContent = domain.insight[2]
+}
+
+function updateStateVulnChart() {
+  if (!csvData || csvData.length === 0) return
+
+  const filtered = csvData.filter((d: any) => 
+    d.Domain === currentDomain.value && DISPLAY_STATES.includes(d.State)
+  )
+  
+  const byState = new Map()
+  filtered.forEach((d: any) => {
+    if (!byState.has(d.State)) {
+      byState.set(d.State, [])
+    }
+    byState.get(d.State).push(d)
+  })
+
+  const datasets: any[] = []
+  byState.forEach((arr: any[], state: string) => {
+    const mapYear = new Map(arr.map((d: any) => [d.Year, d.Vulnerable_pct]))
+    const values = YEARS.map(y => mapYear.get(y) ?? null)
+    
+    datasets.push({
+      label: state,
+      data: values,
+      borderColor: STATE_COLORS[state] || '#999',
+      backgroundColor: (STATE_COLORS[state] || '#999') + '22',
+      borderWidth: state === 'Australia' ? 4 : 2.5,
+      tension: 0.35,
+      pointRadius: state === 'Australia' ? 6 : 4,
+      pointBackgroundColor: STATE_COLORS[state] || '#999',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      fill: true
+    })
+  })
+
+  datasets.sort((a, b) => 
+    a.label === 'Australia' ? -1 : b.label === 'Australia' ? 1 : a.label.localeCompare(b.label)
+  )
+
+  const canvas = document.getElementById('stateVulnChart') as HTMLCanvasElement | null
+  if (!canvas) return
+
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return
+
+  if (stateVulnChartInst) {
+    stateVulnChartInst.destroy()
+  }
+
+  stateVulnChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: YEARS,
+      datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            usePointStyle: true,
+            padding: 18,
+            font: { size: 13 }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: (context: any) => `${context.dataset.label}: ${context.parsed.y?.toFixed(1)}%`
+          }
+        }
+      },
+      scales: {
+        y: {
+          title: { display: true, text: 'Vulnerability (%)' },
+          min: 0,
+          suggestedMax: 20,
+          grid: { color: 'rgba(0,0,0,0.07)' },
+          ticks: {
+            callback: (value: any) => value + '%'
+          }
+        },
+        x: {
+          grid: { display: false }
+        }
+      }
+    }
+  })
+}
+
+function initCharts() {
+  const years = [2009, 2012, 2015, 2018, 2021, 2024]
+  const vulnerableData = [23.6, 22.0, 22.0, 21.7, 22.0, 23.5]
+  const languageData = [8.9, 6.8, 6.5, 6.6, 7.3, 7.7]
+  const communicationData = [9.2, 9.0, 8.5, 8.2, 8.4, 8.9]
+
+  const trendCanvas = document.getElementById("trendChart") as HTMLCanvasElement | null
+
+  if (trendCanvas) {
+    trendChartInst?.destroy()
+    const ctx = trendCanvas.getContext("2d")
+    if (ctx) {
       trendChartInst = new Chart(ctx, {
         type: "line",
         data: {
@@ -170,7 +451,7 @@ onUnmounted(() => {
               },
               ticks: {
                 callback: function (value) {
-                  return value + "%";
+                  return value + "%"
                 },
               },
             },
@@ -186,18 +467,17 @@ onUnmounted(() => {
             },
           },
         },
-      });
+      })
     }
-    }
+  }
 
-    // Development Areas Chart
-   const developmentCanvas = document.getElementById("developmentChart") as HTMLCanvasElement | null;
+  const developmentCanvas = document.getElementById("developmentChart") as HTMLCanvasElement | null
 
-    if (developmentCanvas) {
-  developmentChartInst?.destroy();
-  const devCtx = developmentCanvas.getContext("2d");
-  if (devCtx) {
-    developmentChartInst = new Chart(devCtx, {
+  if (developmentCanvas) {
+    developmentChartInst?.destroy()
+    const devCtx = developmentCanvas.getContext("2d")
+    if (devCtx) {
+      developmentChartInst = new Chart(devCtx, {
         type: "doughnut",
         data: {
           labels: [
@@ -232,7 +512,7 @@ onUnmounted(() => {
                 usePointStyle: true,
                 padding: 20,
                 font: {
-                  size: 13,
+                  size: 16,
                   weight: "bold",
                 },
               },
@@ -240,94 +520,235 @@ onUnmounted(() => {
             tooltip: {
               callbacks: {
                 label: function (context) {
-                  return context.label + ": " + context.parsed + "% vulnerable";
+                  return context.label + ": " + context.parsed + "% vulnerable"
                 },
               },
             },
           },
           cutout: "60%",
         },
-      });
+      })
     }
   }
-  }
+}
 
-  function initAnimations() {
+function initAnimations() {
   const observerOptions = {
     threshold: 0.3,
     rootMargin: "0px 0px -50px 0px",
-  };
+  }
 
   const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        // Narrow to HTMLElement
-        const statNumber = entry.target.querySelector(".stat-number, .fact-number");
+        const statNumber = entry.target.querySelector(".stat-number, .fact-number")
 
         if (statNumber instanceof HTMLElement && !statNumber.classList.contains("animated")) {
           setTimeout(() => {
-            animateNumber(statNumber); // OK: HTMLElement
-          }, Math.random() * 300);
+            animateNumber(statNumber)
+          }, Math.random() * 300)
 
-          statNumber.classList.add("animated");
+          statNumber.classList.add("animated")
         }
       }
-    });
-  }, observerOptions);
-    document.querySelectorAll(".stat-card, .fact-item").forEach((card) => {
-    observer.observe(card);
-  });
+    })
+  }, observerOptions)
+  
+  document.querySelectorAll(".stat-card, .fact-item").forEach((card) => {
+    observer.observe(card)
+  })
 }
 
-  function animateNumber(element: HTMLElement) {
-    const finalValue = (element.textContent || "").trim();
+function animateNumber(element: HTMLElement) {
+  const finalValue = (element.textContent || "").trim()
 
-    // Special cases that display as-is
-    const specialCases = ["1M", "700", "7x", "0-2"];
-    if (specialCases.includes(finalValue)) {
-      element.style.transform = "scale(0)";
-      element.style.transition =
-        "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)";
-      setTimeout(() => {
-        element.style.transform = "scale(1)";
-      }, 200);
-      return;
-    }
-
-    // Extract numeric value
-    const numericValue = parseFloat(finalValue.replace(/[^0-9.]/g, ""));
-    const isPercentage = finalValue.includes("%");
-
-    if (isNaN(numericValue) || numericValue === 0) {
-      return;
-    }
-
-    let currentValue = 0;
-    const increment = numericValue / 60;
-
-    element.textContent = isPercentage ? "0%" : "0";
-
-    const timer = setInterval(() => {
-      currentValue += increment;
-
-      if (currentValue >= numericValue) {
-        element.textContent = finalValue;
-        clearInterval(timer);
-
-        // Bounce effect
-        element.style.transform = "scale(1.1)";
-        element.style.transition = "transform 0.2s ease";
-        setTimeout(() => {
-          element.style.transform = "scale(1)";
-        }, 200);
-      } else {
-        const displayValue = Math.floor(currentValue);
-        element.textContent = isPercentage
-          ? displayValue + "%"
-          : displayValue.toString();
-      }
-    }, 30);
+  const specialCases = ["1M", "700", "7x", "0-2"]
+  if (specialCases.includes(finalValue)) {
+    element.style.transform = "scale(0)"
+    element.style.transition = "transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)"
+    setTimeout(() => {
+      element.style.transform = "scale(1)"
+    }, 200)
+    return
   }
+
+  const numericValue = parseFloat(finalValue.replace(/[^0-9.]/g, ""))
+  const isPercentage = finalValue.includes("%")
+
+  if (isNaN(numericValue) || numericValue === 0) {
+    return
+  }
+
+  let currentValue = 0
+  const increment = numericValue / 60
+
+  element.textContent = isPercentage ? "0%" : "0"
+
+  const timer = setInterval(() => {
+    currentValue += increment
+
+    if (currentValue >= numericValue) {
+      element.textContent = finalValue
+      clearInterval(timer)
+
+      element.style.transform = "scale(1.1)"
+      element.style.transition = "transform 0.2s ease"
+      setTimeout(() => {
+        element.style.transform = "scale(1)"
+      }, 200)
+    } else {
+      const displayValue = Math.floor(currentValue)
+      element.textContent = isPercentage
+        ? displayValue + "%"
+        : displayValue.toString()
+    }
+  }, 30)
+}
+
+function initMap() {
+  if (!geoData || typeof (window as any).L === 'undefined') {
+    console.warn('Leaflet not available or no geo data')
+    return
+  }
+
+  const L = (window as any).L
+  const mapEl = document.getElementById('vicMap')
+  if (!mapEl) return
+
+  map = L.map('vicMap', { center: [-37.4713, 144.7852], zoom: 7, scrollWheelZoom: true })
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap · © CARTO',
+    maxZoom: 19,
+    minZoom: 6.5
+  }).addTo(map)
+
+  const legend = L.control({ position: 'bottomleft' })
+  legend.onAdd = function() {
+    const div = L.DomUtil.create('div', 'map-legend')
+    div.innerHTML = `
+      <div class="legend-title">Vulnerability %</div>
+      <div class="legend-gradient"></div>
+      <div class="legend-labels"><span>Low</span><span>High</span></div>
+    `
+    return div
+  }
+  legend.addTo(map)
+
+  updateMap()
+}
+
+function updateMap() {
+  if (!map || !geoData || typeof (window as any).L === 'undefined') return
+
+  const L = (window as any).L
+  const year = YEARS[currentYearIndex.value]
+
+  if (geoJsonLayer) {
+    map.removeLayer(geoJsonLayer)
+  }
+
+  function getValue(f: any) {
+    const yd = f.properties?.metrics?.[String(year)]
+    const dd = yd?.[currentDomain.value]
+    return dd?.pct ?? null
+  }
+
+  function getMetrics(f: any) {
+    const yd = f.properties?.metrics?.[String(year)]
+    return yd?.[currentDomain.value] ?? null
+  }
+
+  let min = Infinity, max = -Infinity
+  geoData.features.forEach((ft: any) => {
+    const v = getValue(ft)
+    if (v !== null && !isNaN(v)) {
+      min = Math.min(min, v)
+      max = Math.max(max, v)
+    }
+  })
+
+  if (min === Infinity) { min = 0; max = 20 }
+
+  const colorScale = (v: number) => {
+    const normalized = (v - min) / (max - min)
+    if (normalized < 0.5) {
+      const t = normalized * 2
+      return `rgb(${Math.round(16 + (251 - 16) * t)}, ${Math.round(185 + (203 - 185) * t)}, ${Math.round(129 + (64 - 129) * t)})`
+    } else {
+      const t = (normalized - 0.5) * 2
+      return `rgb(${Math.round(251 - (251 - 239) * t)}, ${Math.round(203 - (203 - 68) * t)}, ${Math.round(64 - (64 - 68) * t)})`
+    }
+  }
+
+  geoJsonLayer = L.geoJSON(geoData, {
+    style: (ft: any) => {
+      const v = getValue(ft)
+      return {
+        fillColor: v === null || isNaN(v) ? '#ddd' : colorScale(v),
+        color: '#fff',
+        weight: 1,
+        fillOpacity: v === null ? 0.3 : 0.9,
+        opacity: 1
+      }
+    },
+    onEachFeature: (ft: any, layer: any) => {
+      const v = getValue(ft)
+      const m = getMetrics(ft) || {}
+      const name = ft.properties.LGA_Name || 'LGA'
+      const code = ft.properties.LGA_Code || ''
+
+      layer.bindPopup(`
+        <div style="font-size:13px;line-height:1.6">
+          <div style="font-weight:800;color:#111">${name}</div>
+          <div><b>LGA Code:</b> ${code}</div>
+          <div><b>Year:</b> ${year}</div>
+          <div><b>Domain:</b> ${currentDomain.value}</div>
+          <div><b>Vulnerability:</b> ${v !== null && !isNaN(v) ? v.toFixed(1) + '%' : 'No data'}</div>
+          ${m.valid_n ? `
+            <hr style="border:none;border-top:1px solid #eee"/>
+            <div><b>Sample size:</b> ${Math.round(m.valid_n).toLocaleString()}</div>
+            <div><b>Vulnerable count:</b> ${Math.round(m.vuln_n).toLocaleString()}</div>
+          ` : ''}
+        </div>
+      `)
+
+      layer.on({
+        mouseover: (e: any) => {
+          e.target.setStyle({ weight: 3, color: '#6b7280' })
+          e.target.bringToFront()
+        },
+        mouseout: (e: any) => geoJsonLayer.resetStyle(e.target)
+      })
+    }
+  }).addTo(map)
+
+  if (!map._fitted) {
+    try {
+      map.fitBounds(geoJsonLayer.getBounds(), { padding: [20, 20] })
+      map._fitted = true
+    } catch (e) {
+      console.warn('fitBounds failed', e)
+    }
+  }
+}
+
+function playAnimation() {
+  if (playTimer) {
+    clearInterval(playTimer)
+    playTimer = null
+    return
+  }
+
+  playTimer = setInterval(() => {
+    currentYearIndex.value = (currentYearIndex.value + 1) % YEARS.length
+    updateMap()
+  }, 1300)
+}
+
+function setYear(i: number) {
+  currentYearIndex.value = i
+  updateMap()
+}
 
 </script>
 
@@ -335,7 +756,7 @@ onUnmounted(() => {
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>🧠 Data Insights</h1>
+      <h1>&#129504; Data Insights</h1>
       <p>Evidence-based research on why daily engagement matters</p>
     </div>
   </section>
@@ -572,7 +993,7 @@ onUnmounted(() => {
             In Australia 2024, nearly 1 in 4 children are at risk of
             developmental delays
           </div>
-          <div class="trend-indicator trend-down">↓ Down from 23.6% (2009)</div>
+          <div class="trend-indicator trend-down">&#8595; Down from 23.6% (2009)</div>
         </div>
 
         <div class="stat-card">
@@ -581,7 +1002,7 @@ onUnmounted(() => {
           <div class="stat-description">
             Highest challenges: Communication (8.9%) and Language (7.7%)
           </div>
-          <div class="trend-indicator trend-up">↑ Up from 8.9% (2009)</div>
+          <div class="trend-indicator trend-up">&uarr; Up from 8.9% (2009)</div>
         </div>
 
         <div class="stat-card">
@@ -591,7 +1012,7 @@ onUnmounted(() => {
             Northern Territory shows the highest rate of vulnerable children
           </div>
           <div class="trend-indicator trend-up">
-            ⚠️ Urgent intervention needed
+            &#9888; Urgent intervention needed
           </div>
         </div>
 
@@ -602,45 +1023,93 @@ onUnmounted(() => {
             Most important years for brain architecture formation
           </div>
           <div class="trend-indicator trend-down">
-            ⚡ Time-sensitive opportunity
+            &#9889; Time-sensitive opportunity
           </div>
         </div>
       </div>
 
-      <!-- Chart Section -->
-      <div class="chart-section">
-        <h2 class="chart-title">Why Your Child's Early Years Matter Most</h2>
-        <div class="chart-container">
-          <canvas id="trendChart"></canvas>
+          <!-- Australian Reality Section -->
+    <div class="australian-section">
+      <h2 class="section-title">The Australian Reality: What the Data Shows</h2>
+      <p class="lead">
+        Right now, <b>1 in 4</b> Australian children start school unprepared. The Australian Early Development Census, tracking <b>1.7 million</b> children over 15 years, reveals that <span class="hl"><b>23.5%</b> of children are developmentally vulnerable</span> when they begin school - that's <b>over 70,000</b> children each year already behind their peers. <b>Crucial insight:</b> this is <b>preventable</b> with the right support during ages <b>0-3</b>.
+      </p>
+
+      <div class="explore-title">
+        <h3>Explore the developmental challenges by area:</h3>
+        <p class="explore-sub">Click on any domain below to see 15 years of trends and what they mean for your family</p>
+      </div>
+
+      <div class="pills" id="domainPills"></div>
+
+      <!-- State Vulnerability Chart -->
+      <div class="chart-container">
+        <canvas id="stateVulnChart"></canvas>
+      </div>
+
+      <!-- Insights -->
+      <div class="insight">
+        <h3>&#128161; What This Means for You as a Parent:</h3>
+        <p id="insight-1"><strong>Communication skills show concerning patterns fluctuating nationally, with state variations.</strong></p>
+        <p id="insight-2"><strong>Early communication is foundational. The first 1,000 days are critical for communication skill development.</strong></p>
+        <p class="good" id="insight-3">&#x2728; Good news: Talking, singing & responsive conversation builds strong foundations!</p>
+      </div>
+
+      <div class="next">&#128071; Now let's see where support is needed most inside Victoria.</div>
+    </div>
+
+    <!-- Victoria Map Section -->
+    <div class="australian-section">
+      <h2 class="section-title">Victoria Local Government Areas - Developmental Vulnerability Map</h2>
+      
+      <div id="vicMap"></div>
+
+      <div class="map-controls">
+        <div class="controls-row">
+          <div class="year-badge">Year: {{ YEARS[currentYearIndex] }}</div>
+          <button @click="playAnimation" class="play-btn" title="Play/Pause">
+            {{ playTimer ? '||' : '\u25B6' }}
+          </button>
         </div>
-        <div
-          style="
-            background: #f8fafc;
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 20px;
-            border-left: 4px solid #4facfe;
-          "
-        >
-          <h3 style="color: #64748B; margin-bottom: 15px; font-size: 1.2rem">
-            💡 What This Means for You as a Parent:
-          </h3>
-          <p style="color: #64748B; line-height: 1.6; margin-bottom: 10px">
-            <strong>Language difficulties are on the rise</strong> - from 8.9%
-            to 7.7%. This trend shows that more children are struggling with
-            communication skills when they enter school.
-          </p>
-          <p style="color: #64748B; line-height: 1.6; margin-bottom: 10px">
-            <strong>The window of opportunity is closing</strong> - While
-            overall vulnerability rates have remained relatively stable, early
-            intervention during ages 0-3 can prevent these challenges.
-          </p>
-          <p style="color: #64748B; font-weight: 600">
-            ✨ Good news: Simple daily activities like reading, singing, and
-            talking with your child can make a huge difference!
-          </p>
+
+        <div class="year-marks">
+          <button 
+            v-for="(year, i) in YEARS" 
+            :key="year"
+            @click="setYear(i)"
+            :class="{ active: currentYearIndex === i }"
+          >
+            {{ year }}
+          </button>
+        </div>
+
+        <input 
+          type="range" 
+          min="0" 
+          :max="YEARS.length - 1" 
+          v-model="currentYearIndex"
+          @input="updateMap"
+          class="year-slider"
+        />
+
+        <div class="map-insight">
+          <h4>&#128269; Reading the map</h4>
+          <ul>
+            <li>Colours show the <b>% of children vulnerable</b> in the selected domain.</li>
+            <li>Click an area to see the <b>sample size</b> and estimated number of children affected.</li>
+            <li>Red zones highlight where <b>early support</b> can make the biggest difference.</li>
+          </ul>
         </div>
       </div>
+
+      <div class="insight">
+        <h3>&#128161; Why this matters for families in Victoria</h3>
+        <p><b>Neighbouring LGAs can look very different.</b> Some communities show double the vulnerability of others meaning your address changes your child's odds.</p>
+        <p><b>But the solution starts at home.</b> The same activities used in BrainBuilder like daily talk, shared reading, playful learning directly build the skills this map is measuring.</p>
+        <p class="good">&#x2728; Good news: minutes a day really compound. Start small, stay consistent, and you'll see progress.</p>
+      </div>
+    </div>
+
 
       <!-- Development Areas Chart -->
       <div class="chart-section">
@@ -657,8 +1126,8 @@ onUnmounted(() => {
             border-left: 4px solid #4facfe;
           "
         >
-          <h3 style="color: #4facfe; margin-bottom: 15px; font-size: 1.2rem">
-            🎯 Action Plan for Parents:
+          <h3 style="color: #4facfe; margin-bottom: 15px; font-size: 1.3rem">
+            &#127919; Action Plan for Parents:
           </h3>
           <div
             style="
@@ -669,27 +1138,27 @@ onUnmounted(() => {
             "
           >
             <div>
-              <strong style="color: #43E97B"
+              <strong style="color: #43E97B; font-size: 1.2rem"
                 >Social Skills (10.7% at risk):</strong
               >
-              <p style="color: #64748b; margin-top: 5px">
+              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
                 Arrange playdates, practice sharing, teach emotion words
               </p>
             </div>
             <div>
-              <strong style="color: #43E97B"
+              <strong style="color: #43E97B; font-size: 1.2rem"
                 >Physical Development (10.0% at risk):</strong
               >
-              <p style="color: #64748b; margin-top: 5px">
+              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
                 Encourage active play, fine motor activities like drawing,
                 outdoor exploration
               </p>
             </div>
             <div>
-              <strong style="color: #43E97B"
+              <strong style="color: #43E97B; font-size: 1.2rem"
                 >Language & Communication (8.8% at risk):</strong
               >
-              <p style="color: #64748b; margin-top: 5px">
+              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
                 Read daily, narrate your activities, ask open-ended questions
               </p>
             </div>
@@ -736,11 +1205,11 @@ onUnmounted(() => {
           science-backed activities. Transform everyday moments into powerful
           learning opportunities - starting today.
         </p>
-        <button class="cta-button" onclick="window.open('#', '_blank')">
-          Get Started Free
+        <button class="cta-button" onclick="window.location.href='/activities'">
+          Get Started
         </button>
-        <p style="margin-top: 15px; font-size: 0.9rem; opacity: 0.8">
-          ✓ Age-appropriate activities ✓ 5-minute daily tips ✓ Track your
+        <p style="margin-top: 15px; font-size: 1.2rem; opacity: 0.8">
+          &#10003; Age-appropriate activities &#10003; 5-minute daily tips &#10003; Track your
           child's progress
         </p>
       </div>
@@ -1018,24 +1487,407 @@ circle:hover {
     transform: translate(-50%, -100%) scale(1);
   }
 }
+/* Australian Reality Section */
+.australian-section {
+  background: white;
+  border-radius: 24px;
+  padding: 40px;
+  margin: 40px 0;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.15);
+}
 
-  .hero h1 {
-    font-size: 3.5rem;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-    position: relative;
-    z-index: 1;
-  }
+.section-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #111827;
+}
 
-  .hero p {
-    font-size: 1.3rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 30px;
-    position: relative;
-    z-index: 1;
+.lead {
+  font-size: 1.3rem;
+  line-height: 1.75;
+  color: #1f2937;
+  margin-bottom: 2rem;
+}
+
+.lead b {
+  font-weight: 800;
+  color: #111827;
+}
+
+.lead .hl {
+  background: linear-gradient(135deg, #fef3c7, #fecaca);
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.explore-title {
+  text-align: center;
+  margin: 48px 0 24px;
+}
+
+.explore-title h3 {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 12px;
+}
+
+.explore-sub {
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin: 0;
+}
+/* Pills */
+.pills {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 17px;
+  color: #374151;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  opacity: 0;
+  transition: opacity 0.3s;
+  border-radius: 999px;
+  z-index: 0;
+}
+
+.pill > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pill:hover {
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  border-color: #6366f1;
+}
+
+.pill.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+  animation: glow 2s infinite;
+}
+
+.pill.active::before {
+  opacity: 0;
+}
+
+.pill span {
+  font-size: 24px;
+  animation: bounce 2s infinite;
+}
+/* Chart Container */
+.chart-container {
+  position: relative;
+  height: 400px;
+  margin: 30px 0;
+}
+
+/* Insight Box */
+.insight {
+  border-radius: 20px;
+  background: linear-gradient(135deg, #eef2ff 0%, #fce7f3 100%);
+  border-left: 6px solid #60a5fa;
+  padding: 24px 28px;
+  position: relative;
+  animation: fadeInUp 0.8s ease-out;
+  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+  transition: all 0.4s;
+  overflow: hidden;
+}
+
+.insight::before {
+  content: "💡";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  font-size: 48px;
+  opacity: 0.15;
+  animation: float 3s infinite;
+}
+
+.insight:hover {
+  transform: translateX(8px);
+  box-shadow: 0 15px 40px rgba(96, 165, 250, 0.3);
+  border-left-width: 8px;
+}
+
+.insight h3 {
+  font-size: 30px;
+  margin: 0 0 18px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.3;
+}
+
+.insight p {
+  font-size: 20px;
+  margin: 14px 0;
+  line-height: 1.75;
+  color: #374151;
+}
+
+.insight .good {
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #2563eb, #10b981, #2563eb);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: pulse 3s linear infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 8px rgba(37,99,235,0.3);
+    background-position: 0% 50%;
   }
+  50% {
+    transform: scale(1.05);
+    text-shadow: 0 0 20px rgba(16,185,129,0.5);
+    background-position: 100% 50%;
+  }
+  100% {
+    transform: scale(1);
+    text-shadow: 0 0 8px rgba(37,99,235,0.3);
+    background-position: 0% 50%;
+  }
+}
+
+
+.next {
+  margin: 20px 0 8px;
+  color: #374151;
+  font-weight: 600;
+  font-size: 20px;
+  text-align: center;
+  animation: bounce 2s infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+/* Map Section */
+#vicMap {
+  height: 600px;
+  width: 100%;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  background: #f1f5f9;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s;
+  border: 3px solid transparent;
+}
+
+#vicMap:hover {
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.25);
+  border-color: #6366f1;
+}
+
+.map-controls {
+  background: linear-gradient(135deg, #fff 0%, #f9fafb 100%);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s;
+  border: 2px solid transparent;
+}
+
+.map-controls:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  border-color: #e0e7ff;
+}
+
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.year-badge {
+  font-weight: 800;
+  font-size: 1.5rem;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.play-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  cursor: pointer;
+  font-size: 20px;
+  color: #fff;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.play-btn:hover {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  transform: scale(1.15);
+  box-shadow: 0 10px 30px rgba(99, 102, 241, 0.6);
+}
+
+.year-marks {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.year-marks button {
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.year-marks button:hover {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  transform: scale(1.1);
+  border-color: transparent;
+}
+
+.year-marks button.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.year-slider {
+  width: 100%;
+  height: 8px;
+  background: linear-gradient(to right, #e5e7eb, #d1d5db);
+  border-radius: 10px;
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  margin: 20px 0;
+}
+
+.year-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #fff;
+  border: 4px solid #6366f1;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.year-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+.map-insight {
+  border-radius: 20px;
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transition: all 0.4s;
+  border: 2px solid transparent;
+  margin-top: 20px;
+}
+
+.map-insight:hover {
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.2);
+  border-color: #6366f1;
+  transform: translateY(-4px);
+}
+
+.map-insight h4 {
+  margin: 0 0 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.map-insight ul {
+  margin: 12px 0 0 24px;
+  line-height: 1.9;
+  color: #374151;
+  font-size: 1rem;
+}
+
+.map-legend {
+  background: #fff;
+  padding: 14px;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+}
+
+.legend-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.legend-gradient {
+  height: 16px;
+  width: 200px;
+  border-radius: 8px;
+  background: linear-gradient(to right, #10b981, #34d399, #fbbf24, #fb923c, #f87171, #dc2626);
+}
+
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #374151;
+  margin-top: 4px;
+}
 
   .stats-grid {
     display: grid;
@@ -1143,7 +1995,7 @@ circle:hover {
   }
 
   .insight-card:nth-child(3) {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: linear-gradient(135deg, #36b761 0%, #38f9d7 100%);
   }
 
   .insight-card:hover {
@@ -1157,13 +2009,13 @@ circle:hover {
   }
 
   .insight-text {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     line-height: 1.6;
     opacity: 0.95;
   }
 
   .cta-section {
-    background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
+    background: linear-gradient(135deg, #e1b035 0%, #FF66AA 100%);
     color: white;
     text-align: center;
     padding: 60px 40px;
@@ -1178,7 +2030,7 @@ circle:hover {
   }
 
   .cta-text {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     margin-bottom: 30px;
     opacity: 0.9;
   }
