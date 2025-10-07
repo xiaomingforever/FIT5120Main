@@ -54,7 +54,8 @@
           teachers create a bright future for children. Our free, science-based resources
           turn knowledge into simple daily exercise.
         </p>
-        <a href="#">See resources →</a>
+        <!-- <a href="#">See resources →</a> -->
+         <router-link to="/DataInsights" class="research-link">See resources &rarr;</router-link>
       </div>
       <div class="image-col">
         <img src="/brain-illustration.png" alt="Brain Illustration" />
@@ -101,7 +102,8 @@
         </div>
 
         <div class="research-link-wrap">
-          <a href="#research" class="research-link">See more relevant research →</a>
+          <!-- <a href="#research" class="research-link">See more relevant research &rarr;</a> -->
+          <router-link to="/DataInsights" class="research-link">See more relevant research &rarr;</router-link>
         </div>
 
         <!-- decorate shape -->
