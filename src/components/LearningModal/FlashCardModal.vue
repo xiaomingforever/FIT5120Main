@@ -187,7 +187,7 @@ const sourceHref = computed(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  z-index: 1000;
+  z-index: 2001;
 }
 .modal {
   width: min(720px, 96vw);
