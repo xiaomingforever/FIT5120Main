@@ -739,7 +739,7 @@ function goToLink(url: string) {
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-content">
-      <h1>&#129504; Data Insights</h1>
+      <h1>Data Insights</h1>
       <p>Evidence-based research on why daily engagement matters</p>
     </div>
   </section>
@@ -936,13 +936,22 @@ function goToLink(url: string) {
   position: relative;
   width: 100%;
   height: 320px;
-  background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%);
+  /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
+  background-image: url('https://www.clicdata.com/wp-content/uploads/2025/05/transfrom-data-actionable-insights.jpg');
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #fff;
   overflow: hidden;
+}
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0; /* 相当于 top:0; right:0; bottom:0; left:0 */
+  background-color: rgba(0, 0, 0, 0.6); /* 黑色遮罩，透明度0.5 */
+  z-index: 1;
 }
 
 .hero::after {
@@ -983,7 +992,7 @@ function goToLink(url: string) {
 }
 
 .hero p {
-  font-size: clamp(1.1rem, 2vw, 1.4rem);
+  font-size: clamp(1.4rem, 2vw, 1.8rem);
   font-weight: 500;
   opacity: 0.95;
 }
