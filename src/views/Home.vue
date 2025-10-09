@@ -8,57 +8,55 @@
       <div class="hero-content">
         <h1>Give your child the best start for a healthy brain</h1>
         <p>
-          Early experiences shape the brain for life. We're here to support parents
-          and teachers with knowledge and tools that nurture children's development.
+          Early experiences shape the brain for life. We're here to support parents and teachers
+          with knowledge and tools that nurture children's development.
         </p>
         <!-- <button>Learn More</button> -->
         <router-link to="/today" class="btn">Start Brain Builder</router-link>
       </div>
     </section>
 
-    <!-- What BrainBuilder does -->
-    <section class="features">
-      <h2 class="section-title">What BrainBuilder does</h2>
-      <p style="font-size: 24px;">Turn science into simple daily actions.</p>
-      <div class="feature-cards">
-        <div class="card">
-          <img src="/public/browse-activity.png" alt="browse-activity">
-          <h3>Explore Activities</h3>
-          <p>Search 80+ tips. Filter by age, place, and time.</p>
-          <!-- <button>Open library</button> -->
-          <router-link to="/activities" class="card-btn">Open library</router-link>
-        </div>
-        <div class="card">
-          <img src="/public/today-pick.png" alt="today-pick">
-          <h3>Today's Tips</h3>
-          <p>Discover fun activities to boost child's brain development.</p>
-          <!-- <button>Explore</button> -->
-          <router-link to="/today" class="card-btn">Explore</router-link>
-        </div>
-        <div class="card">
-          <img src="/public/process.png" alt="browse-activity">
-          <h3>Tips Progress</h3>
-          <p>Monitor your child's progress and celebrate achievements.</p>
-          <!-- <button>View Progress</button> -->
-          <router-link to="/progress" class="card-btn">View Progress</router-link>
-        </div>
-      </div>
-    </section>
-
     <!-- What is BrainBuilder -->
     <section class="two-col">
+      <!-- Row-1 -->
       <div>
         <h2 class="section-title">What is BrainBuilder?</h2>
         <p>
-          BrainBuilder is a non-profit education project. We're here to help parents and
-          teachers create a bright future for children. Our free, science-based resources
-          turn knowledge into simple daily exercise.
+          BrainBuilder is a non-profit education project. We're here to help parents and teachers
+          create a bright future for children. Our free, science-based resources turn knowledge into
+          simple daily exercise.
         </p>
         <!-- <a href="#">See resources →</a> -->
-         <router-link to="/DataInsights" class="research-link">See resources &rarr;</router-link>
+        <router-link to="/activities" class="research-link">Learn more &rarr;</router-link>
       </div>
       <div class="image-col">
         <img src="/brain-illustration.png" alt="Brain Illustration" />
+      </div>
+      <!-- Row-2 -->
+      <div class="image-col">
+        <img src="/brain-illustration-2.jpg" alt="Brain Illustration" />
+      </div>
+      <div>
+        <h2 class="section-title">Understand your child's growth</h2>
+        <p>
+          Understand your child's growthOur research helps you see how children grow and learn in
+          their early years. Simple charts and key facts show why small daily routines make a big
+          difference. You can explore real data from trusted research, all explained in plain
+          language.
+        </p>
+        <router-link to="/DataInsights" class="research-link">See Insight &rarr;</router-link>
+      </div>
+      <!-- Row-3 -->
+      <div>
+        <h2 class="section-title">See what you know</h2>
+        <p>
+          Use flashcards and short quizzes to explore what you know about early brain growth. Each
+          small step helps you guide your child's learning with confidence.
+        </p>
+        <router-link to="/learning-start" class="research-link">See Learning &rarr;</router-link>
+      </div>
+      <div class="image-col">
+        <img src="/brain-illustration-3.jpg" alt="Brain Illustration" />
       </div>
     </section>
 
@@ -67,8 +65,8 @@
       <div class="why-inner">
         <h2 class="why-title">Why everyday moments build strong brains</h2>
         <p class="why-sub">
-          Simple daily routines help your child's brain grow. Small actions today prepare them
-          for school, relationships, and lifelong learning.
+          Simple daily routines help your child's brain grow. Small actions today prepare them for
+          school, relationships, and lifelong learning.
         </p>
 
         <div class="why-grid" role="list">
@@ -76,7 +74,8 @@
           <div class="why-text left" role="listitem">
             <p>
               Spending time with your child makes a difference. Reading a story, setting the table,
-              or playing outside all help their brain develop. Even a few minutes each day create lasting impact.
+              or playing outside all help their brain develop. Even a few minutes each day create
+              lasting impact.
             </p>
           </div>
 
@@ -95,15 +94,18 @@
 
           <div class="why-text right" role="listitem">
             <p>
-              Children learn best from people they trust. Your attention and care give them confidence
-              and skills to thrive, turning ordinary moments into powerful brain-building experiences.
+              Children learn best from people they trust. Your attention and care give them
+              confidence and skills to thrive, turning ordinary moments into powerful brain-building
+              experiences.
             </p>
           </div>
         </div>
 
         <div class="research-link-wrap">
           <!-- <a href="#research" class="research-link">See more relevant research &rarr;</a> -->
-          <router-link to="/DataInsights" class="research-link">See more relevant research &rarr;</router-link>
+          <router-link to="/DataInsights" class="research-link"
+            >See more relevant research &rarr;</router-link
+          >
         </div>
 
         <!-- decorate shape -->
@@ -113,6 +115,54 @@
         <span class="shape shape-diamond"></span>
       </div>
     </section>
+    <!-- Video -->
+    <section id="video" class="video-section">
+      <h2 class="why-title">See how early moments shape the brain</h2>
+      <p class="why-sub">
+        Every talk, smile, and shared moment builds new brain connections. Watch this short video to
+        understand how daily interactions help children grow and learn.
+      </p>
+
+      <div class="video-wrapper">
+        <iframe
+          title="Brain Builders video: See how early moments shape the brain"
+          src="https://www.youtube-nocookie.com/embed/hMyDFYSkZSU?rel=0&modestbranding=1&playsinline=1"
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </section>
+
+    <!-- What BrainBuilder does -->
+    <section class="features">
+      <h2 class="section-title">What BrainBuilder does</h2>
+      <p style="font-size: 24px">Turn science into simple daily actions.</p>
+      <div class="feature-cards">
+        <div class="card">
+          <img src="/public/browse-activity.png" alt="browse-activity" />
+          <h3>Explore Activities</h3>
+          <p>Search 80+ tips. Filter by age, place, and time.</p>
+          <!-- <button>Open library</button> -->
+          <router-link to="/activities" class="card-btn">Open library</router-link>
+        </div>
+        <div class="card">
+          <img src="/public/today-pick.png" alt="today-pick" />
+          <h3>Today's Tips</h3>
+          <p>Discover fun activities to boost child's brain development.</p>
+          <!-- <button>Explore</button> -->
+          <router-link to="/today" class="card-btn">Explore</router-link>
+        </div>
+        <div class="card">
+          <img src="/public/process.png" alt="browse-activity" />
+          <h3>Tips Progress</h3>
+          <p>Monitor your child's progress and celebrate achievements.</p>
+          <!-- <button>View Progress</button> -->
+          <router-link to="/progress" class="card-btn">View Progress</router-link>
+        </div>
+      </div>
+    </section>
 
     <!-- FAQ -->
     <div class="faq-div">
@@ -120,62 +170,69 @@
         <h2 class="section-title">Frequently Asked Questions</h2>
         <details>
           <summary>Is BrainBuilder medical advice?</summary>
-          <p>No. BrainBuilder gives education and guidance. For diagnosis or treatment, see a clinician.</p>
+          <p>
+            No. BrainBuilder gives education and guidance. For diagnosis or treatment, see a
+            clinician.
+          </p>
         </details>
         <details>
           <summary>Which ages does BrainBuilder support?</summary>
-          <p> Three stages now, 0-1, 1-3, and 3-5. Daily tips match the stage you pick.</p>
+          <p>Three stages now, 0-1, 1-3, and 3-5. Daily tips match the stage you pick.</p>
         </details>
         <details>
           <summary>How long does a daily exercise tip take?</summary>
-          <p>Most tips take 3-10 minutes. They fit into real moments like mealtime, bath time, or bedtime.</p>
+          <p>
+            Most tips take 3-10 minutes. They fit into real moments like mealtime, bath time, or
+            bedtime.
+          </p>
         </details>
         <details>
           <summary>Where do the exercise tips come from?</summary>
-          <p>From child development research and expert guidance. Each card includes a short "why it helps" note.</p>
+          <p>
+            From child development research and expert guidance. Each card includes a short "why it
+            helps" note.
+          </p>
         </details>
         <details>
           <summary>What data do you store?</summary>
-          <p>Age and sex selection, favorites, history, and progress. Data stays in your browser in this version. No
-            account needed.</p>
+          <p>
+            Age and sex selection, favorites, history, and progress. Data stays in your browser in
+            this version. No account needed.
+          </p>
         </details>
       </section>
     </div>
 
     <!-- Call to Action -->
     <section class="cta">
-      <hr>
+      <hr />
       <h2>Ready to begin?</h2>
-      <p style="font-size: 24px;">Turn science into simply daily actions.</p>
+      <p style="font-size: 24px">Turn science into simply daily actions.</p>
       <!-- <button class="start-btn">Start Brain Builder</button> -->
       <router-link to="/today" class="start-btn">Start Brain Builder</router-link>
-      <hr>
+      <hr />
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-      <!-- <nav>
-        <a href="#">Behind the Research</a>
-        <a href="#">Terms of Use</a>
-        <a href="#">Privacy Policy</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
-      </nav> -->
       <p>
-        BrainBuilder is a social good, non-profit project. It is free for education,
-        with no ads, no sales, and no tracking beyond what is needed to run the site.
+        BrainBuilder is a social good, non-profit project. It is free for education, with no ads, no
+        sales, and no tracking beyond what is needed to run the site.
       </p>
       <p>© 2025 BrainBuilder. A student-led project for social good.</p>
     </footer>
   </div>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 // import ConfirmModal from '@/components/ConfirmModal.vue'
-import HeadBar from '@/components/HeadBar.vue';
+import HeadBar from '@/components/HeadBar.vue'
 
 const router = useRouter()
 const showConfirm = ref(false)
@@ -212,8 +269,8 @@ const goSelector = () => {
 /* Hero Section */
 .hero {
   position: relative;
-  height: 90vh;
-  background: url("/hero.png") center/cover no-repeat;
+  height: 110vh;
+  background: url('/hero.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -536,6 +593,25 @@ const goSelector = () => {
   .shape-diamond {
     display: none;
   }
+  .video-section { padding: 3rem 1rem; }
+}
+/* video */
+.video-wrapper {
+  width: min(960px, 100%);
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+  position: relative;
+  aspect-ratio: 16 / 9;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 /* Features */
@@ -563,7 +639,9 @@ const goSelector = () => {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   background-color: white;
   font-size: 20px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 .card:hover {
   transform: translateY(-8px) scale(1.05);
@@ -671,7 +749,6 @@ hr {
 
 /* Responsive */
 @media (max-width: 768px) {
-
   .two-col,
   .feature-cards {
     grid-template-columns: 1fr;
