@@ -14,6 +14,7 @@ const LearningStart = () => import('@/views/LearningStart.vue')
 const Stories = () => import('@/views/Stories.vue')
 const AITool = () => import('@/views/AITools.vue')
 const DataInsights = () => import('@/views/DataInsights.vue')
+const SearchResults = () => import('@/views/SearchResults.vue')
 
 const Story1 = () => import('@/views/Articles/Story1.vue')
 const Related1 = () => import('@/views/Articles/Related1.vue')
@@ -53,6 +54,7 @@ const router = createRouter({
           component: TipsCongrats,
           props: true,
         },
+        { path: 'search', name: 'SearchResults', component: SearchResults },
         { path: 'favorites', name: 'Favorites', component: Favorites },
         { path: 'progress', name: 'Progress', component: Progress },
         { path: 'edit', name: 'edit', component: EditRoutine },
@@ -80,11 +82,11 @@ router.beforeEach((to, from, next) => {
   // if user not logged in and not going to login → redirect to login
   if (!isAuthenticated && to.name !== 'Login') {
     next({ name: 'Login' })
-  } 
+  }
   // if user is logged in and going to login → redirect to home
   else if (isAuthenticated && to.name === 'Login') {
     next({ name: 'Home' })
-  } 
+  }
   else {
     next()
   }

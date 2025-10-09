@@ -11,8 +11,27 @@
         <img class="logo" src="/src/assets/logo/Brainlogo.png" alt="BrainBuilder" />
       </router-link>
 
-      <!-- hambuger button -->
-      <div class="hamburger" @click="toggleMenu">
+      <!-- Search  -->
+      <div v-if="showSearch" class="header-search" role="search">
+        <input
+          v-model="search.query"
+          class="search-input"
+          type="search"
+          placeholder="Search tips or skills…"
+          aria-label="Search tips or skills"
+          @keyup.enter="goSearch"
+        />
+        <!-- <button
+          v-if="search.query"
+          class="search-clear"
+          @click="search.clear()"
+          aria-label="Clear search"
+        >
+          ×
+        </button> -->
+        <button class="search-btn" @click="goSearch" aria-label="Search">Search</button>
+        </div>
+  <div class="hamburger" @click="toggleMenu">
         <span></span>
         <span></span>
         <span></span>
@@ -27,7 +46,7 @@
             </router-link>
           </li> -->
 
-                    <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+          <li class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
             <a href="#">
               <font-awesome-icon icon="brain" style="color: skyblue" /> Try Brain Builder ▾
             </a>
@@ -37,7 +56,8 @@
                   to="/activities"
                   :class="{ active: $route.path.startsWith('/activities') }"
                 >
-                  <font-awesome-icon icon="clipboard-list" style="color: green" /> Explore Activities
+                  <font-awesome-icon icon="clipboard-list" style="color: green" /> Explore
+                  Activities
                 </router-link>
               </li>
               <li>
@@ -61,23 +81,23 @@
 
           <li>
             <router-link to="/DataInsights">
-              <font-awesome-icon icon="dashboard" style="color: palevioletred"/> Data Insights
+              <font-awesome-icon icon="dashboard" style="color: palevioletred" /> Data Insights
             </router-link>
           </li>
 
           <li>
             <router-link to="/Stories">
-              <font-awesome-icon icon="coffee" style="color: burlywood"/> Stories
+              <font-awesome-icon icon="coffee" style="color: burlywood" /> Stories
             </router-link>
           </li>
           <li>
             <router-link to="/learning-start">
-              <font-awesome-icon icon="book" style="color: brown"/> Learning
+              <font-awesome-icon icon="book" style="color: brown" /> Learning
             </router-link>
           </li>
           <li>
             <router-link to="/AITools">
-              <font-awesome-icon icon="robot" style="color: gray"/> AI Tools
+              <font-awesome-icon icon="robot" style="color: gray" /> AI Tools
             </router-link>
           </li>
         </ul>
@@ -87,13 +107,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useSearchStore } from '@/stores/search'
 
 const showDropdown = ref(false)
 
 const isOpen = ref(false)
 const toggleMenu = () => {
   isOpen.value = !isOpen.value
+}
+const route = useRoute()
+const router = useRouter()
+const search = useSearchStore()
+
+const SHOW_ON = ['Activities', 'TipsDisplay', 'SearchResults']
+const showSearch = computed(() => SHOW_ON.includes(String(route.name || '')))
+
+// clear search when leaving the pages where the bar is visible
+watch(showSearch, (vis) => {
+  if (!vis) search.clear()
+})
+function goSearch() {
+  const q = search.query.trim()
+  if (!q) return
+  router.push({ name: 'SearchResults', query: { q } })
 }
 </script>
 
@@ -136,6 +174,46 @@ const toggleMenu = () => {
   margin-left: 0;
   margin-top: 10px;
 }
+/* Searchbar */
+.header-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: min(520px, 38vw);
+  margin-right: 12px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 14px;
+  outline: none;
+}
+.search-input:focus {
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
+}
+.search-clear {
+  position: absolute;
+  right: 8px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+}
+.search-btn {
+  margin-left: 6px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.search-btn:focus { outline: 3px solid rgba(20,184,166,.25); }
 
 .nav-links {
   list-style: none;
@@ -223,6 +301,10 @@ const toggleMenu = () => {
 @media (max-width: 768px) {
   .hamburger {
     display: flex;
+  }
+  .header-search {
+    width: 100%;
+    margin: 12px 0 0;
   }
 
   .nav-links {
