@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import Chart from 'chart.js/auto'
+import VictoriaMapSection from '@/components/VictoriaMapSection.vue'
 
 // Load Leaflet dynamically
 const loadLeaflet = () => {
@@ -28,20 +29,6 @@ let stateVulnChartInst: Chart | null = null;
 
 const connectionCounter = ref(0)
 let animationFrame: number | null = null
-
-// const brainGrowthData = [
-//   { age: 'Birth', value: 25 },
-//   { age: '1 Year', value: 50 },
-//   { age: '2 Years', value: 65 },
-//   { age: '3 Years', value: 80 },
-//   { age: '4 Years', value: 87 },
-//   { age: '5 Years', value: 90 }
-// ]
-
-// const wordPowerData = [
-//   { type: 'Normal Development', words: 500 },
-//   { type: 'Daily Talk', words: 800 }
-// ]
 
 // Domain data for pills
 const DOMAINS = [
@@ -118,20 +105,6 @@ const tooltip = ref({
   y: 0,
   content: ''
 })
-
-// function showTooltip(event: MouseEvent, content: string) {
-//   const rect = (event.target as SVGElement).getBoundingClientRect()
-//   tooltip.value = {
-//     show: true,
-//     x: event.clientX,
-//     y: event.clientY - 10,
-//     content
-//   }
-// }
-
-// function hideTooltip() {
-//   tooltip.value.show = false
-// }
 
 function animateCounter() {
   const target = 1000000
@@ -770,197 +743,6 @@ function goToLink(url: string) {
   </section>
 
   <section class="insights-container">
-    <!-- <div class="charts-grid"> -->
-    <!-- Chart 1: Brain Growth -->
-    <!-- <div class="chart-card">
-        <div class="chart-title">Brain Growth Race (0-5 years)</div>
-        <div class="chart-visual">
-          <svg viewBox="0 0 400 250" class="line-chart">
-            <defs>
-              <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:0.3" />
-                <stop offset="100%" style="stop-color:#e74c3c;stop-opacity:0.05" />
-              </linearGradient>
-            </defs> -->
-    <!-- Grid lines -->
-    <!-- <line
-              v-for="i in 5"
-              :key="i"
-              :x1="50"
-              :x2="380"
-              :y1="30 + (i-1)*45"
-              :y2="30 + (i-1)*45"
-              stroke="#e5e7eb"
-              stroke-width="1"
-            /> -->
-    <!-- Y-axis labels -->
-    <!-- <text
-              v-for="(val, i) in [100, 75, 50, 25, 0]"
-              :key="'y'+i"
-              x="40"
-              :y="35 + i*45"
-              text-anchor="end"
-              font-size="12"
-              fill="#666"
-            >
-              {{ val }}%
-            </text> -->
-    <!-- Line path -->
-    <!-- <polyline
-              :points="brainGrowthData.map((d, i) => `${70 + i*62},${210 - d.value*1.8}`).join(' ')"
-              fill="url(#gradient)"
-              stroke="#e74c3c"
-              stroke-width="3"
-            /> -->
-    <!-- Points -->
-    <!-- <circle
-              v-for="(d, i) in brainGrowthData"
-              :key="i"
-              :cx="70 + i*62"
-              :cy="210 - d.value*1.8"
-              r="8"
-              fill="#e74c3c"
-              stroke="#fff"
-              stroke-width="2"
-              style="cursor: pointer"
-              @mouseenter="showTooltip($event, `${d.age}: ${d.value}% of adult brain size`)"
-              @mouseleave="hideTooltip"
-            /> -->
-    <!-- X-axis labels -->
-    <!-- <text
-              v-for="(d, i) in brainGrowthData"
-              :key="'x'+i"
-              :x="70 + i*62"
-              y="235"
-              text-anchor="middle"
-              font-size="11"
-              fill="#666"
-            >
-              {{ d.age }}
-            </text>
-          </svg>
-        </div>
-        <div class="takeaway">
-          Your child's brain doubles in size by age 1 - every day counts!
-        </div>
-        <div class="source-link">
-          <a href="https://www.firstthingsfirst.org/early-childhood-matters/brain-development/" target="_blank">
-            View Source: First Things First
-          </a>
-        </div>
-      </div> -->
-
-    <!-- Chart 2: Word Power -->
-    <!-- <div class="chart-card">
-        <div class="chart-title">Daily Talk = Word Power</div>
-        <div class="chart-visual">
-          <svg viewBox="0 0 400 250" class="bar-chart"> -->
-    <!-- Y-axis labels -->
-    <!-- <text x="40" y="20" text-anchor="end" font-size="12" fill="#666">800</text>
-            <text x="40" y="110" text-anchor="end" font-size="12" fill="#666">400</text>
-            <text x="40" y="215" text-anchor="end" font-size="12" fill="#666">0</text> -->
-    <!-- Y-axis title -->
-    <!-- <text
-                x="10"
-                y="120"
-                text-anchor="middle"
-                font-size="12"
-                fill="#374151"
-                font-weight="700"
-                transform="rotate(-90 10 120)"
-                >
-                Vocabulary Size at Age 2
-            </text> -->
-
-    <!-- Bars -->
-    <!-- <rect
-              x="80"
-              y="70"
-              width="100"
-              height="140"
-              fill="#95a5a6"
-              rx="8"
-              style="cursor: pointer"
-              @mouseenter="showTooltip($event, 'Normal Development: 500 words at age 2')"
-              @mouseleave="hideTooltip"
-            />
-            <rect
-              x="220"
-              y="10"
-              width="100"
-              height="200"
-              fill="#27ae60"
-              rx="8"
-              style="cursor: pointer"
-              @mouseenter="showTooltip($event, 'Daily Talk: 800 words at age 2 (+300 more!)')"
-              @mouseleave="hideTooltip"
-            /> -->
-
-    <!-- Value labels on bars -->
-    <!-- <text x="130" y="60" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">500</text>
-            <text x="270" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="#2c3e50">800</text> -->
-
-    <!-- X-axis labels -->
-    <!-- <text x="130" y="230" text-anchor="middle" font-size="13" fill="#666">Normal</text>
-            <text x="270" y="230" text-anchor="middle" font-size="13" fill="#666">Daily Talk</text>
-            <text x="200" y="245" text-anchor="middle" font-size="11" fill="#2c3e50" font-weight="bold">Development Type</text>
-          </svg>
-        </div>
-        <div class="takeaway">
-          Just talking daily gives your child 300 more words by age 2
-        </div>
-        <div class="source-link">
-          <a href="https://www.zerotothree.org/resource/distillation/22-statistics-you-need-to-know-about-childhood-brain-development/" target="_blank">
-            View Source: ZERO TO THREE
-          </a>
-        </div>
-      </div> -->
-
-    <!-- Chart 3: Neural Connections -->
-    <!-- <div class="chart-card">
-        <div class="chart-title">Neural Connection Speed</div>
-        <div class="counter-container">
-          <div class="counter">{{ connectionCounter.toLocaleString() }}</div>
-          <div class="counter-label">connections per second</div>
-        </div>
-        <div class="takeaway">
-          Your baby's brain creates 1 million connections every second
-        </div>
-        <div class="source-link">
-          <a href="https://developingchild.harvard.edu/resources/inbriefs/inbrief-science-of-ecd/" target="_blank">
-            View Source: Harvard Center
-          </a>
-        </div>
-      </div> -->
-
-    <!-- Chart 4: Energy Allocation -->
-    <!-- <div class="chart-card">
-        <div class="chart-title">Energy Allocation: Baby vs Adult</div>
-        <div class="energy-container">
-          <div class="energy-column">
-            <div class="energy-pie baby-pie">
-              <span>60%<br/>Brain</span>
-            </div>
-            <div class="pie-label">Baby</div>
-          </div>
-          <div class="energy-column">
-            <div class="energy-pie adult-pie">
-              <span>20%<br/>Brain</span>
-            </div>
-            <div class="pie-label">Adult</div>
-          </div>
-        </div>
-        <div class="takeaway">
-          60% of your baby's energy goes to building their brain
-        </div>
-        <div class="source-link">
-          <a href="https://www.zerotothree.org/resource/distillation/22-statistics-you-need-to-know-about-childhood-brain-development/" target="_blank">
-            View Source: ZERO TO THREE
-          </a>
-        </div>
-      </div>
-    </div> -->
-
     <div class="kicker">Why the First 5 Years Are So Critical</div>
     <div class="kicker-sub">Decades of neuroscience show early childhood is the most important time for brain
       development.</div>
@@ -996,82 +778,51 @@ function goToLink(url: string) {
       </div>
     </div>
 
-    <!-- Key Statistics -->
-    <!-- <div class="stats-grid">
-        <div class="stat-card">
-          <span class="stat-number">23.5%</span>
-          <div class="stat-label">Children Developmentally Vulnerable</div>
-          <div class="stat-description">
-            In Australia 2024, nearly 1 in 4 children are at risk of
-            developmental delays
-          </div>
-          <div class="trend-indicator trend-down">&#8595; Down from 23.6% (2009)</div>
-        </div>
-
-        <div class="stat-card">
-          <span class="stat-number">10.7%</span>
-          <div class="stat-label">Language Difficulties</div>
-          <div class="stat-description">
-            Highest challenges: Communication (8.9%) and Language (7.7%)
-          </div>
-          <div class="trend-indicator trend-up">&uarr; Up from 8.9% (2009)</div>
-        </div>
-
-        <div class="stat-card">
-          <span class="stat-number">40.8%</span>
-          <div class="stat-label">Highest Vulnerability Rate</div>
-          <div class="stat-description">
-            Northern Territory shows the highest rate of vulnerable children
-          </div>
-          <div class="trend-indicator trend-up">
-            &#9888; Urgent intervention needed
-          </div>
-        </div>
-
-        <div class="stat-card">
-          <span class="stat-number">0-2</span>
-          <div class="stat-label">Critical Window</div>
-          <div class="stat-description">
-            Most important years for brain architecture formation
-          </div>
-          <div class="trend-indicator trend-down">
-            &#9889; Time-sensitive opportunity
-          </div>
-        </div>
-      </div> -->
-    <div class="cards3">
-      <div class="note"
-        @click="goToLink('https://developingchild.harvard.edu/resources/inbriefs/inbrief-science-of-ecd/')">
-        <h4>Brain Architecture is Built Early</h4>
-        Strong early experiences create the foundation for learning, behavior and health.
-        <div class="foot">Harvard Center on the Developing Child</div>
-      </div>
-
-      <div class="note" @click="goToLink('https://heckmanequation.org/')">
-        <h4>Early Investment Pays Off</h4>
-        Every dollar invested in quality early programs returns about $7 over a lifetime.
-        <div class="foot">Heckman Equation Research</div>
-      </div>
-
-      <div class="note"
-        @click="goToLink('https://www.zerotothree.org/resource/distillation/22-statistics-you-need-to-know-about-childhood-brain-development/')">
-        <h4>Language Windows Close Quickly</h4>
-        Rich language before age 3 predicts long-term school advantages.
-        <div class="foot">Hart & Risley Language Study</div>
+    <!-- TRANSITION TO TRENDS -->
+    <div class="container">
+      <div class="transition-text">
+        <p>
+          These numbers tell a powerful story - but they also raise an important question: 
+          <span class="highlight">Are things getting better or worse?</span> 
+          Let's look at 15 years of data.
+        </p>
       </div>
     </div>
 
     <!-- Australian Reality Section -->
-    <div class="australian-section">
-      <h2 class="section-title">The Australian Reality: What the Data Shows</h2>
-      <p class="lead">
-        Right now, <b>1 in 4</b> Australian children start school unprepared. The Australian Early Development Census,
-        tracking <b>1.7 million</b> children over 15 years, reveals that <span class="hl"><b>23.5%</b> of children are
-          developmentally vulnerable</span> when they begin school - that's <b>over 70,000</b> children each year
-        already behind their peers. <b>Crucial insight:</b> this is <b>preventable</b> with the right support during
-        ages <b>0-3</b>.
-      </p>
+    <!-- NATIONAL HOOK + PILLS -->
+    <div class="container section">
+      <div class="title-xl">The Australian Reality: What the Data Shows</div>
+      
+      <div class="stats">
+        <div class="stat">
+          <div class="big">23.5%</div>
+          <div style="font-weight:600; margin-bottom:8px;">Children Developmentally Vulnerable</div>
+          <div style="font-size:14px; line-height:1.5;">In Australia 2024, nearly 1 in 4 children are at risk of developmental delays</div>
+          <div style="margin-top:12px; color:#10b981; font-weight:600; font-size:14px;">↓ Down from 23.6% (2009)</div>
+        </div>
+        <div class="stat">
+          <div class="big">10.7%</div>
+          <div style="font-weight:600; margin-bottom:8px;">Social Competence Challenges</div>
+          <div style="font-size:14px; line-height:1.5;">Highest vulnerability area: Social skills (10.7%) and Physical health (10.0%)</div>
+          <div style="margin-top:12px; color:#ef4444; font-weight:600; font-size:14px;">↑ Up from 9.4% (2009)</div>
+        </div>
+        <div class="stat">
+          <div class="big">21.9%</div>
+          <div style="font-weight:600; margin-bottom:8px;">Highest Vulnerability Rate</div>
+          <div style="font-size:14px; line-height:1.5;">Northern Territory shows the highest rate of vulnerable children</div>
+          <div style="margin-top:12px; color:#f59e0b; font-weight:600; font-size:14px;">⚠ Urgent intervention needed</div>
+        </div>
+        <div class="stat">
+          <div class="big">0-3</div>
+          <div style="font-weight:600; margin-bottom:8px;">Critical Window</div>
+          <div style="font-size:14px; line-height:1.5;">Most important years for brain architecture formation</div>
+          <div style="margin-top:12px; color:#8b5cf6; font-weight:600; font-size:14px;">⚡ Time-sensitive opportunity</div>
+        </div>
+      </div>
+    </div>
 
+    <div class="container section">
       <div class="explore-title">
         <h3>Explore the developmental challenges by area:</h3>
         <p class="explore-sub">Click on any domain below to see 15 years of trends and what they mean for your family
@@ -1096,109 +847,28 @@ function goToLink(url: string) {
           foundations!</p>
       </div>
 
-      <div class="next">&#128071; Now let's see where support is needed most inside Victoria.</div>
+      <!-- <div class="next">&#128071; Now let's see where support is needed most inside Victoria.</div> -->
     </div>
 
     <!-- Victoria Map Section -->
-    <div class="australian-section">
-      <h2 class="section-title">Victoria Local Government Areas - Developmental Vulnerability Map</h2>
-
-      <div id="vicMap"></div>
-
-      <div class="map-controls">
-        <div class="controls-row">
-          <div class="year-badge">Year: {{ YEARS[currentYearIndex] }}</div>
-          <button @click="playAnimation" class="play-btn" title="Play/Pause">
-            {{ playTimer ? '||' : '\u25B6' }}
-          </button>
-        </div>
-
-        <div class="year-marks">
-          <button v-for="(year, i) in YEARS" :key="year" @click="setYear(i)"
-            :class="{ active: currentYearIndex === i }">
-            {{ year }}
-          </button>
-        </div>
-
-        <input type="range" min="0" :max="YEARS.length - 1" v-model="currentYearIndex" @input="updateMap"
-          class="year-slider" />
-
-        <div class="map-insight">
-          <h4>&#128269; Reading the map</h4>
-          <ul>
-            <li>Colours show the <b>% of children vulnerable</b> in the selected domain.</li>
-            <li>Click an area to see the <b>sample size</b> and estimated number of children affected.</li>
-            <li>Red zones highlight where <b>early support</b> can make the biggest difference.</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="insight">
-        <h3>&#128161; Why this matters for families in Victoria</h3>
-        <p><b>Neighbouring LGAs can look very different.</b> Some communities show double the vulnerability of others
-          meaning your address changes your child's odds.</p>
-        <p><b>But the solution starts at home.</b> The same activities used in BrainBuilder like daily talk, shared
-          reading, playful learning directly build the skills this map is measuring.</p>
-        <p class="good">&#x2728; Good news: minutes a day really compound. Start small, stay consistent, and you'll see
-          progress.</p>
+    <!-- TRANSITION TO VICTORIA -->
+    <div class="container">
+      <div class="insight transition-insight">
+        <h3 style="font-size:28px">🗺️ From National Trends to Your Neighborhood</h3>
+        <p style="font-size:19px;margin:16px 0;line-height:1.75;color:#374151">
+          You've seen the big picture across Australia. But here's what really matters: <b>your local community</b>.
+        </p>
+        <p style="font-size:19px;margin:16px 0;line-height:1.75;color:#374151">
+          In Victoria alone, we track <b>480 statistical areas (SA2 level)</b> — and the variation is dramatic. 
+          Some neighborhoods have <b>0% vulnerability</b> in certain domains, while others reach <b>27%</b>. 
+        </p>
+        <p class="good" style="font-size:21px;margin-top:24px">
+          ✨ Understanding your area helps you know where to focus your efforts and what support might be available nearby.
+        </p>
       </div>
     </div>
 
-
-    <!-- Development Areas Chart -->
-    <!-- <div class="chart-section">
-        <h2 class="chart-title">Where Your Child Needs the Most Support</h2>
-        <div class="chart-container">
-          <canvas id="developmentChart"></canvas>
-        </div>
-        <div
-          style="
-            background: #f8fafc;
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 20px;
-            border-left: 4px solid #4facfe;
-          "
-        >
-          <h3 style="color: #4facfe; margin-bottom: 15px; font-size: 1.3rem">
-            &#127919; Action Plan for Parents:
-          </h3>
-          <div
-            style="
-              display: grid;
-              grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-              gap: 15px;
-              margin-top: 15px;
-            "
-          >
-            <div>
-              <strong style="color: #43E97B; font-size: 1.2rem"
-                >Social Skills (10.7% at risk):</strong
-              >
-              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
-                Arrange playdates, practice sharing, teach emotion words
-              </p>
-            </div>
-            <div>
-              <strong style="color: #43E97B; font-size: 1.2rem"
-                >Physical Development (10.0% at risk):</strong
-              >
-              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
-                Encourage active play, fine motor activities like drawing,
-                outdoor exploration
-              </p>
-            </div>
-            <div>
-              <strong style="color: #43E97B; font-size: 1.2rem"
-                >Language & Communication (8.8% at risk):</strong
-              >
-              <p style="color: #64748b; margin-top: 5px; font-size: 1.2rem">
-                Read daily, narrate your activities, ask open-ended questions
-              </p>
-            </div>
-          </div>
-        </div>
-      </div> -->
+    <VictoriaMapSection />
 
     <!-- Insights -->
     <div class="insights-grid">
@@ -1312,6 +982,176 @@ function goToLink(url: string) {
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   font-weight: 500;
   opacity: 0.95;
+}
+
+/* Container & sections */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.hero-container {
+  padding-top: 40px;
+}
+
+.section {
+  background: var(--card);
+  border-radius: 24px;
+  box-shadow: 0 12px 50px rgba(0, 0, 0, .15);
+  padding: 40px;
+  margin: 32px auto;
+  animation: fadeInUp .8s ease-out;
+  position: relative;
+  overflow: hidden;
+  transition: all .4s cubic-bezier(.4, 0, .2, 1);
+}
+
+.section::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+  opacity: 0;
+  transition: opacity .5s;
+  z-index: -1;
+}
+
+.section:hover::before {
+  opacity: .2;
+}
+
+.section:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .2);
+}
+
+.transition-text {
+  text-align: center;
+  max-width: 900px;
+  margin: 10px auto;
+}
+
+.transition-text p {
+  font-size: 26px;
+  line-height: 1.7;
+  color: #232323;
+  font-weight: 700;
+}
+
+.highlight {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 800;
+}
+
+.transition-insight {
+  margin: 48px auto;
+  max-width: 1000px;
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 24px;
+}
+
+.stat {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  border-radius: 20px;
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .1);
+  transition: all .4s cubic-bezier(.4, 0, .2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid transparent;
+}
+
+.stat::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, .15), transparent);
+  transition: left .6s;
+}
+
+.stat:hover {
+  transform: translateY(-12px) scale(1.05);
+  box-shadow: 0 20px 50px rgba(99, 102, 241, .3);
+  border-color: #6366f1;
+}
+
+.stat:hover::before {
+  left: 100%;
+}
+
+.stat .big {
+  font-size: 48px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+/* Titles */
+.title-xl {
+  font-size: 52px;
+  font-weight: 800;
+  margin-bottom: 20px;
+  color: #111827;
+  position: relative;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+.title-xl::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 2px;
+}
+
+/* Pills */
+.explore-title {
+  text-align: center;
+  margin: 48px 0 24px;
+  animation: fadeInUp .8s ease-out;
+}
+
+.explore-title h3 {
+  font-size: 36px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 16px;
+  background: linear-gradient(135deg, #111827, #374151);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.3;
+}
+
+.explore-sub {
+  font-size: 20px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.6;
 }
 
 /* Insights Layout */
@@ -1432,167 +1272,6 @@ function goToLink(url: string) {
   color: #9ca3af;
   font-size: 13px;
   font-style: italic;
-}
-
-/* Chart Visuals */
-.chart-visual {
-  margin-bottom: 1.75rem;
-  min-height: 250px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.line-chart,
-.bar-chart {
-  width: 100%;
-  height: auto;
-}
-
-circle:hover {
-  filter: drop-shadow(0 0 6px #e74c3c);
-  transition: 0.2s;
-}
-
-/* Counter */
-.counter-container {
-  text-align: center;
-  padding: 2.5rem 1rem;
-}
-
-.counter {
-  font-size: clamp(3.2rem, 7vw, 5rem);
-  font-weight: 800;
-  color: #e74c3c;
-  margin-bottom: 0.6rem;
-  text-shadow: 0 3px 8px rgba(231, 76, 60, 0.3);
-}
-
-.counter-label {
-  font-size: 1.1rem;
-  color: #6b7280;
-  font-weight: 500;
-}
-
-/* Energy Pies */
-.energy-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  min-height: 250px;
-}
-
-.energy-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-}
-
-.energy-pie {
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 700;
-  text-align: center;
-  font-size: 1.1rem;
-  line-height: 1.3;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.25s ease;
-}
-
-.energy-pie:hover {
-  transform: scale(1.08) rotate(6deg);
-}
-
-.baby-pie {
-  background: conic-gradient(#e74c3c 0% 60%, #ecf0f1 60% 100%);
-}
-
-.adult-pie {
-  background: conic-gradient(#3498db 0% 20%, #ecf0f1 20% 100%);
-}
-
-.pie-label {
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #374151;
-}
-
-/* Takeaway */
-.takeaway {
-  background: #00C950;
-  color: white;
-  padding: 1rem 1.25rem;
-  border-radius: 12px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 1.05rem;
-  margin-bottom: 1rem;
-  line-height: 1.4;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  transition: transform 0.2s;
-}
-
-.takeaway:hover {
-  transform: scale(1.02);
-}
-
-/* Source Links */
-.source-link {
-  text-align: center;
-}
-
-.source-link a {
-  display: inline-block;
-  background: #f59e0b;
-  color: white;
-  padding: 0.6rem 1.25rem;
-  text-decoration: none;
-  border-radius: 9999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.35);
-}
-
-.source-link a:hover {
-  background: #d97706;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(245, 158, 11, 0.45);
-}
-
-/* Tooltip */
-.tooltip {
-  position: fixed;
-  background: rgba(31, 41, 55, 0.97);
-  color: white;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  pointer-events: none;
-  z-index: 1000;
-  transform: translate(-50%, -100%) scale(0.95);
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  animation: fadeTooltip 0.25s ease forwards;
-}
-
-@keyframes fadeTooltip {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -80%) scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: translate(-50%, -100%) scale(1);
-  }
 }
 
 /* Australian Reality Section */
@@ -2184,25 +1863,6 @@ circle:hover {
   .insights-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.trend-indicator {
-  display: inline-block;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-top: 10px;
-}
-
-.trend-up {
-  background: rgba(239, 68, 68, 0.1);
-  color: #dc2626;
-}
-
-.trend-down {
-  background: rgba(34, 197, 94, 0.1);
-  color: #16a34a;
 }
 
 .kicker {
