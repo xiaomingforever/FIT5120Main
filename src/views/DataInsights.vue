@@ -219,6 +219,7 @@ function buildDomainPills() {
   DOMAINS.forEach(d => {
     const btn = document.createElement('button')
     btn.className = 'pill' + (d.key === currentDomain.value ? ' active' : '')
+    btn.setAttribute('data-key', d.key)
     btn.innerHTML = `<span>${d.icon}</span> ${d.name}`
     btn.onclick = () => {
       currentDomain.value = d.key
@@ -233,8 +234,9 @@ function buildDomainPills() {
 
 function updateDomainPills() {
   const btns = document.querySelectorAll('.pill')
-  btns.forEach((el, i) => {
-    if (DOMAINS[i].key === currentDomain.value) {
+  btns.forEach((el) => {
+    const key = (el as HTMLElement).dataset.key
+    if (key === currentDomain.value) {
       el.classList.add('active')
     } else {
       el.classList.remove('active')
@@ -782,9 +784,11 @@ function goToLink(url: string) {
     <div class="container">
       <div class="transition-text">
         <p>
-          These numbers tell a powerful story - but they also raise an important question: 
-          <span class="highlight">Are things getting better or worse?</span> 
-          Let's look at 15 years of data.
+          These numbers reveal where children need support right now but there's a bigger question: 
+          <span class="highlight">Is childhood development improving or declining across Australia?</span>
+        </p>
+        <p style="margin-top: 16px; font-size: 18px; color: #4b5563;">
+          Let's examine 15 years of national data (2009-2024) to understand the trends shaping our children's futures.
         </p>
       </div>
     </div>
@@ -859,7 +863,7 @@ function goToLink(url: string) {
           You've seen the big picture across Australia. But here's what really matters: <b>your local community</b>.
         </p>
         <p style="font-size:19px;margin:16px 0;line-height:1.75;color:#374151">
-          In Victoria alone, we track <b>480 statistical areas (SA2 level)</b> — and the variation is dramatic. 
+          In Victoria alone, we track <b>480 statistical areas (SA2 level)</b> and the variation is dramatic. 
           Some neighborhoods have <b>0% vulnerability</b> in certain domains, while others reach <b>27%</b>. 
         </p>
         <p class="good" style="font-size:21px;margin-top:24px">

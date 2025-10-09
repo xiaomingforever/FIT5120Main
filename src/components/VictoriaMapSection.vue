@@ -174,9 +174,9 @@
 
       <!-- Key Takeaway -->
       <div style="margin-top:32px;padding:24px;background:linear-gradient(135deg,#eef2ff,#faf5ff);border-radius:16px;border-left:4px solid #667eea">
-        <h4 style="margin:0 0 12px;font-size:18px;color:#1e40af;font-weight:700">🎯 The Bottom Line</h4>
-        <p style="margin:0;font-size:15px;line-height:1.7;color:#374151">
-          Victoria's data shows that <b>where you live matters</b> — but it doesn't determine your child's future. 
+        <h4 style="margin:0 0 12px;font-size:22px;color:#1e40af;font-weight:700">🎯 The Bottom Line</h4>
+        <p style="margin:0;font-size:20px;line-height:1.7;color:#374151">
+          Victoria's data shows that <b>where you live matters</b> but it doesn't determine your child's future. 
           Communities with the best outcomes aren't necessarily the wealthiest; they're the ones where parents are engaged, 
           informed, and taking simple daily actions. <b>You have more power than you think.</b>
         </p>
@@ -189,12 +189,13 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import localforage from 'localforage'
 
 // ======= CONFIG =======
 const LOCAL_FILES = {
   aedc: 'https://child-health-bucket.s3.ap-southeast-2.amazonaws.com/aedc_sa2_VIC_with_SA3_2009_2024.csv',
   mapping: 'https://child-health-bucket.s3.ap-southeast-2.amazonaws.com/sal_sa2_pairs_VIC_2021_allMB.csv',
-  geojson: 'https://child-health-bucket.s3.ap-southeast-2.amazonaws.com/SA2_GEN.geojson'
+  geojson: 'https://child-health-bucket.s3.ap-southeast-2.amazonaws.com/victoria_sa2.geojson'
 }
 
 const domains = [
@@ -218,21 +219,21 @@ const waves = [2009, 2012, 2015, 2018, 2021, 2024]
 const VIC_INSIGHTS = {
   'Physical health and wellbeing': {
     headline: '8.5% of Victorian children show vulnerability in physical development',
-    trend: 'This has increased from 7.6% in 2009 — a concerning +0.9% rise over 15 years.',
+    trend: 'This has increased from 7.6% in 2009, a concerning +0.9% rise over 15 years.',
     why: 'Screen time and reduced outdoor play are likely contributors to declining physical development.',
     action: 'Even 15 minutes of active play daily makes a measurable difference. Outdoor play, dancing, and playground time dramatically boost physical development!',
-    range: 'Vulnerability ranges from 0% in some areas to over 20% in others — showing huge community variation.'
+    range: 'Vulnerability ranges from 0% in some areas to over 20% in others showing huge community variation.'
   },
   'Social competence': {
     headline: '10.5% of Victorian children struggle with social skills',
     trend: 'This is the biggest increase of all domains: from 8.4% in 2009 to 10.5% in 2024 (+2.1%).',
     why: 'Reduced face-to-face social interaction and fewer playgroup opportunities may be contributing factors.',
     action: 'Simple family games, playdates, and conversations about feelings create strong social foundations. Group play is essential for school readiness!',
-    range: 'Some Victorian communities have 0% vulnerability, while others reach 27% — a dramatic 27-point gap showing where support is most needed.'
+    range: 'Some Victorian communities have 0% vulnerability, while others reach 27%, a dramatic 27-point gap showing where support is most needed.'
   },
   'Emotional maturity': {
     headline: '9.9% of Victorian children need support with emotional regulation',
-    trend: 'This has risen from 8.2% in 2009 (+1.7%) — the second-largest increase.',
+    trend: 'This has risen from 8.2% in 2009 (+1.7%), the second-largest increase.',
     why: 'Learning to manage big emotions is challenging, and many children need more coaching in emotional skills.',
     action: 'Naming emotions, offering comfort, and staying calm during tantrums builds emotional intelligence day by day. You are your child\'s first and best teacher!',
     range: 'The variation across Victoria shows that community support and parenting resources make a real difference.'
@@ -276,6 +277,15 @@ const searchResult = ref(null)
 
 let map = null
 let geoLayer = null
+
+const dataLookupCache = ref({})
+
+// ======= LOCALFORAGE CONFIG =======
+localforage.config({
+  name: 'aedcDataCacheDB',
+  storeName: 'aedc_store',
+  description: 'Cache for AEDC, mapping, and GeoJSON files'
+})
 
 // ======= COMPUTED =======
 const insightContent = computed(() => {
@@ -359,7 +369,10 @@ function parseCSV(text) {
 }
 
 function normalizeSA2Code(code) {
-  return String(code ?? '').replace(/\D/g, '').padStart(9, '0')
+  if (!code) return ''
+  const str = String(code).trim()
+  if (/^\d{9}$/.test(str)) return str
+  return str.replace(/\D/g, '').padStart(9, '0')
 }
 
 function toNum(v) {
@@ -368,32 +381,39 @@ function toNum(v) {
 }
 
 function getColor(v) {
-  if (v == null) return '#e5e7eb'
-  return v >= 25 ? '#b30000'
-    : v >= 20 ? '#ff4d4d'
-    : v >= 15 ? '#ff8a8a'
-    : v >= 10 ? '#ffd6d6'
-    : v >= 5 ? '#8fd19e'
-    : '#d9f2e6'
+  if (v == null) return '#e5e7eb' 
+  
+  if (v < 5) return '#10b981'   
+  if (v < 10) return '#8fd19e' 
+  if (v < 15) return '#ffd6d6'  
+  if (v < 20) return '#ff8a8a' 
+  if (v < 25) return '#ff4d4d' 
+  return '#b30000'              
 }
 
 function getBadge(v) {
   if (v == null) return { text: 'No data', color: '#999', icon: '❓' }
-  if (v < 10) return { text: 'Low vulnerability', color: '#10b981', icon: '✓' }
-  if (v < 20) return { text: 'Moderate vulnerability', color: '#f59e0b', icon: '⚠️' }
-  return { text: 'High vulnerability', color: '#ef4444', icon: '⚠️⚠️' }
+  
+  if (v < 5) return { text: 'Excellent - Very low vulnerability', color: '#10b981', icon: '⭐' }
+  if (v < 10) return { text: 'Good - Low vulnerability', color: '#22c55e', icon: '✓' }
+  if (v < 15) return { text: 'Moderate vulnerability', color: '#f59e0b', icon: '⚠️' }
+  if (v < 20) return { text: 'High vulnerability', color: '#f97316', icon: '⚠️' }
+  return { text: 'Very high vulnerability', color: '#ef4444', icon: '🚨' }
 }
 
-function createSparkline(sa2Code) {
-  const trendData = waves.map(year => {
+function precomputeSparklineData(sa2Code) {
+  return waves.map(year => {
     const row = aedcData.value.find(d =>
-      normalizeSA2Code(d.sa2_code) === normalizeSA2Code(sa2Code) &&
+      d.sa2_code === sa2Code &&
       d.domain === selectedDomain.value &&
       +d.year === year
     )
     return row ? toNum(row.vulnerable_pct) : null
   })
+}
 
+function createSparkline(sa2Code) {
+  const trendData = precomputeSparklineData(sa2Code)
   const validData = trendData.filter(v => v != null)
   if (validData.length < 2) return ''
 
@@ -405,20 +425,24 @@ function createSparkline(sa2Code) {
   const pad = 3
   const step = w / (waves.length - 1)
 
+  // ✅ 生成路径和点位数据
   let path = ''
+  const points = []
   trendData.forEach((v, i) => {
     if (v != null) {
       const x = i * step
       const y = h - ((v - min) / range) * (h - 2 * pad) - pad
       path += (path ? 'L' : 'M') + x + ',' + y
+      points.push({ x, y, value: v, year: waves[i] })
     }
   })
 
   if (!path) return ''
 
+  // ✅ 生成交互式 SVG，添加点和悬停事件
   return `
-    <div style="background:#f8f9fa;border-radius:6px;padding:8px 10px;margin-top:8px">
-      <svg width="${w}" height="${h}" style="display:block">
+    <div style="background:#f8f9fa;border-radius:6px;padding:8px 10px;margin-top:8px;position:relative">
+      <svg width="${w}" height="${h}" style="display:block" class="sparkline-svg">
         <defs>
           <linearGradient id="lineGrad_${sa2Code}" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8"/>
@@ -427,7 +451,39 @@ function createSparkline(sa2Code) {
         </defs>
         <line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="1,2" opacity="0.4"/>
         <path d="${path}" fill="none" stroke="url(#lineGrad_${sa2Code})" stroke-width="2.5" stroke-linecap="round"/>
+        
+        ${points.map(p => `
+          <circle 
+            cx="${p.x}" 
+            cy="${p.y}" 
+            r="4" 
+            fill="#667eea" 
+            stroke="#fff" 
+            stroke-width="2"
+            class="sparkline-point"
+            style="cursor:pointer;opacity:0;transition:opacity 0.2s"
+            data-year="${p.year}"
+            data-value="${p.value.toFixed(1)}"
+          />
+        `).join('')}
       </svg>
+      <div class="sparkline-tooltip" style="
+        position:absolute;
+        top:-35px;
+        left:50%;
+        transform:translateX(-50%);
+        background:#2d3748;
+        color:#fff;
+        padding:6px 12px;
+        border-radius:6px;
+        font-size:12px;
+        font-weight:700;
+        white-space:nowrap;
+        pointer-events:none;
+        opacity:0;
+        transition:opacity 0.2s;
+        box-shadow:0 4px 12px rgba(0,0,0,0.2);
+      "></div>
     </div>
   `
 }
@@ -454,6 +510,126 @@ function generateRankingsHtml(isBest) {
   `).join('')
 }
 
+// ✅ 新增：设置 sparkline 交互
+function setupSparklineInteractions() {
+  // 使用事件委托，监听整个 rankings 区域
+  const rankingsEl = document.querySelector('.vic-rankings')
+  if (!rankingsEl) return
+
+  rankingsEl.addEventListener('mouseover', (e) => {
+    const point = e.target.closest('.sparkline-point')
+    if (!point) return
+
+    const svg = point.closest('.sparkline-svg')
+    const container = svg?.parentElement
+    const tooltip = container?.querySelector('.sparkline-tooltip')
+    
+    if (tooltip) {
+      const year = point.dataset.year
+      const value = point.dataset.value
+      
+      tooltip.textContent = `${year}: ${value}%`
+      tooltip.style.opacity = '1'
+      
+      // 定位到鼠标位置
+      const rect = container.getBoundingClientRect()
+      const x = parseFloat(point.getAttribute('cx'))
+      tooltip.style.left = `${x}px`
+    }
+
+    // 显示所有点
+    svg.querySelectorAll('.sparkline-point').forEach(p => {
+      p.style.opacity = '0.3'
+    })
+    point.style.opacity = '1'
+  })
+
+  rankingsEl.addEventListener('mouseout', (e) => {
+    const point = e.target.closest('.sparkline-point')
+    if (!point) return
+
+    const svg = point.closest('.sparkline-svg')
+    const container = svg?.parentElement
+    const tooltip = container?.querySelector('.sparkline-tooltip')
+    
+    if (tooltip) {
+      tooltip.style.opacity = '0'
+    }
+
+    // 隐藏所有点
+    svg?.querySelectorAll('.sparkline-point').forEach(p => {
+      p.style.opacity = '0'
+    })
+  })
+}
+
+// ✅ 修复：增强空值检查
+function simplifyGeoJSON(geojson, maxPoints = 50) {
+  if (!geojson || !geojson.features || !Array.isArray(geojson.features)) {
+    console.warn('⚠️ Invalid GeoJSON structure')
+    return geojson
+  }
+  
+  console.log('🔧 Simplifying GeoJSON geometry...')
+  
+  const simplified = {
+    ...geojson,
+    features: geojson.features.map(feature => {
+      // ✅ 检查 geometry 是否存在
+      if (!feature || !feature.geometry || !feature.geometry.type) {
+        console.warn('⚠️ Skipping feature with invalid geometry')
+        return feature
+      }
+      
+      if (feature.geometry.type === 'Polygon' && 
+          feature.geometry.coordinates && 
+          feature.geometry.coordinates[0]) {
+        const coords = feature.geometry.coordinates[0]
+        if (!Array.isArray(coords) || coords.length === 0) {
+          return feature
+        }
+        
+        const step = Math.max(1, Math.floor(coords.length / maxPoints))
+        const simplifiedCoords = coords.filter((_, i) => i % step === 0 || i === coords.length - 1)
+        
+        return {
+          ...feature,
+          geometry: {
+            ...feature.geometry,
+            coordinates: [simplifiedCoords]
+          }
+        }
+      }
+      
+      return feature
+    })
+  }
+  
+  console.log('✓ GeoJSON simplified')
+  return simplified
+}
+
+function buildDataLookup(domain, year) {
+  const key = `${domain}_${year}`
+  
+  if (dataLookupCache.value[key]) {
+    return dataLookupCache.value[key]
+  }
+  
+  const lut = {}
+  aedcData.value
+    .filter(d => d.domain === domain && +d.year === year)
+    .forEach(d => {
+      const v = toNum(d.vulnerable_pct)
+      if (v != null) {
+        lut[d.sa2_code] = { value: v, ...d }
+      }
+    })
+  
+  dataLookupCache.value[key] = lut
+  return lut
+}
+
 // ======= DATA LOADING =======
 async function loadLocalFiles() {
   try {
@@ -461,22 +637,44 @@ async function loadLocalFiles() {
     loadError.value = null
     loadingProgress.value = 0
 
-    // Step 1: Load AEDC data
-    console.log('📁 Step 1/3: Loading AEDC data...')
+    const CACHE_KEYS = {
+      aedc: 'aedcData_v1',
+      mapping: 'suburbMapping_v1',
+      geojson: 'geojsonData_v2'
+    }
+
+    async function loadCache(key) {
+      try {
+        const data = await localforage.getItem(key)
+        if (data) console.log(`💾 Loaded ${key} from cache`)
+        return data
+      } catch (e) {
+        console.warn(`⚠️ Cache read failed ${key}:`, e)
+        return null
+      }
+    }
+
+    async function saveCache(key, data) {
+      try {
+        await localforage.setItem(key, data)
+        console.log(`📦 Saved ${key} to cache`)
+      } catch (e) {
+        console.warn(`⚠️ Cache save failed ${key}:`, e)
+      }
+    }
+
+    // Step 1: Load AEDC
+    console.log('📊 Loading AEDC data...')
     loadingMessage.value = 'Loading AEDC statistics...'
     loadingProgress.value = 10
 
-    const aedcResponse = await fetch(LOCAL_FILES.aedc)
-    if (!aedcResponse.ok) throw new Error(`AEDC file not found: ${LOCAL_FILES.aedc}`)
-    
-    const aedcText = await aedcResponse.text()
-    loadingProgress.value = 20
-
-    const parsedAedc = parseCSV(aedcText)
-    console.log('✓ AEDC parsed, rows:', parsedAedc.length)
-    
-    if (parsedAedc.length === 0) {
-      throw new Error('AEDC file is empty or invalid format')
+    let parsedAedc = await loadCache(CACHE_KEYS.aedc)
+    if (!parsedAedc) {
+      const response = await fetch(LOCAL_FILES.aedc)
+      if (!response.ok) throw new Error(`AEDC file not found`)
+      const text = await response.text()
+      parsedAedc = parseCSV(text)
+      await saveCache(CACHE_KEYS.aedc, parsedAedc)
     }
 
     aedcData.value = parsedAedc.map(r => ({
@@ -491,171 +689,167 @@ async function loadLocalFiles() {
       vulnerable_n: +(r.vulnerable_n || r.Vulnerable_n || r.VULNERABLE_N || 0),
       vulnerable_pct: toNum(r.vulnerable_pct || r.Vulnerable_pct || r.VULNERABLE_PCT)
     }))
-
+    
     loadingProgress.value = 40
-    console.log('✓ AEDC data processed:', aedcData.value.length, 'rows')
 
-    // Step 2: Load mapping data
-    console.log('📁 Step 2/3: Loading suburb mapping...')
+    // Step 2: Load Mapping
+    console.log('📍 Loading suburb mapping...')
     loadingMessage.value = 'Loading suburb mappings...'
-    
-    const mappingResponse = await fetch(LOCAL_FILES.mapping)
-    if (!mappingResponse.ok) throw new Error(`Mapping file not found: ${LOCAL_FILES.mapping}`)
-    
-    const mappingText = await mappingResponse.text()
-    loadingProgress.value = 50
 
-    const parsedMapping = parseCSV(mappingText)
-    console.log('✓ Mapping parsed, rows:', parsedMapping.length)
+    let parsedMapping = await loadCache(CACHE_KEYS.mapping)
+    if (!parsedMapping) {
+      const response = await fetch(LOCAL_FILES.mapping)
+      if (!response.ok) throw new Error(`Mapping file not found`)
+      const text = await response.text()
+      parsedMapping = parseCSV(text)
+      await saveCache(CACHE_KEYS.mapping, parsedMapping)
+    }
 
     suburbMapping.value = parsedMapping.map(r => ({
       SAL_NAME_2021: r.SAL_NAME_2021,
       SA2_NAME_2021: r.SA2_NAME_2021,
       SA2_CODE_2021: normalizeSA2Code(r.SA2_CODE_2021)
     }))
-
+    
     loadingProgress.value = 70
-    console.log('✓ Mapping data processed:', suburbMapping.value.length, 'rows')
 
     // Step 3: Load GeoJSON
-    console.log('📁 Step 3/3: Loading GeoJSON...')
-    loadingMessage.value = 'Loading geographic boundaries...'
-    
-    const geojsonResponse = await fetch(LOCAL_FILES.geojson)
-    if (!geojsonResponse.ok) throw new Error(`GeoJSON file not found: ${LOCAL_FILES.geojson}`)
-    
-    geojsonData.value = await geojsonResponse.json()
-    loadingProgress.value = 90
+    console.log('🗺️ Loading GeoJSON...')
+    loadingMessage.value = 'Loading map boundaries...'
 
-    console.log('✓ GeoJSON loaded, features:', geojsonData.value.features?.length || 0)
+    let geojson = await loadCache(CACHE_KEYS.geojson)
+    if (!geojson) {
+      const response = await fetch(LOCAL_FILES.geojson)
+      if (!response.ok) throw new Error(`GeoJSON file not found`)
+      geojson = await response.json()
+      
+      // ✅ 验证 GeoJSON 结构
+      if (!geojson || !geojson.features) {
+        throw new Error('Invalid GeoJSON structure')
+      }
+      
+      geojson = simplifyGeoJSON(geojson, 50)
+      await saveCache(CACHE_KEYS.geojson, geojson)
+    }
 
-    // Normalize SA2 codes in GeoJSON
-    if (geojsonData.value && geojsonData.value.features) {
+    geojsonData.value = geojson
+
+    // Normalize SA2 codes
+    if (geojsonData.value?.features) {
       geojsonData.value.features.forEach(feature => {
-        if (feature.properties) {
-          const code = feature.properties.sa2_code_2021 || 
-                      feature.properties.SA2_MAINCODE_2021 || 
-                      feature.properties.sa2_code
-          feature.properties.sa2_code_norm = normalizeSA2Code(code)
-        }
+        if (!feature || !feature.properties) return
+        const code = feature.properties.sa2_code_2021
+        feature.properties.sa2_code_norm = normalizeSA2Code(code)
       })
     }
 
     loadingProgress.value = 100
-    console.log('✅ All data loaded successfully!')
+    console.log('✅ All data loaded')
 
-    // Small delay to show 100% progress
-    await new Promise(resolve => setTimeout(resolve, 300))
-    
+    await new Promise(r => setTimeout(r, 300))
     isLoading.value = false
 
   } catch (err) {
-    console.error('❌ Error loading files:', err)
+    console.error('❌ Load error:', err)
     loadError.value = err.message
     isLoading.value = false
   }
 }
 
-function retryLoad() {
+async function retryLoad() {
+  if (confirm('Clear cache and reload?')) {
+    await localforage.clear()
+    console.log('🗑️ Cache cleared')
+  }
   loadLocalFiles()
 }
 
 // ======= MAP FUNCTIONS =======
 function renderMap() {
   if (!map || !geojsonData.value || !aedcData.value.length) {
-    console.warn('Map not ready:', { map: !!map, geojson: !!geojsonData.value, aedc: aedcData.value.length })
+    console.warn('⏳ Map not ready')
     return
   }
+
+  const startTime = performance.now()
 
   if (geoLayer) {
     map.removeLayer(geoLayer)
   }
 
-  // Create lookup table for current domain/year
-  const lut = {}
-  aedcData.value
-    .filter(d => d.domain === selectedDomain.value && +d.year === currentYear.value)
-    .forEach(d => {
-      const v = toNum(d.vulnerable_pct)
-      if (v != null) {
-        lut[d.sa2_code] = { value: v, ...d }
-      }
-    })
+  const lut = buildDataLookup(selectedDomain.value, currentYear.value)
 
-  console.log(`🗺️ Rendering map: ${Object.keys(lut).length} areas with data`)
+  console.log(`🗺️ Rendering: ${Object.keys(lut).length} areas`)
 
+  const styleCache = {}
+  
   geoLayer = L.geoJSON(geojsonData.value, {
     style: (feature) => {
       const code = feature.properties.sa2_code_norm
-      const data = lut[code]
-      const v = data?.value
-
-      return {
-        fillColor: getColor(v),
-        weight: 1,
-        color: '#fff',
-        opacity: 1,
-        fillOpacity: v != null ? 0.8 : 0.15,
-        dashArray: v == null ? '3,3' : null
+      
+      if (!styleCache[code]) {
+        const data = lut[code]
+        const v = data?.value
+        
+        styleCache[code] = {
+          fillColor: getColor(v),
+          weight: 1,
+          color: '#fff',
+          opacity: 1,
+          fillOpacity: v != null ? 0.8 : 0.15,
+          dashArray: v == null ? '3,3' : null
+        }
       }
+      
+      return styleCache[code]
     },
     onEachFeature: (feature, layer) => {
       const code = feature.properties.sa2_code_norm
-      const name = feature.properties.sa2_name_2021 || 
-                   feature.properties.SA2_NAME_2021 || 
-                   feature.properties.sa2_name
+      const name = feature.properties.sa2_name_2021
       const data = lut[code]
       const v = data?.value
       const badge = getBadge(v)
 
-      const suburbs = suburbMapping.value
-        .filter(s => s.SA2_CODE_2021 === code)
-        .map(s => s.SAL_NAME_2021)
-        .slice(0, 5)
+      // const suburbs = suburbMapping.value
+      //   .filter(s => s.SA2_CODE_2021 === code)
+      //   .map(s => s.SAL_NAME_2021)
+      //   .slice(0, 5)
 
-      const suburbText = suburbs.length 
-        ? `<div style="margin-top:8px;font-size:12px"><strong>Includes:</strong> ${suburbs.join(', ')}${suburbs.length === 5 ? ', …' : ''}</div>`
-        : ''
+      // const suburbText = suburbs.length 
+      //   ? `<div style="margin-top:8px;font-size:12px"><strong>Includes:</strong> ${suburbs.join(', ')}${suburbs.length === 5 ? ', …' : ''}</div>`
+      //   : ''
 
-      const sparkline = v != null ? createSparkline(code) : ''
+      // const sparkline = v != null ? createSparkline(code) : ''
 
       const popupContent = `
-        <div style="min-width:260px;font-family:Inter,sans-serif">
-          <div style="font-size:20px;font-weight:800;margin-bottom:6px;color:#111827;line-height:1.2">${name}</div>
+        <div style="min-width:200px;font-family:Inter,sans-serif">
+          <div style="font-size:20px;font-weight:800;margin-bottom:6px;color:#111827">${name}</div>
           <div style="font-size:14px;color:#374151;margin-bottom:4px;font-weight:600">${currentYear.value}</div>
           <div style="font-size:13px;color:#6b7280;margin-bottom:16px">${selectedDomain.value}</div>
           ${v != null ? `
-            <div style="font-size:48px;font-weight:800;color:${getColor(v)};margin-bottom:14px;line-height:1;letter-spacing:-1px">${v.toFixed(1)}%</div>
-            <div style="display:inline-block;padding:10px 16px;background:${badge.color}1a;color:${badge.color};border-radius:20px;font-size:14px;font-weight:700;margin-bottom:16px;border:2px solid ${badge.color}40">
+            <div style="font-size:32px;font-weight:800;color:${getColor(v)};margin-bottom:14px">${v.toFixed(1)}%</div>
+            <div style="display:inline-block;padding:10px 16px;background:${badge.color}1a;color:${badge.color};border-radius:20px;font-size:14px;font-weight:700;margin-bottom:16px">
               ${badge.icon} ${badge.text}
             </div>
-            ${sparkline}
           ` : `
-            <div style="font-size:32px;font-weight:800;color:#9ca3af;margin-bottom:14px;line-height:1">N/A</div>
-            <div style="display:inline-block;padding:10px 16px;background:#f3f4f622;color:#6b7280;border-radius:20px;font-size:14px;font-weight:700;margin-bottom:16px;border:2px solid #e5e7eb">
-              ℹ️ No data available
-            </div>
-            <div style="padding:12px;background:#fef3c7;border-left:3px solid #fbbf24;border-radius:8px;font-size:13px;color:#92400e;line-height:1.5">
-              <strong>Note:</strong> Data not collected for this area in ${currentYear.value}
+            <div style="font-size:32px;font-weight:800;color:#9ca3af;margin-bottom:14px">N/A</div>
+            <div style="padding:12px;background:#fef3c7;border-left:3px solid #fbbf24;border-radius:8px;font-size:13px;color:#92400e">
+              Data not available for ${currentYear.value}
             </div>
           `}
-          ${suburbText}
         </div>`
 
       layer.bindPopup(popupContent, { maxWidth: 320 })
       
       layer.on({
-        mouseover: (e) => {
-          e.target.setStyle({ weight: 3, color: '#667eea' })
-        },
-        mouseout: (e) => {
-          geoLayer.resetStyle(e.target)
-        }
+        mouseover: (e) => e.target.setStyle({ weight: 3, color: '#667eea' }),
+        mouseout: (e) => geoLayer.resetStyle(e.target)
       })
     }
   }).addTo(map)
 
-  console.log('✓ Map rendered successfully')
+  const endTime = performance.now()
+  console.log(`✓ Map rendered in ${(endTime - startTime).toFixed(0)}ms`)
 }
 
 // ======= SEARCH FUNCTIONS =======
@@ -667,7 +861,6 @@ function filterSuggestions() {
     return
   }
 
-  // Get unique suburbs
   const uniqueSuburbs = new Map()
   suburbMapping.value.forEach(s => {
     if (!uniqueSuburbs.has(s.SAL_NAME_2021)) {
@@ -700,7 +893,6 @@ function searchSuburb() {
   )
 
   if (!suburb) {
-    // Find similar suburbs
     const suggestions = suburbMapping.value
       .filter(s => s.SAL_NAME_2021?.toLowerCase().includes(q.toLowerCase()))
       .slice(0, 5)
@@ -708,7 +900,7 @@ function searchSuburb() {
 
     searchResult.value = `
       <h3>Suburb not found</h3>
-      <p>We couldn't find "<em>${q}</em>". Please check the spelling.</p>
+      <p>We couldn't find "<em>${q}</em>".</p>
       ${suggestions.length ? `<p><strong>Did you mean:</strong> ${suggestions.join(', ')}</p>` : ''}
     `
     return
@@ -726,33 +918,24 @@ function searchSuburb() {
   const pct = row ? toNum(row.vulnerable_pct) : null
   const badge = getBadge(pct)
 
-  // Get all suburbs in this SA2
   const allSuburbs = suburbMapping.value
     .filter(s => s.SA2_CODE_2021 === sa2Code)
     .map(s => s.SAL_NAME_2021)
 
   searchResult.value = `
     <h3>✓ Found: ${suburb.SAL_NAME_2021}</h3>
-    <p style="font-size:15px"><strong>Statistical Area (SA2):</strong> ${sa2Name}</p>
+    <p style="font-size:15px"><strong>SA2:</strong> ${sa2Name}</p>
     ${pct != null ? `
       <div style="font-size:40px;font-weight:800;color:${getColor(pct)};margin:16px 0">${pct.toFixed(1)}%</div>
-      <div style="display:inline-block;padding:8px 14px;background:${badge.color}22;color:${badge.color};border-radius:12px;font-size:13px;font-weight:700;margin-bottom:12px">
+      <div style="display:inline-block;padding:8px 14px;background:${badge.color}22;color:${badge.color};border-radius:12px;font-size:13px;font-weight:700">
         ${badge.icon} ${badge.text}
       </div>
     ` : `
       <div style="font-size:32px;font-weight:800;color:#9ca3af;margin:16px 0">N/A</div>
-      <div style="display:inline-block;padding:8px 14px;background:#f3f4f622;color:#6b7280;border-radius:12px;font-size:13px;font-weight:700;margin-bottom:12px;border:2px solid #e5e7eb">
-        ℹ️ No data available
-      </div>
-      <div style="padding:10px 14px;background:#fef3c7;border-left:3px solid #fbbf24;border-radius:8px;font-size:13px;color:#92400e;margin-bottom:12px;line-height:1.5">
-        <strong>Note:</strong> Data not collected for this area in ${currentYear.value} for this domain.
-      </div>
     `}
-    <p style="font-size:14px;color:#666;margin:12px 0"><strong>Domain:</strong> ${selectedDomain.value} (${currentYear.value})</p>
-    <p style="font-size:14px;margin:12px 0"><strong>This SA2 includes ${allSuburbs.length} suburb(s):</strong><br>${allSuburbs.join(', ')}</p>
+    <p style="font-size:14px;margin:12px 0"><strong>Includes:</strong> ${allSuburbs.join(', ')}</p>
   `
 
-  // Zoom to area on map if found
   if (geojsonData.value && map) {
     const feature = geojsonData.value.features.find(f => 
       f.properties.sa2_code_norm === sa2Code
@@ -780,64 +963,83 @@ function togglePlay() {
 
 function onYearChange() {
   renderMap()
-  // Update search result if visible
   if (searchResult.value && searchQuery.value) {
     searchSuburb()
   }
 }
 
-// ======= DOMAIN SELECTION =======
 function selectDomain(domain) {
   selectedDomain.value = domain
 }
 
+// ======= MAP INITIALIZATION =======
 function initMapSafely() {
   const el = document.getElementById('vicMap')
   if (!el) {
-    console.warn('Waiting for map container...')
     setTimeout(initMapSafely, 300)
     return
   }
 
   try {
-    map = L.map(el, { center: [-37.81, 144.96], zoom: 7 })
+    if (!map) {
+      console.log('🗺️ Creating map...')
+      map = L.map(el, { 
+        center: [-37.81, 144.96], 
+        zoom: 9,
+        zoomControl: true,
+        preferCanvas: true,
+        renderer: L.canvas()
+      })
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map)
+      
+      console.log('✓ Base map created')
+    }
+
     renderMap()
+
+    if (geoLayer) {
+      try {
+        const bounds = geoLayer.getBounds()
+        if (bounds && bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [20, 20], maxZoom: 12 })
+          console.log('✓ Map fitted to bounds')
+        } else {
+          map.setView([-37.81, 144.96], 9)
+        }
+      } catch (err) {
+        console.warn('⚠️ Bounds error:', err)
+        map.setView([-37.81, 144.96], 9)
+      }
+    } else {
+      map.setView([-37.81, 144.96], 9)
+    }
+
   } catch (err) {
-    console.error('❌ Error initializing map:', err)
+    console.error('❌ Map init error:', err)
+    loadError.value = 'Failed to initialize map: ' + err.message
   }
 }
 
 // ======= LIFECYCLE =======
 onMounted(async () => {
-  console.log('🚀 Victoria Map Section initializing...')
+  console.log('🚀 Initializing Victoria Map Section...')
 
-  // Initialize map
-//   try {
-//     map = L.map('vicMap', { minZoom: 6 }).setView([-37.8136, 144.9631], 8)
-//     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//       maxZoom: 12,
-//       attribution: '© OpenStreetMap contributors'
-//     }).addTo(map)
-//     console.log('✓ Map initialized')
-//   } catch (err) {
-//     console.error('❌ Error initializing map:', err)
-//   }
+  await loadLocalFiles()
 
-//   // Load local files
-//   await loadLocalFiles()
-
-//   // Render initial map
-//   if (!loadError.value) {
-//     renderMap()
-//   }
-
-    loadLocalFiles().then(() => {
-        nextTick(() => {
-        initMapSafely()
-        })
+  if (!isLoading.value && !loadError.value) {
+    nextTick(() => {
+      console.log('📍 Data ready, initializing map...')
+      initMapSafely()
+      
+      // ✅ 添加 sparkline 交互事件
+      setupSparklineInteractions()
     })
+  }
 
-  // Setup click outside handler for autocomplete
   const handleClickOutside = (e) => {
     const wrapper = document.querySelector('.vic-search-input-wrapper')
     if (wrapper && !wrapper.contains(e.target)) {
@@ -845,38 +1047,66 @@ onMounted(async () => {
     }
   }
   document.addEventListener('click', handleClickOutside)
-
-  // Cleanup on unmount
-  onUnmounted(() => {
+  
+  // ✅ 保存清理函数的引用
+  window._victoriaMapCleanup = () => {
     document.removeEventListener('click', handleClickOutside)
-  })
+  }
 })
 
+// ✅ onUnmounted 必须在 onMounted 外面，setup 顶层调用
 onUnmounted(() => {
+  console.log('🧹 Cleaning up Victoria Map Section...')
+  
+  // 清理事件监听
+  if (window._victoriaMapCleanup) {
+    window._victoriaMapCleanup()
+    delete window._victoriaMapCleanup
+  }
+  
+  // 清理定时器
   if (playTimer.value) {
     clearInterval(playTimer.value)
   }
+  
+  // 清理地图
   if (map) {
     map.remove()
+    map = null
   }
+  
+  // 清理缓存
+  dataLookupCache.value = {}
 })
 
-// Watch for domain changes
+// ======= WATCHERS =======
+let renderTimeout = null
+
 watch(selectedDomain, () => {
-  renderMap()
-  // Update search result if visible
-  if (searchResult.value && searchQuery.value) {
-    searchSuburb()
-  }
+  console.log('🔄 Domain changed:', selectedDomain.value)
+  dataLookupCache.value = {}
+  
+  clearTimeout(renderTimeout)
+  renderTimeout = setTimeout(() => {
+    renderMap()
+    if (searchResult.value && searchQuery.value) {
+      searchSuburb()
+    }
+    nextTick(() => setupSparklineInteractions())
+  }, 100)
 })
 
-// Watch for year changes
 watch(currentYear, () => {
-  renderMap()
-  // Update search result if visible
-  if (searchResult.value && searchQuery.value) {
-    searchSuburb()
-  }
+  console.log('🔄 Year changed:', currentYear.value)
+  
+  clearTimeout(renderTimeout)
+  renderTimeout = setTimeout(() => {
+    renderMap()
+    if (searchResult.value && searchQuery.value) {
+      searchSuburb()
+    }
+    nextTick(() => setupSparklineInteractions())
+  }, 100)
 })
 </script>
 
@@ -1013,7 +1243,7 @@ watch(currentYear, () => {
 }
 
 .vic-search-input {
-  width: 100%;
+  width: 95%;
   padding: 14px 18px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -1555,7 +1785,7 @@ watch(currentYear, () => {
 :deep(.leaflet-popup-content-wrapper) {
   border-radius: 16px !important;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25) !important;
-  padding: 0 !important;
+  padding: 10px !important;
 }
 
 :deep(.leaflet-popup-content) {
@@ -1573,7 +1803,7 @@ watch(currentYear, () => {
   height: 32px !important;
   font-size: 24px !important;
   color: #9ca3af !important;
-  top: 8px !important;
+  top: 15px !important;
   right: 8px !important;
   border-radius: 8px !important;
   transition: all 0.2s !important;

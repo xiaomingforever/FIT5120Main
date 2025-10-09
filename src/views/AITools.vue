@@ -52,6 +52,13 @@
             <div class="avatar" v-if="msg.role === 'ai'">
               <font-awesome-icon icon="robot" class="icon-robot" />
             </div>
+
+            <!-- AI thinking animation -->
+            <div v-if="msg.role === 'ai' && msg.text === ''" class="thinking-bubble">
+              <span class="thinking-text">Thinking</span>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+
             <div class="bubble" v-html="formatMessage(msg.text)"></div>
           </div>
         </div>
@@ -249,7 +256,7 @@ async function sendMessage() {
   draft.value = ''
 
   // Add loading message
-  messages.value.push({ role: 'ai', text: 'Thinking...' })
+  messages.value.push({ role: 'ai', text: '' })
 
   try {
     console.log("API URL:", API_URL)
@@ -262,14 +269,19 @@ async function sendMessage() {
     
     console.log("Response:", res.data)
     
-    // Remove loading message
-    messages.value.pop()
-    
     const aiReply = res.data.output || res.data.response || res.data.message || 'Sorry, no response received.'
     // const aiReply =
     //   res.data.choices?.[0]?.message?.content ||
     //   'Sorry, no response received.'
-    messages.value.push({ role: 'ai', text: aiReply })
+    // messages.value.push({ role: 'ai', text: aiReply })
+    messages.value.pop()
+    messages.value.push({ role: 'ai', text: '' })
+    let i = 0
+    const interval = setInterval(() => {
+      messages.value[messages.value.length - 1].text += aiReply[i]
+      i++
+      if (i >= aiReply.length) clearInterval(interval)
+    }, 15)
   } catch (err) {
     console.error("Full error:", err)
     
@@ -515,6 +527,39 @@ function formatMessage(text: string) {
 }
 .placeholder p {
   margin: 18px;
+}
+.thinking-bubble {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: #f3f4f6;
+  max-width: 70%;
+}
+
+/* “Thinking”文字 */
+.thinking-text {
+  font-style: italic;
+  color: #6b7280;
+}
+
+/* 闪烁圆点 */
+.thinking-bubble .dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #6b7280;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+.thinking-bubble .dot:nth-child(2) { animation-delay: 0.2s; }
+.thinking-bubble .dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes blink {
+  0%, 20% { opacity: 0; }
+  50%, 100% { opacity: 1; }
 }
 .chat-history {
   max-height: 400px;
