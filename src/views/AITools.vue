@@ -82,6 +82,11 @@
       <div class="card side">
         <h3 class="side-title">Your Chats History</h3>
         <p style="font-size: 12px; color: gray; margin-top: -10px;">( Show only the first user prompt in each session as a summary )</p>
+        
+        <div v-if="chats.length === 0" class="empty-history">
+          <p>No chat history yet.</p>
+        </div>
+
         <div class="chat-history">
           <div v-for="(chat, index) in chats" :key="chat.id" class="chat-summary">
             <button class="summary-btn" @click="openChat(index)">
@@ -204,7 +209,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
 import { marked } from 'marked'
 import axios from 'axios'
 
@@ -218,14 +223,30 @@ interface Chat {
   messages: Message[]
 }
 
+const STORAGE_KEY = 'chat_history'
+
+const saved = localStorage.getItem(STORAGE_KEY)
+
 const draft = ref('')
-const chats = ref<Chat[]>([{ id: Date.now(), messages: [] }])
+const chats = ref<Chat[]>(
+  saved
+    ? JSON.parse(saved) 
+    : [{ id: Date.now(), messages: [] }]
+)
 const currentChatIndex = ref(0)
 
 const messages = computed(() => chats.value[currentChatIndex.value].messages)
 
 const API_URL = 'https://phs1f0y37g.execute-api.ap-southeast-2.amazonaws.com/generate'
 // const API_URL = 'https://my-ai-chatbot.onrender.com/generate' 
+
+watch(
+  chats,
+  (newVal) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newVal))
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   const reveals = document.querySelectorAll('.reveal')
@@ -538,13 +559,11 @@ function formatMessage(text: string) {
   max-width: 70%;
 }
 
-/* “Thinking”文字 */
 .thinking-text {
   font-style: italic;
   color: #6b7280;
 }
 
-/* 闪烁圆点 */
 .thinking-bubble .dot {
   display: inline-block;
   width: 6px;
