@@ -29,7 +29,7 @@ const normalizeFavorite = (f: any) => ({
   act_desc: f.activityDesc || '',
   // additional
   activityName: f.activityName || '',
-  activityId: f.activityId ?? ''
+  activityId: f.activityId ?? '',
 })
 
 const openFromFavorite = (f: any) => {
@@ -45,10 +45,11 @@ const openRelated = (tipId: string | number) => {
   if (found) selectedTip.value = found
 }
 
-const FAV_IMAGES = import.meta.glob(
-  '../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}',
-  { eager: true, import: 'default', query: '?url' }
-) as Record<string, string>
+const FAV_IMAGES = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
 
 const favImage = (actName?: string): string => {
   if (!actName) return ''
@@ -56,7 +57,7 @@ const favImage = (actName?: string): string => {
     actName + '2',
     actName.replace(/\s+/g, '-') + '2',
     actName.replace(/\s+/g, '') + '2',
-  ].map(v => v.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  ].map((v) => v.toLowerCase().replace(/[^a-z0-9]/g, ''))
 
   for (const [path, url] of Object.entries(FAV_IMAGES)) {
     const file = path.split('/').pop() || ''
@@ -66,6 +67,32 @@ const favImage = (actName?: string): string => {
   }
   return ''
 }
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+  const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path
+      .split('/')
+      .pop()
+      ?.toLowerCase()
+      .replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return ''
+}
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 </script>
 
 <template>
@@ -73,10 +100,7 @@ const favImage = (actName?: string): string => {
   <section class="hero">
     <div class="hero-content">
       <h1>Favorite Tips</h1>
-      <p>
-        Collection of your favorite tips,
-        do the same thing again and again...
-      </p>
+      <p>Collection of your favorite tips, do the same thing again and again...</p>
     </div>
   </section>
   <div class="page-wrap">
@@ -107,13 +131,9 @@ const favImage = (actName?: string): string => {
         @keydown.enter="openFromFavorite(t)"
         @keydown.space.prevent="openFromFavorite(t)"
       >
-      <div class="fav-media" v-if="favImage(t.activityName || (t as any).act_name)">
-        <img
-          :src="favImage(t.activityName || (t as any).act_name)"
-          :alt="`${t.activityName || (t as any).act_name} illustration`"
-          loading="lazy"
-        />
-      </div>
+        <div class="fav-media" v-if="getTipImage(t.tip)">
+          <img :src="getTipImage(t.tip)" :alt="`${t.tip} illustration`" loading="lazy" />
+        </div>
         <!-- <div class="tip-card-head">
           <span class="activity-chip">{{ t.activityName }}</span>
         </div> -->
@@ -145,7 +165,10 @@ const favImage = (actName?: string): string => {
       @open-related="openRelated"
     />
   </div>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
 </template>
 
 <style scoped>
@@ -153,7 +176,7 @@ const favImage = (actName?: string): string => {
   position: relative;
   width: 100%;
   height: 300px;
-  background: url("../assets/favorite.png") center/cover no-repeat;
+  background: url('../assets/favorite.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -162,7 +185,7 @@ const favImage = (actName?: string): string => {
   color: #333;
 }
 .hero::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: rgba(23, 23, 23, 0.5);
@@ -227,18 +250,18 @@ const favImage = (actName?: string): string => {
 .storage-hint {
   margin-top: 8px;
   font-size: 16px;
-  color: #6b7280; 
+  color: #6b7280;
   /* font-style: italic; */
 }
 .fav-hero_img {
   width: 160px;
   justify-self: end;
 }
- /* Image for fav tips */
+/* Image for fav tips */
 .fav-media {
   position: relative;
   width: 100%;
-  height: 200px;  /* tweak to change the height of the image  */
+  height: 200px; /* tweak to change the height of the image  */
   background: #f7f7f7;
 }
 .fav-media img {

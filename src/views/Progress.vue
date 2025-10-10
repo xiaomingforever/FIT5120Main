@@ -163,6 +163,32 @@ const progressImage = (actName?: string): string => {
   }
   return ''
 }
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+  const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path
+      .split('/')
+      .pop()
+      ?.toLowerCase()
+      .replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return ''
+}
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 </script>
 
 <template>
@@ -266,13 +292,9 @@ const progressImage = (actName?: string): string => {
               @keydown.enter="openFromCompletion(c)"
               @keydown.space.prevent="openFromCompletion(c)"
             >
-              <div class="fav-media" v-if="progressImage(c.activityName)">
-                <img
-                  :src="progressImage(c.activityName)"
-                  :alt="`${c.activityName} illustration`"
-                  loading="lazy"
-                />
-              </div>
+              <div class="fav-media" v-if="getTipImage(c.tip)">
+          <img :src="getTipImage(c.tip)" :alt="`${c.tip} illustration`" loading="lazy" />
+        </div>
               <div class="fav-media" v-else>
                 <img src="/public/process.png" alt="default progress illustration" loading="lazy" />
               </div>
