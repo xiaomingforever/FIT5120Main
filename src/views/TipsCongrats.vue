@@ -66,7 +66,7 @@ function onBackdrop(e: MouseEvent) {
   background: rgba(0, 0, 0, .45);
   display: grid;
   place-items: center;
-  z-index: 1000;
+  z-index: 3000;
   font-family: 'Nunito', sans-serif;
 }
 
@@ -176,7 +176,7 @@ function onBackdrop(e: MouseEvent) {
   background: rgba(0, 0, 0, 0.45);
   display: grid;
   place-items: center;
-  z-index: 1000;
+  z-index: 3000;
   transition: background 0.3s ease;
 }
 

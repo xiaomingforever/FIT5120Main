@@ -423,7 +423,7 @@ function getTipImage(tipName: string): string {
   background: rgba(0, 0, 0, 0.35);
   display: grid;
   place-items: center;
-  z-index: 100;
+  z-index: 2001;
 }
 .tipmodal {
   width: min(720px, 92vw);
