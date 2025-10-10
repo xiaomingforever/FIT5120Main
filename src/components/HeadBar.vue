@@ -17,7 +17,7 @@
           v-model="search.query"
           class="search-input"
           type="search"
-          placeholder="Search tips or skills…"
+          placeholder="Search tips or skills..."
           aria-label="Search tips or skills"
           @keyup.enter="goSearch"
         />
@@ -121,7 +121,7 @@ const route = useRoute()
 const router = useRouter()
 const search = useSearchStore()
 
-const SHOW_ON = ['Activities', 'TipsDisplay', 'SearchResults']
+const SHOW_ON = ['Activities', 'TipsDisplay', 'SearchResults','Today','Progress', 'Favorites']
 const showSearch = computed(() => SHOW_ON.includes(String(route.name || '')))
 
 // clear search when leaving the pages where the bar is visible
@@ -181,7 +181,7 @@ function goSearch() {
   align-items: center;
   gap: 6px;
   width: min(520px, 38vw);
-  margin-right: 12px;
+  margin-left: 1px;
 }
 
 .search-input {
@@ -300,11 +300,27 @@ function goSearch() {
 /* small screen */
 @media (max-width: 768px) {
   .hamburger {
-    display: flex;
+    display: block;
   }
   .header-search {
+    order: 3;              /* push below nav items if any */
     width: 100%;
-    margin: 12px 0 0;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .search-input {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+  .search-btn {
+    flex: 0 0 auto;
+    padding: 10px 12px;
+    font-size: 14px;
   }
 
   .nav-links {
@@ -323,6 +339,9 @@ function goSearch() {
 
   .nav-links.active {
     display: flex;
+  }
+  .nav-right {
+    margin-left: auto;
   }
 }
 
