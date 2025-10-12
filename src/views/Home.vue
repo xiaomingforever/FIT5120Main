@@ -302,7 +302,11 @@ const goSelector = () => {
 }
 
 .hero .btn {
-  background: #14b8a6;
+  display: flex;
+  width: 200px;
+  justify-content: center;
+  margin: 0 auto;
+  background: linear-gradient(90deg, #35ccba, #219d97);
   border: none;
   padding: 12px 24px;
   color: white;
@@ -311,10 +315,13 @@ const goSelector = () => {
   cursor: pointer;
   text-decoration: none;
   font-size: 20px;
+  transition: all 0.3s ease;
 }
 
 .hero .btn:hover {
-  background: #0d9488;
+  /* background: #0d9488; */
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 /* Sections */
@@ -338,7 +345,7 @@ const goSelector = () => {
 .two-col a {
   display: inline-block;
   margin-top: 1rem;
-  background: #14b8a6;
+  background: linear-gradient(90deg, #35ccba, #219d97);
   border: none;
   padding: 8px 16px;
   color: white;
@@ -347,11 +354,13 @@ const goSelector = () => {
   font-size: 20px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.25s ease;
+  transition: all 0.25s ease;
 }
 
 .two-col a:hover {
-  background: #0d9488;
+  /* background: #0d9488; */
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 .two-col img {
@@ -475,7 +484,7 @@ const goSelector = () => {
 .research-link {
   display: inline-block;
   margin-top: 1rem;
-  background: #14b8a6;
+  background: linear-gradient(90deg, #35ccba, #219d97);
   border: none;
   padding: 8px 16px;
   color: white;
@@ -484,11 +493,13 @@ const goSelector = () => {
   font-size: 20px;
   font-weight: 600;
   text-decoration: none;
-  transition: background 0.25s ease;
+  transition: all 0.25s ease;
 }
 
 .research-link:hover {
-  background: #0d9488;
+  /* background: #0d9488; */
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
 
 /* decorate shape */

@@ -737,7 +737,7 @@ function goToLink(url: string) {
 
 <template>
   <!-- Hero Section -->
-  <section class="hero">
+  <section class="data-hero">
     <div class="hero-content">
       <h1>Data Insights</h1>
       <p>Evidence-based research on why daily engagement matters</p>
@@ -828,7 +828,8 @@ function goToLink(url: string) {
 
     <div class="container section">
       <div class="explore-title">
-        <h3>Explore the developmental challenges by area:</h3>
+        <h3>Explore the developmental challenges by area: </h3> 
+        <h3>(Based on the data of 0-5 years old):</h3>
         <p class="explore-sub">Click on any domain below to see 15 years of trends and what they mean for your family
         </p>
       </div>
@@ -932,7 +933,7 @@ function goToLink(url: string) {
 
 <style>
 /* Hero Section */
-.hero {
+.data-hero {
   position: relative;
   width: 100%;
   height: 320px;
@@ -946,21 +947,21 @@ function goToLink(url: string) {
   overflow: hidden;
 }
 
-.hero::before {
+.data-hero::before {
   content: "";
   position: absolute;
-  inset: 0; /* 相当于 top:0; right:0; bottom:0; left:0 */
-  background-color: rgba(0, 0, 0, 0.6); /* 黑色遮罩，透明度0.5 */
+  inset: 0;
+  background-color: rgba(27, 12, 2, 0.6); 
   z-index: 1;
 }
 
-.hero::after {
+.data-hero::after {
   content: "";
   position: absolute;
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(237, 182, 129, 0.07);
   filter: blur(90px);
   animation: float 12s ease-in-out infinite;
 }
@@ -984,15 +985,15 @@ function goToLink(url: string) {
   margin: 20px;
 }
 
-.hero h1 {
-  font-size: clamp(2.6rem, 5vw, 3.8rem);
+.data-hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
   font-weight: 800;
   letter-spacing: 1px;
   margin: 0 0 0.5rem;
 }
 
-.hero p {
-  font-size: clamp(1.4rem, 2vw, 1.8rem);
+.data-hero p {
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
   font-weight: 500;
   opacity: 0.95;
 }
@@ -1025,14 +1026,14 @@ function goToLink(url: string) {
   position: absolute;
   inset: -2px;
   border-radius: 24px;
-  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #4facfe);
+  background: white;
   opacity: 0;
   transition: opacity .5s;
   z-index: -1;
 }
 
 .section:hover::before {
-  opacity: .2;
+  opacity: 1;
 }
 
 .section:hover {
@@ -1043,7 +1044,7 @@ function goToLink(url: string) {
 .transition-text {
   text-align: center;
   max-width: 900px;
-  margin: 10px auto;
+  margin: 0 auto;
 }
 
 .transition-text p {
@@ -1054,7 +1055,7 @@ function goToLink(url: string) {
 }
 
 .highlight {
-  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  background: #f97316;;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1094,14 +1095,14 @@ function goToLink(url: string) {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, .15), transparent);
+  background: linear-gradient(90deg, transparent, rgba(241, 158, 99, 0.15), transparent);
   transition: left .6s;
 }
 
 .stat:hover {
   transform: translateY(-12px) scale(1.05);
-  box-shadow: 0 20px 50px rgba(99, 102, 241, .3);
-  border-color: #6366f1;
+  box-shadow: 0 20px 50px rgba(241, 135, 99, 0.3);
+  border-color: #f39755;
 }
 
 .stat:hover::before {
@@ -1111,7 +1112,7 @@ function goToLink(url: string) {
 .stat .big {
   font-size: 48px;
   font-weight: 800;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  background: linear-gradient(135deg, #f39755, #eb7fae);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1137,7 +1138,7 @@ function goToLink(url: string) {
   left: 0;
   width: 100%;
   height: 5px;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  background: linear-gradient(90deg, #f39755, #eb7fae);
   border-radius: 2px;
 }
 
@@ -1172,7 +1173,7 @@ function goToLink(url: string) {
   padding: 3rem 1.25rem 4rem;
   max-width: 1250px;
   margin: 0 auto;
-  background: linear-gradient(180deg, #fafbfc, #f1f4f9);
+  background: #fcfaf6;
 }
 
 .charts-grid {
@@ -1386,11 +1387,11 @@ function goToLink(url: string) {
 .pill:hover {
   transform: translateY(-4px) scale(1.05);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-  border-color: #6366f1;
+  border-color: #219d97;
 }
 
 .pill.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #35ccba, #219d97);
   color: #fff;
   border-color: transparent;
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
@@ -1472,19 +1473,19 @@ function goToLink(url: string) {
 @keyframes pulse {
   0% {
     transform: scale(1);
-    text-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+    text-shadow: 0 0 8px rgba(240, 129, 55, 0.3);
     background-position: 0% 50%;
   }
 
   50% {
     transform: scale(1.05);
-    text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+    text-shadow: 0 0 20px rgba(236, 146, 90, 0.5);
     background-position: 100% 50%;
   }
 
   100% {
     transform: scale(1);
-    text-shadow: 0 0 8px rgba(37, 99, 235, 0.3);
+    text-shadow: 0 0 8px rgba(235, 182, 37, 0.3);
     background-position: 0% 50%;
   }
 }
@@ -1879,13 +1880,14 @@ function goToLink(url: string) {
 }
 
 .kicker {
-  color: #333;
+  /* color: #333; */
+  color: #f97316;
   font-size: 52px;
   font-weight: 800;
   text-align: center;
   margin: 24px auto;
   animation: slideInLeft 1s ease-out;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  /* text-shadow: 0 2px 20px rgba(0, 0, 0, 0.2); */
   max-width: 1200px;
   line-height: 1.2;
 }
@@ -1894,6 +1896,7 @@ function goToLink(url: string) {
   color: #3e3e3e;
   text-align: center;
   font-size: 22px;
+  font-weight: 800;
   max-width: 980px;
   margin: 0 auto 32px;
   animation: slideInRight 1s ease-out;
@@ -1902,11 +1905,11 @@ function goToLink(url: string) {
 
 .key-facts {
   /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #f39755, #d55a90);
   color: white;
   padding: 40px;
   border-radius: 20px;
-  margin: 40px 0;
+  margin: 10px 0;
   text-align: center;
 }
 

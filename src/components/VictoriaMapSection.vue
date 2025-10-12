@@ -95,6 +95,7 @@
       <!-- Domain Selection Pills -->
       <div class="explore-title" style="margin-top:24px">
         <h3>Select development domain:</h3>
+        <h3>(Based on the data of 0-5 years old):</h3>
         <p class="explore-sub">Click on any domain below to explore Victoria's 480 SA2 areas</p>
       </div>
 
@@ -420,18 +421,20 @@ function createSparkline(sa2Code) {
   const min = Math.min(...validData)
   const max = Math.max(...validData)
   const range = max - min || 1
-  const w = 110
-  const h = 32
-  const pad = 3
-  const step = w / (waves.length - 1)
+  const w = 240
+  const h = 26
+  const padY = 6
+  const padX = 10 
+  const innerW = w - padX * 2
+  const step = innerW / (waves.length - 1)
 
   // generate path and points
   let path = ''
   const points = []
   trendData.forEach((v, i) => {
     if (v != null) {
-      const x = i * step
-      const y = h - ((v - min) / range) * (h - 2 * pad) - pad
+      const x = padX + i * step
+      const y = h - ((v - min) / range) * (h - 2 * padY) - padY
       path += (path ? 'L' : 'M') + x + ',' + y
       points.push({ x, y, value: v, year: waves[i] })
     }
@@ -439,19 +442,24 @@ function createSparkline(sa2Code) {
 
   if (!path) return ''
 
-  // generate SVG with gradient and points
+  // generate SVG with gradient, axis, and points
   return `
-    <div style="background:#f8f9fa;border-radius:6px;padding:8px 10px;margin-top:8px;position:relative">
-      <svg width="${w}" height="${h}" style="display:block" class="sparkline-svg">
+    <div style="background:#f8f9fa;border-radius:6px;padding:8px 10px;position:relative">
+      <svg width="${w}" height="${h + 16}" style="display:block;overflow:visible" class="sparkline-svg">
         <defs>
           <linearGradient id="lineGrad_${sa2Code}" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" style="stop-color:#667eea;stop-opacity:0.8"/>
             <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1"/>
           </linearGradient>
         </defs>
-        <line x1="0" y1="${h/2}" x2="${w}" y2="${h/2}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="1,2" opacity="0.4"/>
+
+        <!-- baseline -->
+        <line x1="${padX}" y1="${h / 2}" x2="${w - padX}" y2="${h / 2}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="1,2" opacity="0.4"/>
+
+        <!-- trend line -->
         <path d="${path}" fill="none" stroke="url(#lineGrad_${sa2Code})" stroke-width="2.5" stroke-linecap="round"/>
-        
+
+        <!-- points -->
         ${points.map(p => `
           <circle 
             cx="${p.x}" 
@@ -466,10 +474,18 @@ function createSparkline(sa2Code) {
             data-value="${p.value.toFixed(1)}"
           />
         `).join('')}
+
+        <!-- year axis -->
+        <line x1="${padX}" y1="${h + 10}" x2="${w - padX}" y2="${h + 10}" stroke="#d1d5db" stroke-width="1.2"/>
+        <g font-size="9" fill="#6b7280" dominant-baseline="hanging">
+          <text x="${padX + 1}" y="${h + 10}" text-anchor="start">${waves[0]}</text>
+          <text x="${w - padX - 1}" y="${h + 10}" text-anchor="end">${waves[waves.length - 1]}</text>
+        </g>
       </svg>
+
       <div class="sparkline-tooltip" style="
         position:absolute;
-        top:-35px;
+        top:-40px;
         left:50%;
         transform:translateX(-50%);
         background:#2d3748;
@@ -556,7 +572,6 @@ function setupSparklineInteractions() {
     })
   })
 }
-
 
 // number formatting
 function simplifyGeoJSON(geojson, maxPoints = 50) {
@@ -811,7 +826,9 @@ function renderMap() {
         .slice(0, 5)
 
       const suburbText = suburbs.length 
-        ? `<div style="margin-top:8px;font-size:12px"><strong>Includes:</strong> ${suburbs.join(', ')}${suburbs.length === 5 ? ', ...' : ''}</div>`
+        ? `<div style="margin-top:14px;font-size:12px;line-height:1.5;z-index:2;position:relative;">
+            <strong>Includes:</strong> ${suburbs.join(', ')}${suburbs.length === 5 ? ', ...' : ''}
+          </div>`
         : ''
 
       // const sparkline = v != null ? createSparkline(code) : ''
@@ -823,13 +840,13 @@ function renderMap() {
           <div style="font-size:13px;color:#6b7280;margin-bottom:16px">${selectedDomain.value}</div>
           ${v != null ? `
             <div style="font-size:32px;font-weight:800;color:${getColor(v)};margin-bottom:14px">${v.toFixed(1)}%</div>
-            <div style="display:inline-block;padding:10px 16px;background:${badge.color}1a;color:${badge.color};border-radius:20px;font-size:14px;font-weight:700;margin-bottom:16px">
+            <div style="display:inline-block;padding:10px 16px;background:${badge.color}1a;color:${badge.color};border-radius:20px;font-size:14px;font-weight:700;margin-bottom:10px">
               ${badge.icon} ${badge.text}
             </div>
 
             <div class="sparkline-container" 
                 data-code="${code}" 
-                style="width:100%;height:40px;margin-top:10px;text-align:center;">
+                style="width:100%;height:50px;margin:12px 0 16px 0;text-align:center;clear:both;position:relative;z-index:1;">
               <span style="color:#9ca3af;font-size:12px;">(loading chart...)</span>
             </div>
 
@@ -1420,11 +1437,11 @@ watch(currentYear, () => {
 .pill:hover {
   transform: translateY(-4px) scale(1.05);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-  border-color: #6366f1;
+  border-color: #219d97;
 }
 
 .pill.active {
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #35ccba, #219d97);
   color: #fff;
   border-color: transparent;
   box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
