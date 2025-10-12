@@ -299,29 +299,80 @@ watch(
 
 .tip-card {
   perspective: 1000px;
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
   position: relative;
+  width: 100%;
+  height: 450px;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  padding: 0px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
 }
+
 .tip-card-inner {
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d; 
+  transition: transform 0.6s ease-in-out;
+  border-radius: 16px;
+  /* overflow: hidden; */
 }
 .tip-card.flipped .tip-card-inner {
   transform: rotateY(180deg);
 }
+/* flip back on hover */
+.tip-card.flipped:hover .tip-card-inner {
+  transform: rotateY(0deg);
+}
 .tip-card-front,
 .tip-card-back {
-  position: relative;
+  position: absolute;
   width: 100%;
   height: 100%;
+  top: 0;
+  left: 0;
   backface-visibility: hidden;
+  border-radius: 16px;
 }
+
+.tip-card-front {
+  background: #fff;
+}
+
 .tip-card-back {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-align: center;
+  /* padding: 20px; */
   transform: rotateY(180deg);
-  padding: 18px;
-  color: #111827;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: inset 0 4px 8px rgba(0,0,0,0.08);
+}
+.tip-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.08);
+}
+.tip-card.selected {
+  border: 2px solid #0d9488;
+  box-shadow: 0 8px 20px rgba(0, 148, 136, 0.4);
+  transform: scale(1.02);
+  transition: all 0.25s ease;
+}
+.tip-card-head {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .tip-media {
@@ -347,9 +398,17 @@ watch(
   margin: 0 0 6px;
 }
 .tip-descr {
-  color: #374151;
   margin: 0 0 10px;
-  min-height: 44px;
+  color: #4b5563;
+  font-size: 18px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  max-height: calc(1.45em * 4);
+  white-space: normal;
+  word-break: break-word;
 }
 .skills {
   display: flex;
