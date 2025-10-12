@@ -5,6 +5,10 @@ import { useFavoritesStore } from '@/stores/favorites'
 import heartEmpty from '@/assets/Font icons/favorite_empty.png'
 import heartRed from '@/assets/Font icons/favorite_red.png'
 import { useProgressStore } from '@/stores/progress'
+import TipsCongrats from '@/views/TipsCongrats.vue'  //congrats modal
+import confetti from "canvas-confetti"
+
+const showCongrats = ref(false)
 
 type Skill = { code: string; weight?: number }
 type TipLite = { tip_id: number | string; tip: string; age_code?: string }
@@ -46,31 +50,91 @@ const toggleFavorite = () => {
     tip: model.value.tip,
     tip_des: model.value.tip_des,
     skills: model.value.skills,
-    source: model.value.source,
+    source_url: model.value.source,
     activityName: props.activityName,
     activityId: props.activityId,
     age_code: (model.value as any).age_code,
+    brainy_background: model.value.brainy_background
   })
 }
 
 const progress = useProgressStore()
 progress.load()
 // const finished = computed(() => progress.isFinished(model.value.tip_id))
+const completedCounts = ref<Record<string, number>>({})
+
+onMounted(() => {
+  const savedCounts = localStorage.getItem('completedCounts')
+  if (savedCounts) {
+    completedCounts.value = JSON.parse(savedCounts)
+  }
+})
+
+function getCompletedCount(id: string | number) {
+  const savedCounts = JSON.parse(localStorage.getItem('completedCounts') || '{}')
+  return savedCounts[id] || 0
+}
+
+const todayKey = new Date().toISOString().split('T')[0]  // YYYY-MM-DD
 
 function done() {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+
+  const entry = records[model.value.tip_id] || { date: todayKey, count: 0 }
+
+  // reset when a new day
+  if (entry.date !== todayKey) {
+    entry.date = todayKey
+    entry.count = 0
+  }
+
+  if (entry.count >= 2) {
+    alert("Each tip can be completed a maximum of twice a day.")
+    return
+  }
+
+  if (entry.count === 1) {
+    const confirmAgain = confirm("You've already completed this tip today. Do you want to complete it again?")
+    if (!confirmAgain) return
+  }
+
+  entry.count++
+  records[model.value.tip_id] = entry
+  localStorage.setItem('tipDailyCounts', JSON.stringify(records))
+
   // Save the finished tip with skill tags and timestamp
+  completedCounts.value[model.value.tip_id] = (completedCounts.value[model.value.tip_id] || 0) + 1
+  localStorage.setItem('completedCounts', JSON.stringify(completedCounts.value))
 
   progress.record({
     id: model.value.tip_id,
     tip: model.value.tip,
+    tip_des: model.value.tip_des,
     activityName: props.activityName,
     activityId: props.activityId,
     age_code: props.age as string,
     skills: (model.value.skills ?? []) as any[],
-    source: model.value.source || '',
+    source_url: model.value.source || '',
+    brainy_background: model.value.brainy_background
   })
 
-  router.push({ name: 'TipsCongrats' })
+  // fireworks animation
+  confetti({
+    particleCount: 120,
+    spread: 90,
+    origin: { y: 0.6 }, // position
+  })
+
+  setTimeout(() => {
+    showCongrats.value = true
+  }, 300)
+}
+
+const getTipCount = (id: string | number) => {
+  const records = JSON.parse(localStorage.getItem('tipDailyCounts') || '{}')
+  const todayKey = new Date().toISOString().split('T')[0]
+  const entry = records[id]
+  return entry && entry.date === todayKey ? entry.count : 0
 }
 
 const extractHttpsLink = (text?: string): string | null => {
@@ -79,7 +143,7 @@ const extractHttpsLink = (text?: string): string | null => {
   return match ? match[0] : null
 }
 
-const TIP_IMAGES = import.meta.glob('../assets/Tips/*.{png,jpg,jpeg,webp,svg}', {
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
   eager: true,
   import: 'default',
   query: '?url',
@@ -210,29 +274,42 @@ const onKey = (e: KeyboardEvent) => {
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
-// const done = () => {
-//   router.push({
-//     name: 'TipsCongrats',
-//     params: { activityId: String(props.activityId) },
-//     query: {
-//       name: props.activityName,
-//       age: props.age,
-//       gender: props.gender,
-//       period: props.period,
-//       completedTipId: String(model.value.tip_id),
-//     },
-//   })
-// }
-
-const related = computed(() => {
-  const all = props.tips || []
-  const others = all.filter((t) => String(t.tip_id) !== String(model.value.tip_id))
-  // stable: pick first 2 by id
-  return others
-    .slice()
-    .sort((a: any, b: any) => Number(a.tip_id) - Number(b.tip_id))
-    .slice(0, 2)
+const previousTip = computed(() => {
+  const all = (props.tips || []).sort((a, b) => Number(a.tip_id) - Number(b.tip_id))
+  const idx = all.findIndex(t => String(t.tip_id) === String(model.value.tip_id))
+  return idx > 0 ? all[idx - 1] : null
 })
+
+const nextTip = computed(() => {
+  const all = (props.tips || []).sort((a, b) => Number(a.tip_id) - Number(b.tip_id))
+  const idx = all.findIndex(t => String(t.tip_id) === String(model.value.tip_id))
+  return idx >= 0 && idx < all.length - 1 ? all[idx + 1] : null
+})
+
+function handleCongratsClose() {
+  showCongrats.value = false
+  emit('close')  
+}
+
+// Tip Images
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’,]/g, '')        
+    .replace(/[^a-z0-9]+/g, '-') 
+    .replace(/^-+|-+$/g, '')    
+}
+
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+    const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path.split('/').pop()?.toLowerCase().replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return '' 
+}
 </script>
 
 <template>
@@ -252,7 +329,11 @@ const related = computed(() => {
         >
           <img :src="isFavorited ? heartRed : heartEmpty" alt="" />
         </button>
-        <img v-if="imageUrl" class="hero" :src="imageUrl" :alt="activityName" />
+        <!-- <img v-if="imageUrl" class="hero" :src="imageUrl" :alt="activityName" /> -->
+         <div class="hero">
+          <img class="hero-img" :src="getTipImage(model.tip)" :alt="model.tip" />
+           <!-- <p style="font-size:12px;color:#999">DEBUG: {{ getTipImage(model.tip) }}</p> -->
+        </div>
 
         <div class="meta">
           <span class="activity">{{ activityName }}</span>
@@ -265,45 +346,74 @@ const related = computed(() => {
         <ul v-if="model.skills?.length" class="skills">
           <li v-for="s in model.skills" :key="s.code" class="chip">{{ s.code }}</li>
         </ul>
+        <div class="completed-info">
+          <span class="count">Total Completed: {{ getCompletedCount(model.tip_id) }} times</span>
+          <p class="explain">
+            Each time you complete this activity, it helps track your child's progress and growth journey.
+          </p>
+        </div>
         <!-- Brainy Background -->
         <section v-if="model.brainy_background" class="brainy">
           <h3>Why it matters</h3>
           <p>{{ model.brainy_background }}</p>
         </section>
-        <!-- Source-->
+        <!-- Source -->
         <p v-if="model.source_url" class="source">
-          <strong>Source:</strong>
-          <span v-if="extractHttpsLink(model.source_url)">
-            <a
-              :href="extractHttpsLink(model.source_url)!"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {{ extractHttpsLink(model.source_url) }}
-            </a>
-          </span>
-          <span v-else>
-            {{ model.source_url }}
-          </span>
+          <a
+            :href="extractHttpsLink(model.source_url || model.source) || model.source_url || model.source"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="source-link"
+          >
+            <strong>View Related Research</strong>
+          </a>
         </p>
 
-        <section v-if="related.length" class="related">
-          <h3 class="related-title">Related tips</h3>
-          <ul class="related-list">
-            <li v-for="r in related" :key="r.tip_id">
-              <button class="related-link" @click="emit('open-related', r.tip_id)">
-                {{ r.tip }}
-              </button>
-            </li>
-          </ul>
+        <section v-if="previousTip || nextTip" class="related">
+          <h3 class="related-title">✨Related tips</h3>
+          <p class="related-desc">Explore more tips connected to this activity. </p>
+          <p class="related-desc-2">Go back to the previous one or discover what comes next.</p>
+          <div class="related-buttons">
+            <button 
+              v-if="previousTip" 
+              class="related-btn prev" 
+              @click="emit('open-related', previousTip.tip_id)"
+            >
+              <span class="arrow">←</span> {{ previousTip.tip }}
+            </button>
+
+            <button 
+              v-if="nextTip" 
+              class="related-btn next" 
+              @click="emit('open-related', nextTip.tip_id)"
+            >
+              {{ nextTip.tip }} <span class="arrow">→</span>
+            </button>
+          </div>
         </section>
 
         <div class="footer">
-          <button class="start-btn" @click="done">Done</button>
+          <button
+            class="start-btn"
+            :disabled="getTipCount(model.tip_id) >= 2"
+            @click="done"
+          >
+            <span v-if="getTipCount(model.tip_id) === 0">Done</span>
+            <span v-else-if="getTipCount(model.tip_id) === 1">Completed (Once More)</span>
+            <span v-else>Completed (Daily Limit Reached)</span>
+          </button>
         </div>
       </div>
     </div>
   </teleport>
+  <TipsCongrats
+   v-if="showCongrats"
+      :open="showCongrats"
+      :activity-name="activityName || ''"
+      :activity-id="activityId || ''"
+      @close="handleCongratsClose"
+  />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
 </template>
 
 <style scoped>
@@ -313,7 +423,7 @@ const related = computed(() => {
   background: rgba(0, 0, 0, 0.35);
   display: grid;
   place-items: center;
-  z-index: 60;
+  z-index: 2001;
 }
 .tipmodal {
   width: min(720px, 92vw);
@@ -324,45 +434,58 @@ const related = computed(() => {
   padding: 18px 18px 22px;
   position: relative;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  font-family: 'Nunito', sans-serif;
 }
 .close {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  margin-bottom: 10px;
+  top: 25px;         
+  right: 25px; 
+  z-index: 200;
   border: 0;
-  background: #f3f4f6;
-  width: 32px;
-  height: 32px;
+  background: #dfdfe0;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   cursor: pointer;
+  font-size: 22px;
+  font-weight: 600;
 }
 .hero {
-  width: 100%;
-  height: 300px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+.hero-img {
+  width: 40%;
+  height: 250px;
   object-fit: cover;
   border-radius: 12px;
-  margin-bottom: 12px;
+  display: inline-block;
 }
 .meta {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
+  padding-bottom: 10px;
 }
 .activity {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 700;
   color: #065f46;
   background: #d1fae5;
   border: 1px solid #a7f3d0;
   padding: 3px 10px;
+  margin-right: 20px;
   border-radius: 999px;
 }
 .title {
-  margin: 10px 0 6px;
-  font-size: 22px;
+  margin: 0 0 6px;
+  font-size: 24px;
 }
 .desc {
   color: #4b5563;
-  line-height: 1.5;
+  line-height: 1.3;
+  font-size: 20px;
+  text-align: justify;
 }
 .skills {
   list-style: none;
@@ -370,14 +493,16 @@ const related = computed(() => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
 }
 .chip {
-  font-size: 12px;
-  background: #f3f4f6;
+  font-size: 14px;
+  font-weight: 600;
   border: 1px solid #e5e7eb;
   border-radius: 999px;
   padding: 4px 10px;
+  color: #007070;
+  background: #eaf7f7;
 }
 .brainy {
   margin-top: 14px;
@@ -385,49 +510,101 @@ const related = computed(() => {
   background: #f9fafb;
   border-left: 4px solid #0ea641;
   border-radius: 4px;
+  color: #555;
+  font-size: 18px;
 }
 .brainy h3 {
   margin: 0 0 6px;
-  font-size: 15px;
+  font-size: 20px;
   color: #065f46;
 }
 .source {
   margin-top: 14px;
-  font-size: 14px;
+  font-size: 16px;
 }
 .source a {
   text-decoration: underline;
+  color: #065f46;
 }
-/* related tips */
+
 .related {
-  margin-top: 16px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f0fdfa, #ecfdf5);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 .related-title {
-  font-size: 16px;
-  margin: 0 0 8px;
+  font-size: 22px;
+  margin-bottom: 8px;
+  text-align: center;
+  font-weight: 700;
+  color: #064e3b;
 }
-.related-list {
-  list-style: none;
-  padding: 0;
+.related-desc {
+  font-size: 18px;
+  color: #4b5563;
+  text-align: center;
+  margin: 0;
+  line-height: 1.3;
+}
+.related-desc-2 {
+  font-size: 18px;
+  color: #4b5563;
+  text-align: center;
+  margin: 0;
+  padding-bottom: 20px;
+  line-height: 1.3;
+}
+.related-buttons {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 14px;
 }
-.related-link {
-  border: 1px solid #e5e7eb;
-  background: #f9fafb;
-  border-radius: 999px;
-  padding: 6px 10px;
+.related-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: none;
+  background: #ffffff;
+  color: #047857;
+  font-size: 18px;
+  font-weight: 600;
   cursor: pointer;
-  font-size: 14px;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.related-link:hover {
-  background: #f3f4f6;
+
+.related-btn.prev {
+  justify-content: flex-start;
 }
+
+.related-btn.next {
+  justify-content: flex-end;
+}
+
+.related-btn:hover {
+  background: #d1fae5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+.related-btn .arrow {
+  font-size: 18px;
+  font-weight: 700;
+  color: #065f46;
+}
+
 /* the done button */
 .footer {
   position: sticky; /* stays at bottom while scrolling in the modal */
-  bottom: 0;
+  bottom: -22px;
   background: #fff;
   padding-top: 12px;
   margin-top: 16px;
@@ -438,22 +615,34 @@ const related = computed(() => {
 
 .start-btn {
   padding: 10px 16px;
+  margin: 0 auto;
+  margin-bottom: 10px;
   border: 0;
   border-radius: 999px;
   font-weight: 600;
   cursor: pointer;
-  background: #0ea641;
+  background: #007070;
   color: #fff;
+  font-size: 16px;
+}
+.start-btn:hover{
+  background: #0d9488;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
 }
 .start-btn:focus {
   outline: 2px solid #a7f3d0;
   outline-offset: 2px;
 }
+.start-btn:disabled{
+  background: #ccc;
+  cursor: not-allowed;
+}
 
 .fav-btn {
   position: absolute;
-  top: 12px;
-  right: 46px;
+  top: 22px;
+  right: 90px;
   border: 0;
   background: transparent;
   cursor: pointer;
@@ -465,8 +654,28 @@ const related = computed(() => {
   outline-offset: 2px;
 }
 .fav-btn img {
-  width: 26px;
-  height: 26px;
+  width: 40px;
+  height: 40px;
   display: block;
 }
+.completed-info {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  background: #f8f9fa;
+  font-size: 1.2rem;
+}
+
+.completed-info .count {
+  font-weight: 700;
+  color: #2a7;
+  margin-right: 0.5rem;
+}
+
+.completed-info .explain {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+  color: #555;
+}
+
 </style>

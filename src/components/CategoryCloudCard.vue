@@ -4,11 +4,11 @@ import bedtime from '@/assets/Activities/ActivityCard/Bedtime1.png'
 import mealtime from '@/assets/Activities/ActivityCard/Mealtime1.png'
 import bathtime from '@/assets/Activities/ActivityCard/Bathtime1.png'
 import learning from '@/assets/Activities/ActivityCard/LearningTime1.png'
-import outdoor from '@/assets/Activities/ActivityCard/Outdoor1.png'
-import problem from '@/assets/Activities/ActivityCard/Problem1.png'
-import language from '@/assets/Activities/ActivityCard/Language1.png'
+import outdoor from '@/assets/Activities/ActivityCard/anytime-anywhere1.png'
+import problem from '@/assets/Activities/ActivityCard/diaper-change1.png'
+import language from '@/assets/Activities/ActivityCard/cleaning-up1.png'
 import gardening from '@/assets/Activities/ActivityCard/Gardening1.png'
-import dressing from '@/assets/Activities/ActivityCard/Dressing1.png'
+import dressing from '@/assets/Activities/ActivityCard/getting-dressed1.png'
 
 type Cat = { key: string; label: string; icon: string }
 const cats: Cat[] = [
@@ -50,7 +50,7 @@ const goToActivity = (c: Cat) => {
 
 <template>
   <section class="card">
-    <h2 class="heading">Browse Exercises by Activity</h2>
+    <h2 class="heading">Browse Tips by Activity</h2>
     <ul class="pill-grid">
       <li v-for="c in cats" :key="c.label">
         <!-- Send users to the Activities page with a category query -->
@@ -59,7 +59,7 @@ const goToActivity = (c: Cat) => {
           @click="goToActivity(c)"
         >
           <img class="pill-icon" :src="c.icon" :alt="c.label" aria-hidden="true" />
-          <span>{{ c.label }}</span>
+          <span style="font-size: 20px;">{{ c.label }}</span>
         </button>
       </li>
     </ul>
@@ -72,10 +72,12 @@ const goToActivity = (c: Cat) => {
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 22px;
-  box-shadow: var(--card-shadow);
-  width: min(960px, 88vw);
+  /* box-shadow: var(--card-shadow); */
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  width: min(900px, 88vw);
   margin: 0 auto;
-  width: 702px;
+  margin-bottom: 20px;
+  /* margin-top: -50px; */
 }
 .heading {
   font-size: 2rem;

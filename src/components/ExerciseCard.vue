@@ -6,11 +6,11 @@
 
     <div class="body">
       <h3 class="title">{{ exercise.title.toUpperCase() }}</h3>
-      <p class="desc">{{ exercise.description }}</p>
+      <p class="desc" style="font-size: 18px;">{{ exercise.description }}</p>
 
       <ul class="meta">
         <span class="pill">Age {{ exercise.currentAgeGroup }}</span>
-        <span class="badge">{{ exercise.practiceCount }} Practices</span>
+        <span class="badge" style="font-weight: 600;">{{ exercise.practiceCount }} Tips</span>
       </ul>
     </div>
   </article>
@@ -90,7 +90,7 @@ const imageSrc = computed(() => {
 }
 .title {
   margin: 0 0 0.5rem;
-  font-size: 1.05rem;
+  font-size: 1.2rem;
   font-weight: 700;
 }
 
@@ -101,10 +101,15 @@ const imageSrc = computed(() => {
   padding: 0;
   margin: 0 0 0.6rem;
   color: #444;
+  font-size: 18px;
 }
 .meta .pill {
   text-transform: capitalize;
-  background: #f2f2f2;
+  /* background: #b7d4d6; */
+  font-size: 16px;
+  font-weight: 600;
+  color: #007070;
+  background: #eaf7f7;
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
 }

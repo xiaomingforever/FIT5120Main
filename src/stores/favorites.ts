@@ -7,10 +7,11 @@ export type FavoriteTip = {
   tip: string
   tip_des?: string
   skills?: Skill[]
-  source?: string
+  source_url?: string
   activityName: string
   activityId: string | number
   age_code?: string
+  brainy_background?: string
 }
 
 const LS_KEY = 'bb:favorites.v1'
@@ -35,7 +36,12 @@ export const useFavoritesStore = defineStore('favorites', () => {
   const isFavorite = (id: string | number) => Boolean(items.value[id])
 
   const add = (t: FavoriteTip) => {
-    items.value[t.tip_id] = t
+    items.value[t.tip_id] = {
+      ...t,
+      source_url: (t as any).source_url || (t as any).source || '',
+      tip_des: t.tip_des || '',
+      brainy_background: t.brainy_background || ''
+    }
     save()
   }
   const remove = (id: string | number) => {

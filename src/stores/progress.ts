@@ -4,11 +4,13 @@ export type Skill = { code: string; weight?: number }
 export type Completion = {
   id: string | number
   tip: string
+  tip_des?: string
   activityName: string
   activityId: string | number
   age_code?: string
   skills: Skill[]
-  source?: string
+  source_url?: string
+  brainy_background?: string
   completedAt: string // ISO timestamp
 }
 

@@ -17,8 +17,23 @@ const gender = String(localStorage.getItem('gender') || 'girl')
 const age = String(localStorage.getItem('age_code') || '1-3y')
 const period = 'Any'
 
-const openTip = (t: FavoriteTip) => {
-  selectedTip.value = t
+const normalizeFavorite = (f: any) => ({
+  tip_id: f.tip_id,
+  tip: f.tip,
+  tip_des: f.tip_des || '',
+  brainy_background: f.brainy_background || '',
+  source_url: f.source_url || f.source || '',
+  skills: f.skills || [],
+  age_code: f.age_code || '',
+  act_name: f.activityName || '',
+  act_desc: f.activityDesc || '',
+  // additional
+  activityName: f.activityName || '',
+  activityId: f.activityId ?? '',
+})
+
+const openFromFavorite = (f: any) => {
+  selectedTip.value = normalizeFavorite(f)
   showTip.value = true
 }
 const closeTip = () => {
@@ -29,9 +44,65 @@ const openRelated = (tipId: string | number) => {
   const found = favorites.value.find((t) => String(t.tip_id) === String(tipId))
   if (found) selectedTip.value = found
 }
+
+const FAV_IMAGES = import.meta.glob('../assets/Activities/Excercise/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+
+const favImage = (actName?: string): string => {
+  if (!actName) return ''
+  const variants = [
+    actName + '2',
+    actName.replace(/\s+/g, '-') + '2',
+    actName.replace(/\s+/g, '') + '2',
+  ].map((v) => v.toLowerCase().replace(/[^a-z0-9]/g, ''))
+
+  for (const [path, url] of Object.entries(FAV_IMAGES)) {
+    const file = path.split('/').pop() || ''
+    const stem = file.replace(/\.[^.]+$/, '')
+    const normalized = stem.toLowerCase().replace(/[^a-z0-9]/g, '')
+    if (variants.includes(normalized)) return url
+  }
+  return ''
+}
+const TIP_IMAGES = import.meta.glob('../assets/TipsDisplay/*.{png,jpg,jpeg,webp,svg}', {
+  eager: true,
+  import: 'default',
+  query: '?url',
+}) as Record<string, string>
+function getTipImage(tipName: string): string {
+  if (!tipName) return ''
+  const slug = slugTipName(tipName)
+
+  for (const [path, url] of Object.entries(TIP_IMAGES)) {
+    const file = path
+      .split('/')
+      .pop()
+      ?.toLowerCase()
+      .replace(/\.[^.]+$/, '')
+    if (file === slug) return url
+  }
+  return ''
+}
+function slugTipName(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/['’]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
 </script>
 
 <template>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Favorite Tips</h1>
+      <p>Collection of your favorite tips, do the same thing again and again...</p>
+    </div>
+  </section>
   <div class="page-wrap">
     <!-- HERO CARD -->
     <section class="fav-hero">
@@ -40,6 +111,9 @@ const openRelated = (tipId: string | number) => {
           <h1 class="fav-hero_title">Your Favorites</h1>
           <p class="fav-hero_sub">Doing the same thing over and over again...</p>
           <span class="fav-hero_pill">{{ countLabel }}</span>
+          <p class="storage-hint">
+            💡 Your favorites are stored locally in your browser (localStorage).
+          </p>
         </div>
         <img class="fav-hero_img" src="/src/assets/favorite page/favorite page.png" alt="" />
       </div>
@@ -53,18 +127,23 @@ const openRelated = (tipId: string | number) => {
         class="tip-card"
         role="button"
         tabindex="0"
-        @click="openTip(t)"
-        @keydown.enter="openTip(t)"
-        @keydown.space.prevent="openTip(t)"
+        @click="openFromFavorite(t)"
+        @keydown.enter="openFromFavorite(t)"
+        @keydown.space.prevent="openFromFavorite(t)"
       >
-        <div class="tip-card-head">
-          <span class="activity-chip">{{ t.activityName }}</span>
+        <div class="fav-media" v-if="getTipImage(t.tip)">
+          <img :src="getTipImage(t.tip)" :alt="`${t.tip} illustration`" loading="lazy" />
         </div>
-        <h3 class="tip-title">{{ t.tip }}</h3>
-        <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
-        <ul v-if="t.skills && t.skills.length" class="skills">
-          <li v-for="s in t.skills" :key="s.code" class="skill">{{ s.code }}</li>
-        </ul>
+        <!-- <div class="tip-card-head">
+          <span class="activity-chip">{{ t.activityName }}</span>
+        </div> -->
+        <div class="fav-content">
+          <h3 class="tip-title">{{ t.tip }}</h3>
+          <p v-if="t.tip_des" class="tip-descr">{{ t.tip_des }}</p>
+          <ul v-if="t.skills && t.skills.length" class="skills">
+            <li class="skill">{{ t.skills[0].code }}</li>
+          </ul>
+        </div>
       </article>
     </section>
 
@@ -86,12 +165,53 @@ const openRelated = (tipId: string | number) => {
       @open-related="openRelated"
     />
   </div>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+    rel="stylesheet"
+  />
 </template>
 
 <style scoped>
+.hero {
+  position: relative;
+  width: 100%;
+  height: 300px;
+  background: url('../assets/favorite.png') center/cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  color: #333;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 23, 23, 0.5);
+  z-index: 0;
+}
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+.hero-content {
+  position: relative;
+  color: white;
+  max-width: 700px;
+  margin: 20px;
+}
+.hero h1 {
+  font-size: 3.5rem;
+}
+.hero p {
+  margin-bottom: 1.5rem;
+  font-size: 26px;
+  font-weight: 500;
+}
 .page-wrap {
   padding: 16px 20px 28px;
-  width: 750px;
+  width: 900px;
   margin: 0 auto;
 }
 
@@ -116,6 +236,7 @@ const openRelated = (tipId: string | number) => {
 .fav-hero_sub {
   margin: 6px 0 10px;
   color: #6b7280;
+  font-size: clamp(1.2rem, 0.5rem + 1vw, 2rem);
 }
 .fav-hero_pill {
   display: inline-block;
@@ -126,9 +247,32 @@ const openRelated = (tipId: string | number) => {
   padding: 6px 12px;
   font-weight: 700;
 }
+.storage-hint {
+  margin-top: 8px;
+  font-size: 16px;
+  color: #6b7280;
+  /* font-style: italic; */
+}
 .fav-hero_img {
   width: 160px;
   justify-self: end;
+}
+/* Image for fav tips */
+.fav-media {
+  position: relative;
+  width: 100%;
+  height: 200px; /* tweak to change the height of the image  */
+  background: #f7f7f7;
+}
+.fav-media img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+.fav-content {
+  padding: 12px 16px 16px;
 }
 
 /* LIST GRID */
@@ -141,8 +285,11 @@ const openRelated = (tipId: string | number) => {
   background: #fff;
   border: 1px solid #e5e7eb;
   border-radius: 14px;
-  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
   cursor: pointer;
   transition:
     transform 0.12s ease,
@@ -173,6 +320,14 @@ const openRelated = (tipId: string | number) => {
   margin: 0 0 10px;
   color: #4b5563;
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+
+  max-height: calc(1.45em * 4);
+  white-space: normal;
+  word-break: break-word;
 }
 .skills {
   margin: 0;
@@ -184,15 +339,17 @@ const openRelated = (tipId: string | number) => {
 }
 .skill {
   font-size: 12px;
-  background: #f3f4f6;
+  background: #d1fae5;
   border-radius: 999px;
   padding: 2px 8px;
   border: 1px solid #e5e7eb;
+  font-weight: 600;
 }
 
 .empty {
   text-align: center;
   padding: 40px 0;
-  color: #6b7280;
+  color: #727373;
+  font-size: 20px;
 }
 </style>
