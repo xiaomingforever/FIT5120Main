@@ -5,7 +5,7 @@
         <!-- Header -->
         <header class="header">
           <h2 class="title">{{ title }}</h2>
-          <button class="icon-btn" @click="onClose" aria-label="Close">✕</button>
+          <button class="icon-btn" @click="requestClose" aria-label="Close">✕</button>
         </header>
 
         <!-- Body -->
@@ -37,9 +37,9 @@
                 <span class="key">{{ opt.key.toUpperCase() }})</span>
                 <span class="text">{{ opt.text }}</span>
                 <!-- tick or cross -->
-      <span class="mark" v-if="locked && (showTick(opt.key) || showCross(opt.key))">
-        <img :src="showTick(opt.key) ? marks.tick : marks.cross" alt="" />
-      </span>
+                <span class="mark" v-if="locked && (showTick(opt.key) || showCross(opt.key))">
+                  <img :src="showTick(opt.key) ? marks.tick : marks.cross" alt="" />
+                </span>
               </button>
             </li>
           </ul>
@@ -76,6 +76,22 @@
         />
       </div>
     </div>
+
+    <!-- Exit confirmation modal -->
+    <div v-if="showExitConfirm" class="confirm-overlay" @click.self="cancelExit">
+      <div class="confirm-modal" role="dialog" aria-modal="true" aria-label="Confirm exit">
+        <header class="confirm-header">
+          <h3 class="confirm-title">Exit the quiz?</h3>
+        </header>
+        <div class="confirm-body">
+          <p>Your current progress ({{ answered }}/{{ total }}) will be lost.</p>
+        </div>
+        <footer class="confirm-footer">
+          <button class="btn-secondary" @click="cancelExit">Cancel</button>
+          <button class="btn-primary" @click="confirmExit">OK</button>
+        </footer>
+      </div>
+    </div>
   </Teleport>
 </template>
 
@@ -98,15 +114,6 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'retry'): void
 }>()
-// If the quiz is still in progress, confirm before closing
-function requestClose() {
-  if (!showSummary.value) {
-    const answered = currentIndex.value + (locked.value ? 1 : 0)
-    const msg = `Exit the quiz? Your current progress (${answered}/${total.value}) will be lost.`
-    if (!window.confirm(msg)) return
-  }
-  emit('close')
-}
 
 // state
 const ageImage = computed(() => QUIZ_AGE_IMAGES[props.ageGroup] || '')
@@ -183,12 +190,12 @@ function next() {
   locked.value = false
 }
 // when to show tick/cross
-function showTick(key: 'a'|'b'|'c') {
+function showTick(key: 'a' | 'b' | 'c') {
   const q = currentQ.value
   return !!(locked.value && q && key === q.correctKey)
 }
 
-function showCross(key: 'a'|'b'|'c') {
+function showCross(key: 'a' | 'b' | 'c') {
   const q = currentQ.value
   // show a cross only on the wrong option
   return !!(locked.value && q && selectedKey.value === key && key !== q.correctKey)
@@ -212,6 +219,29 @@ watch(
 onMounted(() => {
   if (props.open) init()
 })
+// If the quiz is still in progress, confirm before closing
+const showExitConfirm = ref(false)
+const answered = computed(
+
+  () => currentIndex.value + (locked.value ? 1 : 0),
+)
+function requestClose() {
+
+  if (!showSummary.value) {
+    showExitConfirm.value = true
+    return
+  }
+  emit('close')
+}
+
+function cancelExit() {
+  showExitConfirm.value = false
+}
+
+function confirmExit() {
+  showExitConfirm.value = false
+  emit('close')
+}
 </script>
 
 <style scoped>
@@ -224,7 +254,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 24px;
-  z-index: 2001;
+  z-index: 3000; /* Headbar: 2000 */
 }
 .modal {
   width: min(880px, 96vw);
@@ -311,7 +341,9 @@ onMounted(() => {
   align-items: center;
   cursor: pointer;
 }
-.option .text { flex: 1; }          /* push the mark to the right */
+.option .text {
+  flex: 1;
+} /* push the mark to the right */
 .option:hover {
   border-color: #d0d0d0;
 }
@@ -327,8 +359,16 @@ onMounted(() => {
   border-color: #ff6b6b;
   background: #fff1f1;
 }
-.option .mark { display: inline-flex; width: 24px; height: 24px; }
-.option .mark img { width: 100%; height: 100%; object-fit: contain; }
+.option .mark {
+  display: inline-flex;
+  width: 24px;
+  height: 24px;
+}
+.option .mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
 .option.selected {
   box-shadow: inset 0 0 0 2px #0077ff;
 }
@@ -384,5 +424,62 @@ onMounted(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+/* Exit confirmation modal */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 4000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+
+}
+
+.confirm-modal {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+}
+
+.confirm-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+.confirm-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.confirm-body {
+  padding: 16px 20px;
+}
+
+.confirm-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 12px 16px 16px;
+}
+
+.btn-secondary,
+.btn-primary {
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #f2f2f2;
+}
+.btn-primary {
+  background: #ffb800;
 }
 </style>
