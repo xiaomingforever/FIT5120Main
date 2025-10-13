@@ -740,7 +740,9 @@ function goToLink(url: string) {
   <section class="data-hero">
     <div class="hero-content">
       <h1>Data Insights</h1>
-      <p>Evidence-based research on why daily engagement matters</p>
+      <p>Based on AEDC (Australian Early Development Census) data, 
+        a national survey of how children around age 5 are developing when they start school, 
+        highlighting why daily engagement matters.</p>
     </div>
   </section>
 
@@ -787,8 +789,9 @@ function goToLink(url: string) {
           These numbers reveal where children need support right now but there's a bigger question: 
           <span class="highlight">Is childhood development improving or declining across Australia?</span>
         </p>
-        <p style="margin-top: 16px; font-size: 18px; color: #4b5563;">
-          Let's examine 15 years of national data (2009-2024) to understand the trends shaping our children's futures.
+        <p style="margin-top: 16px; font-size: 22px; color: #4b5563;">
+          Let's explore 15 years of <span style="color: #f97316;">AEDC data (2009-2024) from children around age 5</span> to see where many struggle when starting school 
+          and why the experiences in the first five years truly shape their future.
         </p>
       </div>
     </div>
@@ -829,15 +832,15 @@ function goToLink(url: string) {
     <div class="container section">
       <div class="explore-title">
         <h3>Explore the developmental challenges by area: </h3> 
-        <h3>(Based on the data of preschool children):</h3>
+        <h3 class="explore-data-source">Data source: Australian Early Development Census, surveying <span style="color: #f97316;">children aged around 5 years</span> in their first year of school</h3>
         <p class="explore-sub">Click on any domain below to see 15 years of trends and what they mean for your family
         </p>
       </div>
-
       <div class="pills" id="domainPills"></div>
 
       <!-- State Vulnerability Chart -->
       <div class="chart-container">
+        <h3 style="font-size: 26px; margin-left: 30px; padding-left: 10px; border-left: #8b5cf6 4px solid; font-weight: 800;">State Vulnerability Trends</h3>
         <canvas id="stateVulnChart"></canvas>
       </div>
 
@@ -910,9 +913,9 @@ function goToLink(url: string) {
     <div class="cta-section">
       <h2 class="cta-title">Ready to Give Your Child the Best Start?</h2>
       <p class="cta-text">
-        Join thousands of parents who are already using BrainBuilder's simple,
-        science-backed activities. Transform everyday moments into powerful
-        learning opportunities - starting today.
+        Based on AEDC data from children aged around 5, these insights show where many little ones struggle when they start school 
+        and why what happens in the first five years truly matters. 
+        BrainBuilder turns this data into practical, everyday tips for parents.
       </p>
       <button class="cta-button" onclick="window.location.href='/activities'">
         Get Started
@@ -938,20 +941,21 @@ function goToLink(url: string) {
   width: 100%;
   height: 320px;
   /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
-  background-image: url('https://www.clicdata.com/wp-content/uploads/2025/05/transfrom-data-actionable-insights.jpg');
+  background-image: url('https://media.discordapp.net/attachments/1400803493069062157/1427107060818120704/content.png?ex=68eda885&is=68ec5705&hm=dc1f44f4cc146e7cbe4c9f072f1f4cade19e9a6702aded12b6ae97234df72c93&=&format=webp&quality=lossless&width=974&height=649');
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: #fff;
   overflow: hidden;
+  font-family: 'Nunito', sans-serif;
 }
 
 .data-hero::before {
   content: "";
   position: absolute;
   inset: 0;
-  background-color: rgba(27, 12, 2, 0.6); 
+  background-color: rgba(0, 0, 0, 0.3); 
   z-index: 1;
 }
 
@@ -1149,7 +1153,7 @@ function goToLink(url: string) {
   animation: fadeInUp .8s ease-out;
 }
 
-.explore-title h3 {
+.explore-title h3:first-child {
   font-size: 36px;
   font-weight: 800;
   color: #111827;
@@ -1160,7 +1164,12 @@ function goToLink(url: string) {
   background-clip: text;
   line-height: 1.3;
 }
-
+.explore-title .explore-data-source {
+  font-size: 21px;
+  color: #2b2d33;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
 .explore-sub {
   font-size: 20px;
   color: #6b7280;

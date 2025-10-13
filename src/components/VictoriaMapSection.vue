@@ -95,7 +95,7 @@
       <!-- Domain Selection Pills -->
       <div class="explore-title" style="margin-top:24px">
         <h3>Select development domain:</h3>
-        <h3>(Based on the data of preschool children):</h3>
+        <h3 class="explore-data-source">Data source: Australian Early Development Census, surveying <span style="color: #f97316;">children aged around 5 years</span> in their first year of school</h3>
         <p class="explore-sub">Click on any domain below to explore Victoria's 480 SA2 areas</p>
       </div>
 
@@ -1415,7 +1415,12 @@ watch(currentYear, () => {
   color: #111827;
   margin: 0 0 12px;
 }
-
+.explore-title .explore-data-source {
+  font-size: 21px;
+  color: #2b2d33;
+  margin: 0 0 12px;
+  font-weight: 600;
+}
 .explore-sub {
   font-size: 16px;
   color: #6b7280;

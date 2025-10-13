@@ -181,7 +181,7 @@ function goSearch() {
   display: flex;
   align-items: center;
   gap: 6px;
-  width: min(320px, 38vw);
+  width: min(280px, 38vw);
   /* margin-left: -20px; */
 }
 
