@@ -829,7 +829,7 @@ function goToLink(url: string) {
     <div class="container section">
       <div class="explore-title">
         <h3>Explore the developmental challenges by area: </h3> 
-        <h3>(Based on the data of 0-5 years old):</h3>
+        <h3>(Based on the data of preschool children):</h3>
         <p class="explore-sub">Click on any domain below to see 15 years of trends and what they mean for your family
         </p>
       </div>
@@ -1064,7 +1064,7 @@ function goToLink(url: string) {
 
 .transition-insight {
   margin: 48px auto;
-  max-width: 1000px;
+  max-width: 1110px;
 }
 
 /* Stats */

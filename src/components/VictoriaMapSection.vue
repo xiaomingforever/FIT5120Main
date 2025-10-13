@@ -95,7 +95,7 @@
       <!-- Domain Selection Pills -->
       <div class="explore-title" style="margin-top:24px">
         <h3>Select development domain:</h3>
-        <h3>(Based on the data of 0-5 years old):</h3>
+        <h3>(Based on the data of preschool children):</h3>
         <p class="explore-sub">Click on any domain below to explore Victoria's 480 SA2 areas</p>
       </div>
 
@@ -846,7 +846,19 @@ function renderMap() {
 
             <div class="sparkline-container" 
                 data-code="${code}" 
-                style="width:100%;height:50px;margin:12px 0 16px 0;text-align:center;clear:both;position:relative;z-index:1;">
+                 style="
+                  width: 100%;
+                  max-width: 260px;
+                  height: 60px;
+                  margin: 14px auto 16px auto;
+                  text-align: center;
+                  overflow: hidden;
+                  position: relative;
+                  border-radius: 8px;
+                  background: #fafafa;
+                  padding: 6px 6px 0 6px;
+                  box-sizing: border-box;
+                ">
               <span style="color:#9ca3af;font-size:12px;">(loading chart...)</span>
             </div>
 

@@ -177,11 +177,12 @@ function goSearch() {
 /* Searchbar */
 .header-search {
   position: relative;
+  right: 60px;
   display: flex;
   align-items: center;
   gap: 6px;
-  width: min(520px, 38vw);
-  margin-left: 1px;
+  width: min(320px, 38vw);
+  /* margin-left: -20px; */
 }
 
 .search-input {
