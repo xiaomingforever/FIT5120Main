@@ -11,10 +11,10 @@
     <div class="col-left">
       <div class="card ai">
         <header class="ai-head">
-
           <h2>BrainBuilder AI</h2>
-          <!-- <span class="mini-logo" aria-hidden="true">logo</span> -->
-          <span class="mini-logo"><font-awesome-icon icon="robot" style="color: gray; height: 30px; width: 30px;" /></span>
+          <div class="logo-container">
+            <img src="../assets/logo/Brainlogo.png" alt="BrainBuilder Logo" class="main-logo" />
+          </div>
           <p class="lead">Hi there! How can I support you in your parenting journey today?</p>
           <p class="muted">Empowering parents with AI guidance</p>
         </header>
@@ -387,9 +387,12 @@ function formatMessage(text: string) {
 .hero::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: #24242466;
-  z-index: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 300px;
+  background: black;
+  opacity: 0.35;
 }
 .hero > * {
   position: relative;
@@ -432,16 +435,6 @@ function formatMessage(text: string) {
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   margin: 0;
 }
-.hero::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 240px;
-  background: linear-gradient(90deg, #d9a657 0%, #f3c55a 25%, #ffd48b 55%, #d2b48c 100%);
-  opacity: 0.35;
-}
 
 .grid-main {
   display: grid;
@@ -481,49 +474,56 @@ function formatMessage(text: string) {
   font-size: 12px;
 }
 
-.ai-head h2 {
-  font-size: 24px;
-  margin: 0 0 0.25rem;
+.ai-head {
+  text-align: center;
+  padding: 20px 0;
 }
-.mini-logo {
-  display: inline-flex;
-  align-items: center;
+.ai-head h2 {
+  font-size: 28px;
+  margin: 0 0 1rem;
+  font-weight: 700;
+}
+.logo-container {
+  display: flex;
   justify-content: center;
-  width: 60px;
-  height: 35px;
-  background: #eef2ff;
-  border-radius: 6px;
-  font-size: 10px;
-  margin-left: 0.5rem;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  margin: 20px 0;
+}
+.main-logo {
+  width: 100px;
+  height: auto;
 }
 .lead {
-  margin: 0.5rem 0 0;
+  margin: 1.5rem 0 0.5rem;
   font-weight: 500;
+  font-size: 16px;
+  color: #1f2937;
 }
 .muted {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 14px;
   margin-top: 0.25rem;
 }
 
 .chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 16px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 24px 0;
 }
 .chip {
-  text-align: left;
-  background: #f6f7f9;
-  border: 1px solid #eceff3;
-  border-radius: 999px;
-  padding: 8px 12px;
-  font-size: 13px;
-  line-height: 1.35;
+  text-align: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  font-size: 14px;
+  line-height: 1.4;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+.chip:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
 }
 .chip:focus-visible {
   outline: 2px solid var(--amber);
@@ -531,13 +531,14 @@ function formatMessage(text: string) {
 }
 
 .conversation {
-  min-height: 120px;
+  min-height: 200px;
   background: white;
-  border: 1px dashed #e5e7eb;
-  border-radius: 10px;
-  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
   max-height: 400px;
   overflow-y: auto;
+  margin-bottom: 16px;
 }
 .placeholder {
   display: grid;
