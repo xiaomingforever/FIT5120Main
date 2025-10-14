@@ -126,11 +126,47 @@
 
         <!-- Time Controls -->
         <div class="vic-timebar">
+          <!-- Color Legend Bar with Hover and Click -->
+          <div class="vic-color-legend">
+            <div class="vic-color-legend-title">
+              Vulnerability Level: 
+              <span v-if="selectedRange" style="color:#667eea;font-size:13px">
+                (Filtered: {{ selectedRange.label }})
+              </span>
+              <!-- <button 
+                v-if="selectedRange" 
+                @click="toggleRangeSelection(selectedRange)"
+                style="margin-left:8px;padding:4px 12px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:700"
+              >
+                Clear Filter
+              </button> -->
+            </div>
+            <div class="vic-color-bar-wrap">
+              <div 
+                v-for="(range, index) in colorRanges" 
+                :key="index"
+                class="vic-color-segment"
+                :class="{ 
+                  'selected': selectedRange && selectedRange.min === range.min && selectedRange.max === range.max 
+                }"
+                :style="{ background: range.color, flex: 1 }"
+                @mouseenter="highlightRange(range)"
+                @mouseleave="clearHighlight"
+                @click="toggleRangeSelection(range)"
+              >
+                <span class="vic-color-label">{{ range.label }}</span>
+              </div>
+            </div>
+            <div v-if="selectedRange" style="margin-top:12px;text-align:center;font-size:13px;color:#6b7280">
+              Click on a color segment to filter, or click again to clear
+            </div>
+          </div>
+
           <div class="vic-time-row">
-            <button class="vic-play-btn" @click="togglePlay">{{ isPlaying ? '⏸' : '▶' }}</button>
+            <button class="vic-play-btn" @click="togglePlay">{{ isPlaying ? '||' : '▶' }}</button>
             <div class="vic-year-pill">{{ waves[0] }}</div>
             <div class="vic-slider-wrap">
-              <div class="vic-year-gradient"></div>
+              <div class="vic-time-progress" :style="{ width: (currentYearIndex / (waves.length - 1) * 100) + '%' }"></div>
               <input 
                 type="range" 
                 v-model.number="currentYearIndex"
@@ -174,8 +210,8 @@
       </div>
 
       <!-- Key Takeaway -->
-      <div style="margin-top:32px;padding:24px;background:linear-gradient(135deg,#eef2ff,#faf5ff);border-radius:16px;border-left:4px solid #667eea">
-        <h4 style="margin:0 0 12px;font-size:22px;color:#1e40af;font-weight:700">🎯 The Bottom Line</h4>
+      <div style="margin-top:32px;padding:24px;background:linear-gradient(135deg, #fff9e6, #fff);border-radius:16px;border-left:4px solid #d47e7b">
+        <h4 style="margin:0 0 12px;font-size:22px;color:#f97316;font-weight:700">🎯 The Bottom Line</h4>
         <p style="margin:0;font-size:20px;line-height:1.7;color:#374151">
           Victoria's data shows that <b>where you live matters</b> but it doesn't determine your child's future. 
           Communities with the best outcomes aren't necessarily the wealthiest; they're the ones where parents are engaged, 
@@ -281,6 +317,18 @@ let geoLayer = null
 
 const dataLookupCache = ref({})
 
+const hoveredRange = ref(null)
+const selectedRange = ref(null)
+
+const colorRanges = [
+  { min: 0, max: 5, color: '#10b981', label: '<5%' },
+  { min: 5, max: 10, color: '#8fd19e', label: '5-10%' },
+  { min: 10, max: 15, color: '#ffd6d6', label: '10-15%' },
+  { min: 15, max: 20, color: '#ff8a8a', label: '15-20%' },
+  { min: 20, max: 25, color: '#ff4d4d', label: '20-25%' },
+  { min: 25, max: 100, color: '#b30000', label: '25%+' }
+]
+
 // ======= LOCALFORAGE CONFIG =======
 localforage.config({
   name: 'aedcDataCacheDB',
@@ -295,7 +343,7 @@ const insightContent = computed(() => {
   
   return `
     <p style="font-size:20px;margin:14px 0;line-height:1.75;color:#374151">
-      <b style="color:#1e40af">${insight.headline}</b>
+      <b style="color:#d55a90">${insight.headline}</b>
     </p>
     <p style="font-size:18px;margin:14px 0;line-height:1.75;color:#374151">
       <b>The trend:</b> ${insight.trend}
@@ -402,6 +450,69 @@ function getBadge(v) {
   return { text: 'Very high vulnerability', color: '#ef4444', icon: '🚨' }
 }
 
+function highlightRange(range) {
+  hoveredRange.value = range
+  applyRangeHighlight(range)
+}
+
+function clearHighlight() {
+  hoveredRange.value = null
+  // if a range is selected, keep it highlighted
+  if (selectedRange.value) {
+    applyRangeHighlight(selectedRange.value)
+  } else {
+    resetAllHighlight()
+  }
+}
+
+function toggleRangeSelection(range) {
+  // if the same range is clicked again, clear selection
+  if (selectedRange.value && 
+      selectedRange.value.min === range.min && 
+      selectedRange.value.max === range.max) {
+    selectedRange.value = null
+    resetAllHighlight()
+  } else {
+    // or select new range
+    selectedRange.value = range
+    applyRangeHighlight(range)
+  }
+}
+
+function applyRangeHighlight(range) {
+  if (geoLayer) {
+    geoLayer.eachLayer(layer => {
+      const code = layer.feature.properties.sa2_code_norm
+      const lut = buildDataLookup(selectedDomain.value, currentYear.value)
+      const data = lut[code]
+      const v = data?.value
+      
+      if (v != null && v >= range.min && v < range.max) {
+        layer.setStyle({
+          weight: 1,
+          color: '#333',
+          fillOpacity: 0.95
+        })
+        layer.bringToFront()
+      } else {
+        layer.setStyle({
+          weight: 1,
+          color: '#fff',
+          fillOpacity: v != null ? 0.3 : 0.15
+        })
+      }
+    })
+  }
+}
+
+function resetAllHighlight() {
+  if (geoLayer) {
+    geoLayer.eachLayer(layer => {
+      geoLayer.resetStyle(layer)
+    })
+  }
+}
+
 function precomputeSparklineData(sa2Code) {
   return waves.map(year => {
     const row = aedcData.value.find(d =>
@@ -428,6 +539,10 @@ function createSparkline(sa2Code) {
   const innerW = w - padX * 2
   const step = innerW / (waves.length - 1)
 
+  // get current year position
+  const currentYearIdx = waves.indexOf(currentYear.value)
+  const currentX = padX + currentYearIdx * step
+
   // generate path and points
   let path = ''
   const points = []
@@ -442,7 +557,7 @@ function createSparkline(sa2Code) {
 
   if (!path) return ''
 
-  // generate SVG with gradient, axis, and points
+  // generate SVG with gradient, axis, vertical line, and points
   return `
     <div style="background:#f8f9fa;border-radius:6px;padding:8px 10px;position:relative">
       <svg width="${w}" height="${h + 16}" style="display:block;overflow:visible" class="sparkline-svg">
@@ -456,6 +571,9 @@ function createSparkline(sa2Code) {
         <!-- baseline -->
         <line x1="${padX}" y1="${h / 2}" x2="${w - padX}" y2="${h / 2}" stroke="#e5e7eb" stroke-width="1" stroke-dasharray="1,2" opacity="0.4"/>
 
+        <!-- current year -->
+        <line x1="${currentX}" y1="0" x2="${currentX}" y2="${h}" stroke="#f97316" stroke-width="2" opacity="0.8" stroke-dasharray="4,2"/>
+
         <!-- trend line -->
         <path d="${path}" fill="none" stroke="url(#lineGrad_${sa2Code})" stroke-width="2.5" stroke-linecap="round"/>
 
@@ -464,12 +582,12 @@ function createSparkline(sa2Code) {
           <circle 
             cx="${p.x}" 
             cy="${p.y}" 
-            r="4" 
-            fill="#667eea" 
+            r="${p.year === currentYear.value ? 5 : 4}" 
+            fill="${p.year === currentYear.value ? '#f97316' : '#667eea'}" 
             stroke="#fff" 
             stroke-width="2"
             class="sparkline-point"
-            style="cursor:pointer;opacity:0.5;transition:opacity 0.2s"
+            style="cursor:pointer;opacity:${p.year === currentYear.value ? 1 : 0.5};transition:opacity 0.2s"
             data-year="${p.year}"
             data-value="${p.value.toFixed(1)}"
           />
@@ -874,7 +992,7 @@ function renderMap() {
       layer.bindPopup(popupContent, { maxWidth: 320 })
       
       layer.on({
-        mouseover: (e) => e.target.setStyle({ weight: 3, color: '#667eea' }),
+        mouseover: (e) => e.target.setStyle({ weight: 2, color: '#333' }),
         mouseout: (e) => geoLayer.resetStyle(e.target)
       })
 
@@ -1126,6 +1244,7 @@ let renderTimeout = null
 watch(selectedDomain, () => {
   console.log('Domain changed:', selectedDomain.value)
   dataLookupCache.value = {}
+  selectedRange.value = null // clear selected range
   
   clearTimeout(renderTimeout)
   renderTimeout = setTimeout(() => {
@@ -1139,6 +1258,7 @@ watch(selectedDomain, () => {
 
 watch(currentYear, () => {
   console.log('Year changed:', currentYear.value)
+  selectedRange.value = null // clear selected range
   
   clearTimeout(renderTimeout)
   renderTimeout = setTimeout(() => {
@@ -1527,6 +1647,83 @@ watch(currentYear, () => {
   gap: 20px;
 }
 
+.vic-time-progress {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 14px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  pointer-events: none;
+  transition: width 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+/* Color Legend Bar */
+.vic-color-legend {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #e5e7eb;
+}
+
+.vic-color-legend-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.vic-color-bar-wrap {
+  display: flex;
+  height: 40px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.vic-color-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  border: 3px solid transparent;
+}
+
+.vic-color-segment:hover {
+  transform: scaleY(1.15);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.vic-color-segment.selected {
+  border-color: #333;
+  transform: scaleY(1.2);
+  z-index: 15;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.vic-color-segment.selected .vic-color-label {
+  opacity: 1;
+}
+
+.vic-color-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.vic-color-segment:hover .vic-color-label {
+  opacity: 1;
+}
+
 .vic-play-btn {
   width: 52px;
   height: 52px;
@@ -1569,30 +1766,7 @@ watch(currentYear, () => {
 }
 
 .vic-year-gradient {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  height: 14px;
-  border-radius: 8px;
-  background: linear-gradient(
-    to right,
-    #d9f2e6 0%,
-    #d9f2e6 16.666%,
-    #8fd19e 16.666%,
-    #8fd19e 33.333%,
-    #ffd6d6 33.333%,
-    #ffd6d6 50%,
-    #ff8a8a 50%,
-    #ff8a8a 66.666%,
-    #ff4d4d 66.666%,
-    #ff4d4d 83.333%,
-    #b30000 83.333%,
-    #b30000 100%
-  );
-  pointer-events: none;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  display: none;
 }
 
 .vic-year-slider {
@@ -1659,11 +1833,11 @@ watch(currentYear, () => {
 /* Insight Box */
 .insight {
   border-radius: 20px;
-  background: linear-gradient(135deg, #eef2ff 0%, #fce7f3 100%);
-  border-left: 6px solid #60a5fa;
+  background: linear-gradient(135deg, #fff9e6, #fff);
+  border-left: 6px solid #d47e7b;
   padding: 24px 28px;
   position: relative;
-  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+  box-shadow: 0 10px 30px rgba(250, 129, 96, 0.2);
   transition: all 0.4s;
   overflow: hidden;
 }
@@ -1679,14 +1853,14 @@ watch(currentYear, () => {
 
 .insight:hover {
   transform: translateX(8px);
-  box-shadow: 0 15px 40px rgba(96, 165, 250, 0.3);
+  box-shadow: 0 15px 40px rgba(250, 104, 96, 0.3);
   border-left-width: 8px;
 }
 
 .insight h3 {
   font-size: 30px;
   margin: 0 0 18px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #f39755, #d55a90);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1697,13 +1871,13 @@ watch(currentYear, () => {
   font-size: 18px;
   margin: 14px 0;
   line-height: 1.75;
-  color: #374151;
+  color: #513e37;
 }
 
 .insight :deep(.good) {
   font-size: 20px;
   font-weight: 800;
-  background: linear-gradient(135deg, #2563eb, #10b981);
+  background: linear-gradient(135deg, #f39755, #ac5ad5);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
