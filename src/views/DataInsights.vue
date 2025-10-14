@@ -950,7 +950,7 @@ function goToLink(url: string) {
   width: 100%;
   height: 320px;
   /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
-  background-image: url('dataInsightHero.jpg');
+  background: url('../assets/dataInsightHero.jpg');
   display: flex;
   align-items: center;
   justify-content: center;
