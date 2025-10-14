@@ -784,15 +784,24 @@ function goToLink(url: string) {
 
     <!-- TRANSITION TO TRENDS -->
     <div class="container">
-      <div class="transition-text">
-        <p>
-          These numbers reveal where children need support right now but there's a bigger question: 
-          <span class="highlight">Is childhood development improving or declining across Australia?</span>
-        </p>
-        <p style="margin-top: 16px; font-size: 22px; color: #4b5563;">
-          Let's explore 15 years of <span style="color: #f97316;">AEDC data (2009-2024) from children around age 5</span> to see where many struggle when starting school 
-          and why the experiences in the first five years truly shape their future.
-        </p>
+      <div class="transition-boxes">
+        <div class="transition-box box-question">
+          <div class="box-icon">🤔</div>
+          <h3>The Big Question</h3>
+          <p>
+            These numbers reveal where children need support right now, but there's a bigger question: 
+            <span class="question-highlight">Is childhood development improving or declining across Australia?</span>
+          </p>
+        </div>
+        
+        <div class="transition-box box-explore">
+          <div class="box-icon">🔍</div>
+          <h3>Let's Explore the Data</h3>
+          <p>
+            We'll examine 15 years of <span class="data-highlight">AEDC data (2009-2024) from children around age 5</span> 
+            to see where many struggle when starting school and why the experiences in the first five years truly shape their future.
+          </p>
+        </div>
       </div>
     </div>
 
@@ -941,7 +950,7 @@ function goToLink(url: string) {
   width: 100%;
   height: 320px;
   /* background: linear-gradient(135deg, #FFC93C 0%, #FF66AA 100%); */
-  background-image: url('https://media.discordapp.net/attachments/1400803493069062157/1427107060818120704/content.png?ex=68eda885&is=68ec5705&hm=dc1f44f4cc146e7cbe4c9f072f1f4cade19e9a6702aded12b6ae97234df72c93&=&format=webp&quality=lossless&width=974&height=649');
+  background-image: url('dataInsightHero.jpg');
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1011,6 +1020,134 @@ function goToLink(url: string) {
 
 .hero-container {
   padding-top: 40px;
+}
+
+.transition-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 48px 0;
+}
+
+.transition-box {
+  position: relative;
+  padding: 32px 28px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.transition-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  transition: height 0.3s;
+}
+
+.transition-box:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.18);
+}
+
+.transition-box:hover::before {
+  height: 8px;
+}
+
+.box-question {
+  background: linear-gradient(135deg, #fef3c7 0%, #fff9e6 100%);
+  border-left: 5px solid #fbbf24;
+}
+
+.box-question::before {
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+.box-explore {
+  background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  border-left: 5px solid #0ea5e9;
+}
+
+.box-explore::before {
+  background: linear-gradient(90deg, #0ea5e9, #0284c7);
+}
+
+.box-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.transition-box h3 {
+  margin: 0 0 16px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111827;
+}
+
+.box-question h3 {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.box-explore h3 {
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.transition-box p {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #374151;
+}
+
+.box-question .question-highlight {
+  font-weight: 800;
+  color: #d97706;
+  background: rgba(251, 191, 36, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.box-explore .data-highlight {
+  font-weight: 800;
+  color: #0284c7;
+  background: rgba(14, 165, 233, 0.2);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transition-boxes {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .box-icon {
+    font-size: 40px;
+  }
+  
+  .transition-box h3 {
+    font-size: 20px;
+  }
+  
+  .transition-box p {
+    font-size: 16px;
+  }
 }
 
 .section {
@@ -1426,12 +1563,12 @@ function goToLink(url: string) {
 /* Insight Box */
 .insight {
   border-radius: 20px;
-  background: linear-gradient(135deg, #eef2ff 0%, #fce7f3 100%);
-  border-left: 6px solid #60a5fa;
+  background: linear-gradient(135deg, #fff9e6, #fff);
+  border-left: 6px solid #d47e7b;
   padding: 24px 28px;
   position: relative;
   animation: fadeInUp 0.8s ease-out;
-  box-shadow: 0 10px 30px rgba(96, 165, 250, 0.2);
+  box-shadow: 0 10px 30px rgba(250, 129, 96, 0.2);
   transition: all 0.4s;
   overflow: hidden;
 }
@@ -1448,14 +1585,14 @@ function goToLink(url: string) {
 
 .insight:hover {
   transform: translateX(8px);
-  box-shadow: 0 15px 40px rgba(96, 165, 250, 0.3);
+  box-shadow: 0 15px 40px rgba(250, 129, 96, 0.2);
   border-left-width: 8px;
 }
 
 .insight h3 {
   font-size: 30px;
   margin: 0 0 18px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: linear-gradient(135deg, #f39755, #d55a90);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1472,7 +1609,7 @@ function goToLink(url: string) {
 .insight .good {
   font-size: 24px;
   font-weight: 800;
-  background: linear-gradient(135deg, #2563eb, #10b981, #2563eb);
+  background: linear-gradient(135deg, #f39755, #ac5ad5);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
