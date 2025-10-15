@@ -59,12 +59,20 @@
               <div class="vic-autocomplete-item-sa2">{{ item.SA2_NAME_2021 }}</div>
             </div>
             <div v-if="searchQuery.length >= 2 && filteredSuggestions.length === 0" 
-                 style="padding:12px 18px;color:#999;font-style:italic">
+                style="padding:12px 18px;color:#999;font-style:italic">
               No suburbs found
             </div>
           </div>
         </div>
         <button class="vic-search-btn" @click="searchSuburb">Search</button>
+        <button 
+          v-if="searchResult" 
+          class="vic-clear-btn" 
+          @click="clearSearch"
+          title="Clear search"
+        >
+          ✕
+        </button>
       </div>
 
       <!-- Search Result -->
@@ -314,6 +322,7 @@ const searchResult = ref(null)
 
 let map = null
 let geoLayer = null
+let highlightedLayer = null
 
 const dataLookupCache = ref({})
 
@@ -506,6 +515,11 @@ function applyRangeHighlight(range) {
 }
 
 function resetAllHighlight() {
+  if (highlightedLayer) {
+    geoLayer.resetStyle(highlightedLayer)
+    highlightedLayer = null
+  }
+
   if (geoLayer) {
     geoLayer.eachLayer(layer => {
       geoLayer.resetStyle(layer)
@@ -952,7 +966,7 @@ function renderMap() {
       // const sparkline = v != null ? createSparkline(code) : ''
 
       const popupContent = `
-        <div style="min-width:200px;font-family:Inter,sans-serif">
+        <div style="min-width:260px;font-family:Inter,sans-serif">
           <div style="font-size:20px;font-weight:800;margin-bottom:6px;color:#111827">${name}</div>
           <div style="font-size:14px;color:#374151;margin-bottom:4px;font-weight:600">${currentYear.value}</div>
           <div style="font-size:13px;color:#6b7280;margin-bottom:16px">${selectedDomain.value}</div>
@@ -1046,6 +1060,7 @@ function searchSuburb() {
   const q = searchQuery.value.trim()
   if (!q) {
     searchResult.value = null
+    resetAllHighlight()
     return
   }
 
@@ -1064,6 +1079,7 @@ function searchSuburb() {
       <p>We couldn't find "<em>${q}</em>".</p>
       ${suggestions.length ? `<p><strong>Did you mean:</strong> ${suggestions.join(', ')}</p>` : ''}
     `
+    resetAllHighlight()
     return
   }
 
@@ -1097,13 +1113,96 @@ function searchSuburb() {
     <p style="font-size:14px;margin:12px 0"><strong>Includes:</strong> ${allSuburbs.join(', ')}</p>
   `
 
+  // highlight on map
+  highlightSearchedArea(sa2Code)
+
+  // zoom to area
   if (geojsonData.value && map) {
     const feature = geojsonData.value.features.find(f => 
       f.properties.sa2_code_norm === sa2Code
     )
     if (feature) {
       const bounds = L.geoJSON(feature).getBounds()
-      map.fitBounds(bounds, { maxZoom: 12 })
+      map.fitBounds(bounds, { maxZoom: 12, padding: [50, 50] })
+    }
+  }
+
+  // scroll to map
+  scrollToMap()
+}
+
+function scrollToMap() {
+  nextTick(() => {
+    const mapElement = document.getElementById('vicMap')
+    if (mapElement) {
+      // calculate position with offset
+      const offset = 100 
+      const elementPosition = mapElement.getBoundingClientRect().top
+      const offsetPosition = elementPosition + window.pageYOffset - offset
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  })
+}
+
+function highlightSearchedArea(sa2Code) {
+  // remove previous highlight
+  if (highlightedLayer) {
+    geoLayer.resetStyle(highlightedLayer)
+    highlightedLayer = null
+  }
+
+  // highlight new area
+  if (geoLayer) {
+    geoLayer.eachLayer(layer => {
+      const code = layer.feature.properties.sa2_code_norm
+      if (code === sa2Code) {
+        layer.setStyle({
+          weight: 4,
+          color: '#f97316',
+          fillOpacity: 0.9,
+          dashArray: '8,4'
+        })
+        layer.bringToFront()
+        highlightedLayer = layer
+        
+        // add flash effect
+        let flashCount = 0
+        const flashInterval = setInterval(() => {
+          if (flashCount >= 6) {
+            clearInterval(flashInterval)
+            return
+          }
+          
+          const isEven = flashCount % 2 === 0
+          layer.setStyle({
+            fillOpacity: isEven ? 0.9 : 0.6
+          })
+          flashCount++
+        }, 200)
+      }
+    })
+  }
+}
+
+function clearSearch() {
+  searchQuery.value = ''
+  searchResult.value = null
+  showSuggestions.value = false
+  resetAllHighlight()
+  
+  // reset map view
+  if (map && geoLayer) {
+    try {
+      const bounds = geoLayer.getBounds()
+      if (bounds && bounds.isValid()) {
+        map.fitBounds(bounds, { padding: [20, 20], maxZoom: 12 })
+      }
+    } catch (err) {
+      map.setView([-37.81, 144.96], 9)
     }
   }
 }
@@ -1244,28 +1343,46 @@ let renderTimeout = null
 watch(selectedDomain, () => {
   console.log('Domain changed:', selectedDomain.value)
   dataLookupCache.value = {}
-  selectedRange.value = null // clear selected range
+  selectedRange.value = null
   
   clearTimeout(renderTimeout)
   renderTimeout = setTimeout(() => {
     renderMap()
+    
+    // if there are search results, re-highlight
     if (searchResult.value && searchQuery.value) {
+      const suburb = suburbMapping.value.find(
+        s => s.SAL_NAME_2021?.toLowerCase() === searchQuery.value.toLowerCase()
+      )
+      if (suburb) {
+        highlightSearchedArea(suburb.SA2_CODE_2021)
+      }
       searchSuburb()
     }
+    
     nextTick(() => setupSparklineInteractions())
   }, 100)
 })
 
 watch(currentYear, () => {
   console.log('Year changed:', currentYear.value)
-  selectedRange.value = null // clear selected range
+  selectedRange.value = null
   
   clearTimeout(renderTimeout)
   renderTimeout = setTimeout(() => {
     renderMap()
+    
+    // if there are search results, re-highlight
     if (searchResult.value && searchQuery.value) {
+      const suburb = suburbMapping.value.find(
+        s => s.SAL_NAME_2021?.toLowerCase() === searchQuery.value.toLowerCase()
+      )
+      if (suburb) {
+        highlightSearchedArea(suburb.SA2_CODE_2021)
+      }
       searchSuburb()
     }
+    
     nextTick(() => setupSparklineInteractions())
   }, 100)
 })
@@ -1433,6 +1550,26 @@ watch(currentYear, () => {
 .vic-search-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.vic-clear-btn {
+  padding: 14px 18px;
+  border: 2px solid #ef4444;
+  border-radius: 12px;
+  background: #fff;
+  color: #ef4444;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.vic-clear-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 /* Autocomplete */
