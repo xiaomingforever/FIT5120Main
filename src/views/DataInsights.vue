@@ -315,6 +315,11 @@ function updateStateVulnChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          bottom: 40
+        }
+      },
       plugins: {
         legend: {
           position: 'bottom',
@@ -740,9 +745,7 @@ function goToLink(url: string) {
   <section class="data-hero">
     <div class="hero-content">
       <h1>Data Insights</h1>
-      <p>Based on AEDC (Australian Early Development Census) data, 
-        a national survey of how children around age 5 are developing when they start school, 
-        highlighting why daily engagement matters.</p>
+      <p>Discover how children across Australia are developing by age 5 and why everyday moments shape their future.</p>
     </div>
   </section>
 
