@@ -693,6 +693,9 @@ const allTips = computed(() => {
   gap: 20px;
   align-items: stretch;
   margin-bottom: 40px;
+  max-width: calc(3 * 280px + 2 * 20px); 
+  margin-left: auto;
+  margin-right: auto; 
 }
 
 .tip-card {
